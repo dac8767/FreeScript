@@ -32,6 +32,43 @@ const { browser, page } = await launch({ width: 1500, height: 950 });
 await boot(page);
 await settle(page);
 
+/* ── v7.76: there is nothing to export until something is changed ─────────
+ * When this check was written the app shipped with 81 design overrides and 141
+ * helper-text ones seeded in, so both windows had a payload on first launch.
+ * v7.76 moved all of that into the code — "add these settings directly into
+ * the app code" — so a fresh profile overrides NOTHING and both buttons are
+ * correctly dead. That empty state is now the first thing worth asserting; the
+ * export itself is then exercised the way it is actually used, which is after
+ * the writer has moved something.
+ */
+console.log('\nwith nothing changed there is nothing to export, and it says so');
+const empty = await page.evaluate(async () => {
+  const S = window.__scStore.getState();
+  const P = await window.__scImport('/src/utils/presets.ts');
+  return {
+    design: Object.keys(S.designVars).length,
+    overrides: Object.keys(S.helperTextOverrides).length,
+    hidden: S.helperTextHidden.length,
+    designPart: Object.keys(JSON.parse(P.buildPresetBundle(['design'], '2026-08-22T00:00:00.000Z')).parts.design).length,
+  };
+});
+ok('a fresh profile overrides nothing in either window',
+  empty.design === 0 && empty.overrides === 0 && empty.hidden === 0, JSON.stringify(empty));
+ok('…so the file the builder would write is empty too', empty.designPart === 0, `${empty.designPart}`);
+
+/* Now make the changes a writer would have made before pressing Export. Three
+   kinds, because the helper-text part carries two halves and a file that
+   dropped either would still look right from the outside. */
+await page.evaluate(async () => {
+  const S = window.__scStore.getState();
+  S.setDesignVar('editorMainPadTop', 51);
+  S.setDesignVar('toolWinRadius', 9);
+  S.setHelperTextOverride('Drag to resize', 'MY OWN WORDING');
+  S.setHelperTextHidden(['Drag to resize']);
+  await new Promise((r) => setTimeout(r, 200));
+});
+await settle(page);
+
 /* ── the file the builder writes reads back as itself ────────────────────── */
 console.log('\na one-part file is a preset file the app can read');
 const roundTrip = await page.evaluate(async () => {

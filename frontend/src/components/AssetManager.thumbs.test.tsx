@@ -86,6 +86,9 @@ describe('AssetManager thumbnails', () => {
     expect(host!.querySelector('img.asset-thumb')).toBeNull();
     const missing = host!.querySelector('.asset-thumb-missing');
     expect(missing).not.toBeNull();
-    expect(missing!.getAttribute('title')).toContain('re-upload');
+    /* v7.76: Derek's own wording — the em dash became a full stop, so the
+       "r" is a capital now. Matched case-insensitively rather than pinned to
+       one spelling of a sentence he is free to keep editing. */
+    expect(missing!.getAttribute('title')?.toLowerCase()).toContain('re-upload');
   });
 });

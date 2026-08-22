@@ -55,7 +55,6 @@ export function SaveWorkspaceDialog({ open, onClose }: { open: boolean; onClose:
               ref={inputRef}
               type="text"
               value={name}
-              placeholder="e.g. Writing, Outlining, Editing"
               maxLength={60}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -221,7 +220,7 @@ export function EditWorkspacesDialog({ open, onClose }: { open: boolean; onClose
                           {hidden ? <FaRegEyeSlash /> : <FaRegEye />}
                         </button>
                         {isBuiltinWorkspace(n) ? (
-                          <span className="ws-builtin-badge" title="Ships with ScriptCraft — you can rearrange it and save your changes, but it can't be renamed or deleted">default</span>
+                          <span className="ws-builtin-badge">default</span>
                         ) : isConfirming ? (
                           <>
                             <span className="ws-confirm-label">Delete?</span>

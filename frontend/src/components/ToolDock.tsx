@@ -364,7 +364,7 @@ function HeaderRightCluster({ id, chrome, onClose, closeTitle, fullscreenBtn = t
           <button
             className="tool-window-minimize"
             onClick={(e) => { e.stopPropagation(); onMinimize(); }}
-            title="Shrink to a floating window"
+            title="Shrink to floating window"
           ><RestoreIcon /></button>
         )}
         <button
@@ -1183,7 +1183,6 @@ export default function ToolDock({ side, editor, scrollContainer }: ToolDockProp
         <div
           className={`tool-dock-edge tool-dock-edge-${side}`}
           onPointerDown={startEdgeResize}
-          title="Drag sideways: panel width · drag up/down: item size"
         >
           {/* v2.77: Premiere-style indicator — where the item scale sits */}
           <span
@@ -1341,7 +1340,6 @@ export default function ToolDock({ side, editor, scrollContainer }: ToolDockProp
                   <div
                     className="tool-inline-resize"
                     onPointerDown={startInlineResize}
-                    title="Drag to resize — the new height becomes this tool's default"
                   />
                 )}
               </div>

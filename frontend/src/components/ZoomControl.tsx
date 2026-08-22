@@ -183,7 +183,7 @@ const ZoomControl: React.FC = () => {
         ) : (
           <span
             className="toolbar-btn-text zoom-tb-value"
-            title="Click to type an exact zoom"
+            title="Click to type exact zoom %"
             onClick={() => { setZoomEditing(true); setTimeout(() => zoomInputRef.current?.select(), 0); }}
           >{zoomLevel}%</span>
         )}

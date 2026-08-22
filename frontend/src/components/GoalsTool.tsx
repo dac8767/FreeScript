@@ -131,7 +131,7 @@ export function GoalChip({ variant, words }: { variant: 'status' | 'toolbar'; wo
   return (
     <button
       className={`status-goal goal-chip-${variant}${variant === 'status' ? ' status-item' : ''}${progress.done ? ' done' : ''}`}
-      title={progress.done ? 'Goal complete — click to clear it' : 'Writing goal — click to open Goals'}
+      title={progress.done ? 'Goal complete. Click to clear' : 'Click to open Goals'}
       onClick={() => {
         if (progress.done) {
           useEditorStore.getState().incrementGoalsCompleted();

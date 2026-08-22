@@ -28,7 +28,7 @@
 .navigator-scene {
   /* v4.52, Derek: content CENTERS in the row (min-height made flex-start
      read top-hung). */
-  display: flex; align-items: center; padding: var(--dz-nav-scene-pady, 10px) 14px;
+  display: flex; align-items: center; padding: var(--dz-nav-scene-pady, 2px) 14px;
   cursor: pointer; border-left: 3px solid transparent;
   min-height: 40px;
 }
@@ -98,7 +98,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: calc(-1 * var(--dz-nav-scene-pady, 10px)) 0;
+  margin: calc(-1 * var(--dz-nav-scene-pady, 2px)) 0;
   margin-left: -10px;
   padding: 0 0 0 10px;
   background: none;

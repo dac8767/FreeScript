@@ -61,13 +61,12 @@ export function FocusHeaderControls() {
       <button
         ref={helpBtnRef}
         className="fs-help-btn"
-        title="About Focus"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); toggleHelp(); }}
       ><FaRegQuestionCircle /></button>
       {helpOpen && helpPos && createPortal(
         <div className="fs-help-pop" style={{ top: helpPos.top, left: helpPos.left }}>
-          {ht("Focus mode keeps the line you're typing on fixed on screen — the page scrolls, your eyes don't. This window stays open while you write.")}
+          {ht("Focus mode keeps the line you're typing on fixed on screen. The page scrolls, your eyes don't.")}
         </div>,
         document.body,
       )}

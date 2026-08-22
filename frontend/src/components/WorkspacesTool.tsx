@@ -116,7 +116,7 @@ export default function WorkspacesTool() {
                   <span className="ws-apply-name">{name}</span>
                 </button>
                 {builtin ? (
-                  <span className="ws-builtin-badge" title="Ships with ScriptCraft — you can rearrange it and save your changes, but it can't be renamed or deleted">default</span>
+                  <span className="ws-builtin-badge">default</span>
                 ) : confirmDelete === name ? (
                   <>
                     <button className="ws-icon-btn ws-danger" title="Confirm delete" onClick={() => { deleteWorkspace(name); setConfirmDelete(null); }}><FaCheck /></button>
@@ -141,7 +141,6 @@ export default function WorkspacesTool() {
             a workspace to be active. */}
         <button
           className="ws-action-btn"
-          title="Save the current panel layout as a new workspace"
           onClick={() => { void doSaveAs(); }}
         >
           Save as New Workspace
@@ -149,7 +148,7 @@ export default function WorkspacesTool() {
         <button
           className="ws-action-btn"
           disabled={!activeWorkspace || !dirty}
-          title={!activeWorkspace ? 'Apply a workspace first'
+          title={!activeWorkspace ? ''
             : dirty ? `Overwrite “${activeWorkspace}” with the current layout`
               : `“${activeWorkspace}” already matches the current layout`}
           onClick={() => { if (activeWorkspace && dirty) saveWorkspace(activeWorkspace); }}
@@ -159,9 +158,9 @@ export default function WorkspacesTool() {
         <button
           className="ws-action-btn"
           disabled={!activeWorkspace || !dirty}
-          title={!activeWorkspace ? 'Apply a workspace first'
+          title={!activeWorkspace ? ''
             : dirty ? `Reapply the saved “${activeWorkspace}” layout`
-              : 'Nothing has moved since this workspace was applied'}
+              : 'Nothing has changed'}
           onClick={() => { if (activeWorkspace && dirty) applyWorkspace(activeWorkspace); }}
         >
           Reset to Saved Layout

@@ -225,7 +225,7 @@ export default function FeedbackTool() {
         Name:<strong>{profile.name}</strong>
         <button
           className="fb-signout"
-          title="Change the name or email on your feedback"
+          title="Change name or email"
           onClick={() => { setNameDraft(profile.name); setEmailDraft(profile.email); setEditingProfile(true); }}
         >Edit</button>
       </div>
@@ -279,10 +279,10 @@ export default function FeedbackTool() {
               it is — the three buttons beside it are the answer to it. */}
           <span className="fb-attach-title">Add a Screenshot:</span>
           <div className="fb-attach-btns">
-            <button className="dialog-btn" disabled={busy} title="Attach a screenshot of the whole window" onClick={() => capture('full')}>
+            <button className="dialog-btn" disabled={busy} title="Take a screenshot of the whole window" onClick={() => capture('full')}>
               <FaCamera aria-hidden /> Full Screen
             </button>
-            <button className="dialog-btn" disabled={busy} title="Attach a screenshot of a selected area" onClick={() => capture('area')}>
+            <button className="dialog-btn" disabled={busy} title="Take a screenshot of a selected area" onClick={() => capture('area')}>
               <FaCrop aria-hidden /> Area
             </button>
             <button className="dialog-btn" disabled={busy} title="Attach image files from disk" onClick={() => fileInput.current?.click()}>
@@ -296,7 +296,7 @@ export default function FeedbackTool() {
               <span className="fb-shotchip" key={s.url}>
                 <img className="fb-shotthumb" src={s.url} alt="Attached image" />
                 <span className="fb-shotname">{s.name}</span>
-                <button className="fb-shot-x" title="Remove this attachment" onClick={() => removeShot(i)}><FaTimes aria-hidden /></button>
+                <button className="fb-shot-x" title="Remove attachment" onClick={() => removeShot(i)}><FaTimes aria-hidden /></button>
               </span>
             ))}
           </div>
@@ -309,7 +309,7 @@ export default function FeedbackTool() {
         <button
           className="dialog-btn dialog-btn-primary fb-send"
           disabled={busy || !message.trim()}
-          title="Send this feedback"
+          title="Send feedback"
           onClick={submit}
         >{busy ? 'Sending…' : 'Submit'}</button>
       </div>

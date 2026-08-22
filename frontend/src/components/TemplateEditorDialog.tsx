@@ -122,7 +122,6 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
               className="dialog-input"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description"
             />
           </div>
           <div className="template-editor-field">
@@ -327,7 +326,6 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                         className="dialog-input"
                         value={selectedRule.textColor || ''}
                         onChange={(e) => updateRule(selectedId!, { textColor: e.target.value || null })}
-                        placeholder="inherit"
                       />
                       {selectedRule.textColor && (
                         <button
@@ -350,7 +348,6 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                         className="dialog-input"
                         value={selectedRule.backgroundColor || ''}
                         onChange={(e) => updateRule(selectedId!, { backgroundColor: e.target.value || null })}
-                        placeholder="transparent"
                       />
                       {selectedRule.backgroundColor && (
                         <button

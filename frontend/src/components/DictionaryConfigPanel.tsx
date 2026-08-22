@@ -23,7 +23,7 @@ const AddTargetToggle: React.FC<{ active: boolean; onToggle: () => void; disable
     type="button"
     onClick={onToggle}
     disabled={disabled}
-    title={active ? 'Add to Dictionary writes here' : 'Click to make this an Add-to-Dictionary target'}
+    title={active ? '' : 'Click to make this an Add-to-Dictionary target'}
     style={{
       padding: '3px 8px',
       borderRadius: 12,

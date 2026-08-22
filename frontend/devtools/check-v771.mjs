@@ -143,20 +143,30 @@ ok('Minimalist’s toolbar mode comes back', size.toolbarMode === WS.Minimalist.
 
 /* ── what a workspace does NOT carry falls through to the shipped bundle ─── */
 console.log('\nwhat a workspace does not carry falls through to what ships');
+/* v7.76 turned two of these three the other way up. The probe used to EMPTY
+   designVars and helperTextHidden, because a correct reset REFILLED them from
+   the 81 seeded design values and the seeded hidden list. Those are the code
+   now, so a correct reset EMPTIES them instead — and emptying something that
+   is already empty proves nothing. So the probe dirties all three the same
+   way: a value that could not have come from a reset. */
 await page.evaluate(async () => {
   const s = window.__scStore.getState();
-  s.setDesignVars({});
+  s.setDesignVars({ editorMainPadTop: 97, toolWinRadius: 3 });
   s.setMarkupPresets([{ icon: 'star', color: '#ff0000' }]);
-  s.setHelperTextHidden([]);
+  s.setHelperTextHidden(['a string no catalog entry has']);
   await new Promise((r) => setTimeout(r, 200));
 });
 await runReset('designTokens');
 await runReset('markupPresets');
 await runReset('helperText');
 const rest = await read(['designVars', 'markupPresets', 'helperTextHidden']);
-ok('the Design values come back as the app’s, not empty',
-  Object.keys(rest.designVars).length === Object.keys(BUNDLE.parts.design).length,
-  `${Object.keys(rest.designVars).length} vs ${Object.keys(BUNDLE.parts.design).length}`);
+/* "Reset Design" restores the DEFAULTS, and the defaults are the tokens
+   themselves now — so a correct reset clears the override map, where before it
+   refilled it with the 81 seeded values. The probe left two overrides in it,
+   so this cannot pass by standing still. */
+ok('Reset Design clears the overrides — the defaults are the code now',
+  Object.keys(rest.designVars).length === 0,
+  `${Object.keys(rest.designVars).length} left`);
 /* By VALUE, and honestly labelled: Derek never changed his annotation presets,
    so the six in the bundle are the six in DEFAULT_MARKUP_PRESETS, character for
    character. NOTHING here can tell which source the reset read — proven by
@@ -165,9 +175,10 @@ ok('the Design values come back as the app’s, not empty',
 ok('…the annotation presets come back in full',
   JSON.stringify(rest.markupPresets) === JSON.stringify(BUNDLE.parts.annotations),
   `${rest.markupPresets.length} vs ${BUNDLE.parts.annotations.length}`);
-ok('…and the hidden helper text',
-  rest.helperTextHidden.length === BUNDLE.parts.helpertext.hidden.length,
-  `${rest.helperTextHidden.length} vs ${BUNDLE.parts.helpertext.hidden.length}`);
+/* Same reversal, and the probe planted a string no catalog entry carries, so
+   an untouched list would still be holding it. */
+ok('…and the helper-text reset leaves nothing hidden',
+  rest.helperTextHidden.length === 0, JSON.stringify(rest.helperTextHidden));
 
 /* The element list is not in a workspace either, and its reset used to empty
    the hidden set — which is a REAL difference now: the defaults hide four. */

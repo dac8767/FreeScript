@@ -344,7 +344,7 @@ export function ResetAllButton() {
   return (
     <button
       className="fs-reset-all-btn"
-      title="Reset every customization to the defaults — sizes, toolbar layout, Quick Access, menu bar, panels, outline bar"
+      title="Reset every customization to the defaults"
       onClick={async () => {
         if (await confirmDialog(
           'Reset ALL customizations to their defaults? Sizes and spacing, the toolbar layout, dropdown widths, Quick Access Toolbar, menu bar order, side panels, and the Outline Bar all go back to factory. (Themes, Editor and Keyboard Shortcuts have their own resets and are not touched.) You can undo this afterwards with the usual Undo key.',

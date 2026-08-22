@@ -3420,7 +3420,7 @@ const ScreenplayEditor: React.FC = () => {
           grabbed.) */}
       <div
         className={`fs-top-chrome-resize${uiResizeLocked ? ' locked' : ''}`}
-        title={uiResizeLocked ? undefined : 'Drag to resize the menu bar and toolbar together'}
+        title={uiResizeLocked ? undefined : 'Drag to resize'}
         onPointerDown={uiResizeLocked ? undefined : startBarsResize}
       />
       {/* v1.75: Outline Bar — FD-style outline lanes directly under the toolbar. */}

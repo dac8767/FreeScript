@@ -130,7 +130,7 @@ export const LocationPlaceDetails: React.FC<Props> = ({ locations, scriptNames, 
           <button
             ref={(el) => { connect.triggerRef.current = el; }}
             className="locmap-tool-btn"
-            title="Connect this location to others — connected locations form a group"
+            title="Connect this location to others. Connected locations form a group"
             onClick={() => connect.toggle()}
           ><FaLink /> Group</button>
         </div>
@@ -140,13 +140,13 @@ export const LocationPlaceDetails: React.FC<Props> = ({ locations, scriptNames, 
         <div className="locplace-group-row">
           <input
             className="locmap-field-input"
-            title="Rename this group — the name shows everywhere the group does"
+            title="Rename this group"
             value={place.displayName}
             onChange={(e) => updatePlace(place.id, { displayName: e.target.value })}
           />
           <button
             className="locmap-add-field"
-            title="Dissolve the group's name — the locations stay connected"
+            title="Delete group name. The locations stay connected"
             onClick={() => updatePlace(place.id, { displayName: '' })}
           >Ungroup</button>
         </div>
@@ -178,7 +178,7 @@ export const LocationPlaceDetails: React.FC<Props> = ({ locations, scriptNames, 
             ref={(el) => { groupMenu.triggerRef.current = el; }}
             className="locmap-add-field"
             disabled={namedGroups.length === 0}
-            title={namedGroups.length ? 'Join an existing group' : 'No groups yet — create one first'}
+            title={namedGroups.length ? 'Join an existing group' : 'No groups yet'}
             onClick={() => groupMenu.toggle()}
           >+ Add to group</button>
         </div>

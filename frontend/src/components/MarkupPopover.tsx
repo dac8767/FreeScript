@@ -517,7 +517,7 @@ export default function MarkupPopover({ editor }: { editor: Editor | null }) {
         <span className="markup-pop-title">Annotation</span>
         <button
           className={`markup-win-btn markup-win-status${markup.done ? ' done' : ''}`}
-          title={markup.done ? 'Complete — click to reopen' : 'Mark as complete'}
+          title={markup.done ? '' : 'Mark as complete'}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => updateMarkup(id, { done: !markup.done })}
         >
@@ -599,7 +599,6 @@ export default function MarkupPopover({ editor }: { editor: Editor | null }) {
           <input
             className="tool-action-field markup-insert-url"
             autoFocus
-            placeholder="https://…"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
           />
@@ -618,7 +617,6 @@ export default function MarkupPopover({ editor }: { editor: Editor | null }) {
           <input
             className="tool-action-field markup-insert-url"
             autoFocus
-            placeholder="https://…/image.png"
             value={imgUrl}
             onChange={(e) => setImgUrl(e.target.value)}
           />

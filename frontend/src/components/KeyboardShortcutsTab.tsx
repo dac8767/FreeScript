@@ -166,7 +166,7 @@ export default function KeyboardShortcutsTab() {
         {/* v6.77: warned + undoable like every bulk reset (majorChange). */}
         <button
           className="dialog-btn dialog-btn-sm"
-          title="Restore every shortcut to its default"
+          title="Restore all shortcuts to default"
           onClick={() => {
             const st = useShortcutStore.getState();
             const n = Object.keys(st.overrides).length;

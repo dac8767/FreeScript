@@ -115,7 +115,7 @@ const ScriptDiffView: React.FC<Props> = ({ docA, docB, labelA, labelB, onClose }
             onClick={() => setMode('changes-only')}
           >Changes only</button>
           {onClose && (
-            <button className="script-diff-close" onClick={onClose} title="Close diff">×</button>
+            <button className="script-diff-close" onClick={onClose}>×</button>
           )}
         </div>
       </div>

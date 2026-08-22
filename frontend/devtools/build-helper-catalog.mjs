@@ -169,12 +169,29 @@ function stripInterpolatedTemplates(expr) {
   return out;
 }
 
+/** What the STRING IS, not what the source spells (v7.76).
+ *
+ *  The harvester read the raw characters between the quotes, so a literal
+ *  written `'tag1, tag2, \u2026'` was catalogued with a backslash, a u and four
+ *  digits in it — while the DOM shows an ellipsis. Overrides are keyed on the
+ *  catalogued text and the applier compares against what is ON the element, so
+ *  those two could never match: an override on such a string was dead on
+ *  arrival and there was nothing on screen to say so. Two catalogue entries
+ *  were in that state. Decode the escapes JS itself would. */
+function decodeSourceEscapes(raw) {
+  return raw
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\(['"`\\])/g, '$1');
+}
+
 /** Fixed string literals inside an attribute expression, operands skipped. */
 function literalsInExpr(rawExpr) {
   const expr = stripInterpolatedTemplates(rawExpr);
   const out = [];
   for (const m of expr.matchAll(EXPR_LITERAL_RE)) {
-    const text = (m[1] ?? m[2] ?? m[3]).replace(/\\(['"`])/g, '$1');
+    const text = decodeSourceEscapes(m[1] ?? m[2] ?? m[3]);
     if (OPERAND_BEFORE_RE.test(expr.slice(0, m.index))) continue;
     if (OPERAND_AFTER_RE.test(expr.slice(m.index + m[0].length))) continue;
     out.push(text);
@@ -271,8 +288,8 @@ export function buildCatalog() {
 
   for (const f of files) {
     const src = readFileSync(f, 'utf8');
-    for (const m of src.matchAll(TITLE_RE)) add(m[1], 'tooltip', f, contextAfter(src, m.index + m[0].length));
-    for (const m of src.matchAll(PLACEHOLDER_RE)) add(m[1], 'placeholder', f);
+    for (const m of src.matchAll(TITLE_RE)) add(decodeSourceEscapes(m[1]), 'tooltip', f, contextAfter(src, m.index + m[0].length));
+    for (const m of src.matchAll(PLACEHOLDER_RE)) add(decodeSourceEscapes(m[1]), 'placeholder', f);
     for (const m of src.matchAll(HT_RE)) add((m[1] ?? m[2]).replace(/\\(['"])/g, '$1'), 'hint', f);
     // v6.51: dynamic attribute expressions — every fixed literal inside.
     for (const m of src.matchAll(ATTR_EXPR_RE)) {

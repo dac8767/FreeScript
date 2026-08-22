@@ -436,7 +436,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
               ) : r.label}
               <button
                 className="fs-dnd-rowbtn"
-                title={r.kind === 'divider' ? 'Delete' : 'Hide (find it again under Hidden)'}
+                title={r.kind === 'divider' ? 'Delete' : 'Hide'}
                 onClick={() => setRowSide(r, 'hidden')}
               >×</button>
             </span>
@@ -460,7 +460,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                 {label}
                 <button
                   className="fs-dnd-rowbtn"
-                  title="Show in its default panel"
+                  title="Show in default panel"
                   onClick={() => { setTool(id, { enabled: true, side: homeSide(id) }); sendToBottom(id); }}
                 >+</button>
               </span>
@@ -743,8 +743,8 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
     <button
       className={`dialog-btn dialog-btn-sm${uiResizeLocked ? ' active' : ''}`}
       title={uiResizeLocked
-        ? 'Customizations are locked — click to unlock'
-        : 'Freeze every customization: sizing, spacing, and layout edits'}
+        ? 'Click to unlock'
+        : 'Lock all customizations'}
       onClick={() => useEditorStore.getState().setUiResizeLocked(!uiResizeLocked)}
     >{uiResizeLocked ? 'Locked' : 'Lock All'}</button>
   );
@@ -791,7 +791,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
   const tabAdders: Partial<Record<string, React.ReactNode>> = {
     toolbar: (
       <button className="dialog-btn dialog-btn-sm"
-        title="Hide every toolbar item (re-add items from the palette)"
+        title="Hide all toolbar items"
         onClick={() => setToolbarZones([], [])}>Hide All</button>
     ),
   };
@@ -815,7 +815,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
   const backupDoor = (
     <button
       className="dialog-btn dialog-btn-sm"
-      title="Back up or restore your customizations — opens Settings ▸ Backup & Restore"
+      title="Back up or restore your customizations"
       onClick={() => useEditorStore.getState().openPreferences('backup')}
     >Backup &amp; Restore</button>
   );
@@ -904,7 +904,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                     )}
                     <button
                       className="fs-dnd-headbtn"
-                      title="Show every Quick Access button"
+                      title="Show all Quick Access buttons"
                       onClick={() => setQatItems([...qatItems, ...QAT_OPTIONS.map((o) => o.id).filter((id) => !qatItems.includes(id))])}
                     >Show All</button>
                   </>),
@@ -931,7 +931,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                 {
                   id: 'hidden', title: 'Hidden', isHidden: true,
                   headerExtra: (
-                    <button className="fs-dnd-headbtn" title="Hide every Quick Access button" onClick={() => setQatItems([])}>Hide All</button>
+                    <button className="fs-dnd-headbtn" title="Hide all Quick Access buttons" onClick={() => setQatItems([])}>Hide All</button>
                   ),
                   sections: [{
                     label: 'Available',

@@ -66,7 +66,7 @@ try {
   const textBefore = await page.evaluate(() => window.__scEditor.state.doc.textContent);
 
   /* ── 1–3: send ── */
-  await page.click('button[title^="Send to Script"]');
+  await page.click('button[title^="Add all sections to the script"]');
   await page.waitForSelector('.fs-confirm-overlay', { timeout: 5000 });
   const prompt = await page.evaluate(() => document.querySelector('.fs-confirm-box')?.textContent ?? '');
   ok(/annotations/.test(prompt) && !/section lines/.test(prompt),
@@ -114,7 +114,7 @@ try {
     st.addBeatColumn('Act IV', 6);
   });
   await settle(page);
-  await page.click('button[title^="Send to Script"]');
+  await page.click('button[title^="Add all sections to the script"]');
   await page.waitForSelector('.fs-confirm-overlay', { timeout: 5000 });
   await page.click('.fs-confirm-ok');
   await settle(page);
@@ -163,7 +163,7 @@ try {
   await settle(page);
   ok((await page.evaluate(() => window.__scEditor.state.doc.textContent)).includes('# Section 1'),
     'a v6.64 line is in the script to start with');
-  await page.click('button[title^="Send to Script"]');
+  await page.click('button[title^="Add all sections to the script"]');
   await page.waitForSelector('.fs-confirm-overlay', { timeout: 5000 });
   await page.click('.fs-confirm-ok');
   await settle(page);
@@ -184,7 +184,7 @@ try {
     return ['Page One', 'Page Two', 'Page Three'].map((t) => st.addBeatColumn(t, 1));
   });
   await settle(page);
-  await page.click('button[title^="Send to Script"]');
+  await page.click('button[title^="Add all sections to the script"]');
   await page.waitForSelector('.fs-confirm-overlay', { timeout: 5000 });
   await page.click('.fs-confirm-ok');
   await settle(page);

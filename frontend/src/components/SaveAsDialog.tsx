@@ -469,7 +469,7 @@ const SaveAsDialog: React.FC<SaveAsDialogProps> = ({
                     ref={pathBtnRef}
                     className="fs-saveas-path"
                     onClick={chooseFolder}
-                    title={localSaveFolder ? `${localSaveFolder} — click to change` : 'Click to choose a folder'}
+                    title={localSaveFolder ? `${localSaveFolder} — click to change` : 'Choose a folder'}
                   >
                     {localSaveFolder ? displayPath : 'Choose a folder…'}
                   </button>

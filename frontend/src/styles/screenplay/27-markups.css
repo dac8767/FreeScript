@@ -241,7 +241,7 @@
 /* v5.29: ONE head row — "Icon:" group + "Highlight:" group + ⋮. The three
    --dz-anno-* knobs live in Design ▸ Annotations. */
 .markup-pop-head {
-  gap: var(--dz-anno-group-gap, 14px);
+  gap: var(--dz-anno-group-gap, 13px);
   padding: var(--dz-anno-head-pad, 0px);
   /* v5.42, Derek: the OUTER row never wraps — the ⋮ stays pinned top-right;
      the groups wrap inside head-main (no spacer = no phantom empty row). */
@@ -252,7 +252,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--dz-anno-group-gap, 14px);
+  gap: var(--dz-anno-group-gap, 13px);
   flex: 1;
   min-width: 0;
 }
@@ -263,7 +263,7 @@
 .markup-pop-group {
   display: inline-flex;
   align-items: center;
-  gap: var(--dz-anno-head-gap, 6px);
+  gap: var(--dz-anno-head-gap, 3px);
 }
 .markup-pop-grouplabel { font-size: 11px; color: inherit; opacity: 0.62; }
 .markup-hl-eye {
@@ -549,7 +549,7 @@ input.markup-dot-custom::-webkit-color-swatch { border: none; opacity: 0; }
   flex-wrap: nowrap;
   border-top: 1px solid rgba(0, 0, 0, 0.14);
   /* v5.42, Derek: all four sides are Design knobs (Design ▸ Annotations) */
-  padding: var(--dz-anno-prev-pad-top, 8px) var(--dz-anno-prev-pad-right, 0px) var(--dz-anno-prev-pad-bottom, 0px) var(--dz-anno-prev-pad-left, 0px);
+  padding: var(--dz-anno-prev-pad-top, 15px) var(--dz-anno-prev-pad-right, 13px) var(--dz-anno-prev-pad-bottom, 5px) var(--dz-anno-prev-pad-left, 9px);
 }
 .markup-prev-lines {
   flex: 1;

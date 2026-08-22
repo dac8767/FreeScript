@@ -110,7 +110,7 @@ export function MarkupsControls() {
           the same word the ribbon's Annotation Filter uses for the same
           choice, so one idea has one name. The class and data-ctl keep
           their old names: they are persisted/check ids. */}
-      <button ref={filterBtn} data-ctl="filter" className={`tool-ctl markup-ctl-filter${filterOpen ? ' open' : ''}`} title="Choose which annotations show (script and window together)"
+      <button ref={filterBtn} data-ctl="filter" className={`tool-ctl markup-ctl-filter${filterOpen ? ' open' : ''}`} title="Choose which annotations show"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); setFilterOpen((v) => !v); }}>
         <span className="tool-ctl-label">Filter</span>

@@ -28,7 +28,6 @@ export default function LocationsGroupToggle() {
       <button
         className={`locmap-tool-btn${grouped ? ' loc-group-on' : ''}`}
         aria-pressed={grouped}
-        title="Locations that share a group fold together"
         onClick={() => setGrouped(true)}
       >Grouped</button>
     </span>

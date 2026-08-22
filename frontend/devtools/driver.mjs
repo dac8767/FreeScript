@@ -25,9 +25,34 @@
 //   ... assertions ...
 //   await browser.close();
 
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
 export const VITE_URL = 'http://localhost:5199/';
+
+/** The shipped default of one Design knob, read from designTokens.ts.
+ *
+ *  v7.76: Derek's own Design numbers ARE the token defaults now, so five
+ *  checks that had his old defaults typed into them as literals ("old default
+ *  1", "the built-in 30px") all went red at once — every one of them a fixture
+ *  restating a number rather than testing anything. A check that hardcodes a
+ *  default is asserting that nobody ever changes it.
+ *
+ *  So they read it from the same file the app reads, and what they assert is
+ *  the part that can actually break: that the default REACHES THE PIXELS. Left
+ *  as literals, the next preset he sends would light up the same five again.
+ *  One reader, because five copies of this regex is exactly the drift
+ *  CLAUDE.md's single-source rule is about. */
+const TOKENS_SRC = readFileSync(new URL('../src/design/designTokens.ts', import.meta.url), 'utf8');
+export function tokenDefault(id) {
+  const at = TOKENS_SRC.indexOf(`id: '${id}'`);
+  if (at < 0) throw new Error(`tokenDefault: no knob with id '${id}' in designTokens.ts`);
+  // Negatives are real defaults (ribRowGapUntitled is -3), so the sign is part
+  // of the number — a [0-9.] class here silently read "-3" as 3.
+  const m = TOKENS_SRC.slice(at).match(/def:\s*(-?[\d.]+)/);
+  if (!m) throw new Error(`tokenDefault: knob '${id}' has no def:`);
+  return Number(m[1]);
+}
 
 /** The standard fixture: 4 scenes, unequal lengths so page counts, runtimes
  *  and the length icons all differ — the shapes the Scenes tools care about. */

@@ -206,7 +206,6 @@ export function DesignPanelBody() {
         <LuSearch className="dz-search-icon" />
         <input
           className="dz-search-input"
-          placeholder="Search settings…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

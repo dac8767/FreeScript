@@ -33,7 +33,6 @@ export default function HelperTextTool() {
         <LuSearch className="dz-search-icon" />
         <input
           className="dz-search-input"
-          placeholder="Search helper text…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

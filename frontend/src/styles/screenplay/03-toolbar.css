@@ -410,17 +410,17 @@
      asymmetric (titled rows measured 26.75px with only the untitled knob
      moved). Rows also carry flex-shrink: 0 now — if the numbers are ever
      wrong again it must show as overflow, not as silent squeeze. */
-  min-height: calc(var(--rib-content-h, calc(var(--rib-rowh, 28px) * 2 + 16px)) + var(--dz-rib-pad-top, 5px) + var(--dz-rib-pad-bottom, 2px));
+  min-height: calc(var(--rib-content-h, calc(var(--rib-rowh, 28px) * 2 + 16px)) + var(--dz-rib-pad-top, 6px) + var(--dz-rib-pad-bottom, 10px));
   /* v3.98/v4.1, Derek: breathing room above the section titles at the top.
      v4.15: Design knobs. */
-  padding-top: var(--dz-rib-pad-top, 5px);
+  padding-top: var(--dz-rib-pad-top, 6px);
   /* v5.16, Derek: the bar's far sides are knobs too. The LEFT one loses to
      the inline auto-align padding unless the user has touched the knob —
      Toolbar.tsx gates that. (Right lives a few lines down, where a later
      12px literal used to override it.) */
-  padding-left: var(--dz-rib-pad-left, 8px);
+  padding-left: var(--dz-rib-pad-left, 10px);
   /* v3.44, Derek: a hair of breathing room under the buttons. */
-  padding-bottom: var(--dz-rib-pad-bottom, 2px);
+  padding-bottom: var(--dz-rib-pad-bottom, 10px);
   /* v3.10, Derek: the right-aligned tail (Customize) sat flush against the
      window edge; v3.32 settled on 12px. v5.16: that 12 is the KNOB's default
      now — this later rule was overriding the knob and pinning Bar right
@@ -545,7 +545,7 @@ div.rib-tall, .toolbar-priority-block.rib-tall { height: 80%; display: flex; ali
   padding-top: 0;
   padding-bottom: 0;
   height: auto;
-  min-height: var(--dz-toolbar-big-icon, 26px);
+  min-height: var(--dz-toolbar-big-icon, 28px);
 }
 .rib-single .toolbar-btn {
   width: auto;
@@ -557,7 +557,7 @@ div.rib-tall, .toolbar-priority-block.rib-tall { height: 80%; display: flex; ali
    which let icons with taller/wider viewBoxes render at different heights). A
    fixed svg height with auto width = every big icon the same height, so the
    whole icon+label button measures the same top-to-bottom. */
-.rib-single .toolbar-btn svg { height: var(--dz-toolbar-big-icon, 26px); width: auto; }
+.rib-single .toolbar-btn svg { height: var(--dz-toolbar-big-icon, 28px); width: auto; }
 /* Tall pinned tools/commands: the same big-button format, self-contained. */
 .toolbar-btn.rib-tall-btn {
   height: 80%;
@@ -569,8 +569,8 @@ div.rib-tall, .toolbar-priority-block.rib-tall { height: 80%; display: flex; ali
   justify-content: center;
   gap: 3px;
 }
-.rib-tall-icon { display: inline-flex; align-items: center; justify-content: center; height: var(--dz-toolbar-big-icon, 26px); }
-.rib-tall-icon svg { height: var(--dz-toolbar-big-icon, 26px); width: auto; }   /* v3.75: same fixed height as .rib-single */
+.rib-tall-icon { display: inline-flex; align-items: center; justify-content: center; height: var(--dz-toolbar-big-icon, 28px); }
+.rib-tall-icon svg { height: var(--dz-toolbar-big-icon, 28px); width: auto; }   /* v3.75: same fixed height as .rib-single */
 /* v3.99, Derek: the sizing lock now renders as a rib-tall-btn (label inside)
    like the other big buttons, so its icon uses the shared .rib-tall-icon rule.
    Both padlock glyphs are 448×512, so height:auto keeps the two states the same
@@ -705,25 +705,25 @@ div.rib-tall, .toolbar-priority-block.rib-tall { height: 80%; display: flex; ali
   --rib-k: var(--rib-k-t, 1);
   --rib-btn-gap-top-k: var(--dz-rib-btn-gap-top-titled, 1px);
   --rib-btn-gap-bot-k: var(--dz-rib-btn-gap-bottom-titled, 1px);
-  --rib-row-gap-k: var(--dz-rib-row-gap-titled, 0px);
+  --rib-row-gap-k: var(--dz-rib-row-gap-titled, -2px);
 }
 .toolbar.toolbar-ribbon .rib-kind-untitled {
   --rib-k: var(--rib-k-u, 1);
-  --rib-btn-gap-top-k: var(--dz-rib-btn-gap-top-untitled, 1px);
-  --rib-btn-gap-bot-k: var(--dz-rib-btn-gap-bottom-untitled, 1px);
-  --rib-row-gap-k: var(--dz-rib-row-gap-untitled, 0px);
+  --rib-btn-gap-top-k: var(--dz-rib-btn-gap-top-untitled, 0px);
+  --rib-btn-gap-bot-k: var(--dz-rib-btn-gap-bottom-untitled, -1px);
+  --rib-row-gap-k: var(--dz-rib-row-gap-untitled, -3px);
 }
 /* Padding is per KIND — and single-row sections are their OWN kind with
    their own three knobs, so the titled/untitled pads exclude them. */
 .toolbar.toolbar-ribbon .rib-kind-titled:not(.rib-single) {
-  padding: var(--dz-rib-pad-top-titled, 0px) var(--dz-rib-pad-x-titled, 0px) var(--dz-rib-pad-bottom-titled, 0px);
+  padding: var(--dz-rib-pad-top-titled, 0px) var(--dz-rib-pad-x-titled, 13px) var(--dz-rib-pad-bottom-titled, 1px);
 }
 .toolbar.toolbar-ribbon .rib-kind-untitled:not(.rib-single) {
-  padding: var(--dz-rib-pad-top-untitled, 0px) var(--dz-rib-pad-x-untitled, 0px) var(--dz-rib-pad-bottom-untitled, 0px);
+  padding: var(--dz-rib-pad-top-untitled, 2px) var(--dz-rib-pad-x-untitled, 7px) var(--dz-rib-pad-bottom-untitled, 5px);
 }
 .toolbar.toolbar-ribbon .rib-section.rib-single,
 .toolbar.toolbar-ribbon .rib-group.rib-single {
-  padding: var(--dz-rib-pad-top-single, 0px) var(--dz-rib-pad-x-single, 0px) var(--dz-rib-pad-bottom-single, 0px);
+  padding: var(--dz-rib-pad-top-single, 0px) var(--dz-rib-pad-x-single, 6px) var(--dz-rib-pad-bottom-single, 0px);
 }
 /* Rows, small buttons and item boxes all multiply their base by the kind
    factor. Two-row sections only — single-row big buttons already span the

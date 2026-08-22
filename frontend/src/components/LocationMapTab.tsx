@@ -500,7 +500,7 @@ const LocationMapTab: React.FC<Props> = ({ locations, allLocations, onGoToScene,
                 className={`locmap-add-btn locmap-addpin-btn${placing ? ' locmap-addpin-armed' : ''}`}
                 onClick={armPin}
                 aria-pressed={placing}
-                title={placing ? 'Click the map to set the pin, or press Escape' : 'Add a pin — it follows the cursor until you click'}
+                title={placing ? 'Click the map to set the pin, or press Escape' : 'Add a pin'}
               >+ Add Pin</button>
               {/* v6.38, Derek: Map Options moved into the WINDOW HEADER as
                   "Options" (LocationsControls); the count stretches so the

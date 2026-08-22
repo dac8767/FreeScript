@@ -151,7 +151,7 @@ export default function PresetsPanel({ showImports = true, preCheck }: {
         <button
           className="fs-presets-all"
           onClick={() => setChecked(allOn ? [] : available)}
-          title={allOn ? 'Untick every item' : 'Tick every item'}
+          title={allOn ? 'Uncheck all items' : 'Check all items'}
         >{allOn ? 'Select none' : 'Select all'}</button>
       </div>
 
@@ -179,13 +179,13 @@ export default function PresetsPanel({ showImports = true, preCheck }: {
         <button
           className="fs-presets-btn fs-presets-btn-primary"
           disabled={!live.length}
-          title={live.length ? 'Save the ticked items as one preset file' : 'Tick at least one item to export'}
+          title={live.length ? 'Save chosen items as one preset file' : 'Check at least one item to export'}
           onClick={() => void exportBundle()}
         ><FaFileExport aria-hidden /> Export Preset</button>
         {showImports && (
           <button
             className="fs-presets-btn"
-            title="Load a preset file — it applies whatever that file contains"
+            title="Load a preset file"
             onClick={() => void importBundle()}
           ><FaFileImport aria-hidden /> Import Preset</button>
         )}

@@ -279,7 +279,7 @@ export default function ScriptNotePopover({ editor }: { editor: Editor | null })
             value={note.content}
             onChange={(e) => handleTextChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Research links, themes to keep present, notes to self…"
+            placeholder="Research links, notes to self…"
           />
           {assetSuggestions.length > 0 && assetQuery !== null && (
             <div className="note-asset-dropdown">

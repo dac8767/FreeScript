@@ -15,7 +15,8 @@
  *
  *    So the assertions are about REACHABILITY, not just arithmetic: an
  *    out-of-range value paints inside the range, the readout agrees with the
- *    paint, and the reset that clears it actually returns the 30px default.
+ *    paint, and the reset that clears it actually returns the token's default
+ *    (30px when this was written; Derek's 42 since v7.76 — read, not typed).
  *
  * B. THE GEAR. His images/gear3.png, black on transparency, stored white.
  *    Two renderers read the one asset; the assertion is that the in-app icon
@@ -23,7 +24,7 @@
  *    mask resolves to a real file rather than a 404 that renders as nothing.
  */
 import { readFileSync } from 'node:fs';
-import { launch, boot, settle, zoom100 } from './driver.mjs';
+import { launch, boot, settle, zoom100, tokenDefault } from './driver.mjs';
 
 let pass = 0, fail = 0;
 const ok = (name, cond, extra = '') => {
@@ -63,17 +64,23 @@ console.log('\nA. the gap above the first page');
    carry Derek's 140% zoom. */
 await zoom100(page);
 
-/* v7.70: the app SHIPS with a value for this token — 42px, from Derek's own
-   Design settings, which are the defaults now. So there are two claims here,
-   and the second is the one this check was written for: the shipped app paints
-   his number, and clearing the override returns the built-in 30. A profile
-   with nothing overriding it is what "default" means to everything below. */
+/* v7.70 shipped Derek's 42px as a seeded OVERRIDE on top of a built-in 30, so
+   there were two numbers to check: what the app paints, and what clearing the
+   override falls back to.
+   v7.76 collapsed that — his values are the token defaults now and there is no
+   override to clear. The 42 is still asserted (that is the half that says his
+   settings arrived); what replaces the second claim is that RESET IS A NO-OP
+   HERE, because there is nothing to reset from. A fresh profile that quietly
+   moved when reset was pressed would mean an override had been seeded after
+   all, which is exactly what v7.76 set out to remove. */
 const shipped = await gap();
-ok('the shipped default carries his 42px', shipped === 42, `got ${shipped}`);
+ok(`the shipped default carries his ${tokenDefault('editorMainPadTop')}px`,
+  shipped === tokenDefault('editorMainPadTop'), `got ${shipped}`);
 await page.evaluate(() => window.__scStore.getState().resetDesignVar('editorMainPadTop'));
 await settle(page);
 const base = await gap();
-ok('…and with no override it is the built-in 30px', base === 30, `got ${base}`);
+ok('…and reset does not move it, because nothing was overriding it',
+  base === shipped, `got ${base}, was ${shipped}`);
 
 /* The failure exactly as it reached Derek: a persisted number outside the
    slider's range. setDesignVar is the store door every import ends up at. */
@@ -121,7 +128,11 @@ if (shown.found) {
 await page.evaluate(() => window.__scStore.getState().resetDesignVar('editorMainPadTop'));
 await settle(page);
 const after = await gap();
-ok('resetting it returns the page to the 30px default', after === 30, `got ${after}`);
+/* v7.76: the way out lands on the token's own default — 42 now, not the 30
+   this line used to name. This is the assertion the whole check exists for:
+   a value no slider can reach still has an undo. */
+ok(`resetting it returns the page to the ${tokenDefault('editorMainPadTop')}px default`,
+  after === tokenDefault('editorMainPadTop'), `got ${after}`);
 
 console.log('\nB. the Settings gear');
 

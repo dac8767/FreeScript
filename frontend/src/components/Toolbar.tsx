@@ -44,6 +44,7 @@ import { confirmDialog } from './ConfirmDialog';
 import { commandDef, type ToolbarCommand } from './toolbarCommands';
 import { resolvePickedElement } from './screenplayEditorConstants';
 import { BUILTIN_BY_KEY, DEFAULT_TOOLBAR_LEFT, DEFAULT_TOOLBAR_RIGHT, normalizeToolbarZones, stripTall, parseRibbon, ribbonKindVars } from './toolbarBuiltins';
+import { designValue } from '../design/designTokens';
 import { smartUndo, smartRedo, useEditorStore } from '../stores/editorStore';
 import { useWindowUndoStore } from '../stores/windowUndoStore';
 import { createScriptNoteAtSelection } from '../utils/scriptNoteActions';
@@ -551,7 +552,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <div className="toolbar-group" style={{ position: 'relative' }}>
           <button
             className="toolbar-btn"
-            title="Text Background Color (Scrapbook) — None removes it"
+            title="Text Background Color (Scrapbook)"
             onMouseDown={(e) => {
               e.preventDefault();
               const sel = document.getSelection();
@@ -650,7 +651,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       case 'viewAnnotations': return (
         <button
           className={`toolbar-btn${markupsVisible ? ' active' : ''}`}
-          title={markupsVisible ? 'Hide annotations on the script' : 'Show annotations on the script'}
+          title={markupsVisible ? 'Hide annotations' : 'Show annotations'}
           onClick={() => useEditorStore.getState().setMarkupsVisible(!markupsVisible)}
         >{markupsVisible ? TOOLBAR_ICONS.viewAnnotations : TOOLBAR_ICONS.viewAnnotationsOff}</button>
       );
@@ -923,7 +924,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       case 'lockResize': return (
         <button
           className={`toolbar-btn${uiResizeLocked ? ' active' : ''}`}
-          title={uiResizeLocked ? 'Sizing is locked — click to unlock' : 'Lock all sizing and spacing'}
+          title={uiResizeLocked ? 'Sizing is locked' : 'Lock all sizing and spacing'}
           onClick={() => useEditorStore.getState().setUiResizeLocked(!uiResizeLocked)}
         >{uiResizeLocked ? TOOLBAR_ICONS.lockResize : TOOLBAR_ICONS.lockResizeOpen}</button>
       );
@@ -933,7 +934,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <button
           className="toolbar-btn"
           disabled={uiResizeLocked}
-          title={uiResizeLocked ? 'Sizing is locked — unlock to reset' : 'Reset all sizes & spacing to defaults'}
+          title={uiResizeLocked ? 'Sizing is locked' : 'Reset all sizes & spacing to defaults'}
           onClick={async () => {
             if (await confirmDialog(
               'Reset all sizes and spacing to their defaults? Side panels, toolbar, menu bar, outline bar, and spacing all go back to factory positions.',
@@ -1013,7 +1014,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           key={tok}
           className={`toolbar-btn rib-tall-btn${uiResizeLocked ? ' active' : ''}`}
           data-key="lockResize"
-          title={uiResizeLocked ? 'Sizing is locked — click to unlock' : 'Lock all sizing and spacing'}
+          title={uiResizeLocked ? 'Sizing is locked' : 'Lock all sizing and spacing'}
           onClick={() => useEditorStore.getState().setUiResizeLocked(!uiResizeLocked)}
         >
           <span className="rib-tall-icon">{uiResizeLocked ? TOOLBAR_ICONS.lockResize : TOOLBAR_ICONS.lockResizeOpen}</span>
@@ -1146,19 +1147,27 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   /* v5.14, Derek: per-kind geometry. The numbers ride the same inline style
      block as --rib-rowh; ribbonKindVars (toolbarBuiltins) holds the maths.
      Auto-fill: untitled two-row sections stretch to a titled section's total
-     height; the two Design scale knobs multiply each kind on top. */
+     height; the two Design scale knobs multiply each kind on top.
+
+     v7.76: every knob goes through designValue, which answers override-or-
+     default. Passing dzVars[id] straight in handed `undefined` for any knob
+     the user had not moved, and ribbonKindVars then fell back to its own
+     copies of the defaults — copies that had drifted from the stylesheet's.
+     While Derek's numbers were overrides the map was full and it never showed;
+     the moment they became the defaults, the fill sized untitled rows against
+     a titled section that does not exist. */
   const ribKind = ribbonKindVars({
     rowH: ribRowH,
     anyTitle: anyRibTitle,
     anyUntitled: liveSections.some(({ s: ls }) => !ls.title),
-    titleFont: dzVars.ribTitleFont,
-    titleGap: dzVars.ribTitleGap,
-    rowGapTitled: dzVars.ribRowGapTitled,
-    rowGapUntitled: dzVars.ribRowGapUntitled,
-    padTopTitled: dzVars.ribPadTopTitled,
-    padBottomTitled: dzVars.ribPadBottomTitled,
-    padTopUntitled: dzVars.ribPadTopUntitled,
-    padBottomUntitled: dzVars.ribPadBottomUntitled,
+    titleFont: designValue(dzVars, 'ribTitleFont'),
+    titleGap: designValue(dzVars, 'ribTitleGap'),
+    rowGapTitled: designValue(dzVars, 'ribRowGapTitled'),
+    rowGapUntitled: designValue(dzVars, 'ribRowGapUntitled'),
+    padTopTitled: designValue(dzVars, 'ribPadTopTitled'),
+    padBottomTitled: designValue(dzVars, 'ribPadBottomTitled'),
+    padTopUntitled: designValue(dzVars, 'ribPadTopUntitled'),
+    padBottomUntitled: designValue(dzVars, 'ribPadBottomUntitled'),
     scaleTitledPct: ribScaleTitledPct,
     scaleUntitledPct: ribScaleUntitledPct,
   });
@@ -1330,7 +1339,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       {tok.startsWith('b:') && DD_RESIZABLE[tok.slice(2)] && (
         <span
           className="toolbar-spacer-resize rib-edit-ddgrip"
-          title="Drag to resize this dropdown"
+          title="Drag to resize"
           onPointerDown={(e) => startDdResize(e, tok.slice(2))}
         />
       )}
@@ -1371,7 +1380,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     <button
       type="button"
       className="rib-edit-add"
-      title="Add a section, divider, spacer, alignment split or item here"
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -1412,7 +1420,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           {i > 0 && (i === splitAt
             ? (
               <div className="rib-align-gap">
-                <span className="rib-edit-alignsplit" title="Align Split — sections after this hug the right edge">
+                <span className="rib-edit-alignsplit" title="Align Split: sections after this hug the right edge">
                   <FaExchangeAlt />
                   <button className="rib-edit-x" title="Remove the align split" onPointerDown={(e) => e.stopPropagation()} onClick={ribRemoveSplit}>×</button>
                 </span>
@@ -1433,7 +1441,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
             ) : (
               <div
                 className="toolbar-separator rib-section-sep rib-edit-sep"
-                title="Hide this divider — click again to bring it back"
+                title="Hide this divider"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => ribToggleSectionSep(i)}
               />
@@ -1508,7 +1516,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
               <div className="rib-edit-break">
                 <span
                   className={`rib-row-line rib-edit-breakline${s.breakLine ? ' heavy' : ''}`}
-                  title={s.breakLine ? 'Row split line: shown — click to hide' : 'Row split line: hidden — click to show'}
+                  title={s.breakLine ? 'Click to hide' : 'Click to show'}
                   onClick={() => ribToggleBreakLine(i)}
                 />
                 <button className="rib-edit-x" title="Remove the row split" onPointerDown={(e) => e.stopPropagation()} onClick={() => ribRemoveBreak(i)}>×</button>

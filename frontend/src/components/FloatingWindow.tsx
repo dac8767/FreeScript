@@ -143,7 +143,7 @@ export default function FloatingWindow({ id, title, onClose, className, initial,
         <span className="tool-chrome-actions htw-header-right">
           <button
             className="char-profiles-fullscreen-btn htw-fsbtn"
-            title={fullscreen ? 'Shrink to a floating window' : 'Fullscreen'}
+            title={fullscreen ? 'Shrink to floating window' : 'Fullscreen'}
             onClick={() => setFullscreen((v) => !v)}
           >{fullscreen ? <RestoreIcon /> : <FullscreenIcon />}</button>
           <button className="tool-window-close" title="Close" onClick={onClose}><CloseIcon /></button>

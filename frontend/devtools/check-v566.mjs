@@ -1,7 +1,7 @@
 // devtools/check-v566.mjs — the Focus "?" rides the window header (popover
 // works from there), and the new Focus Design knobs actually move the panel
 // (no dead sliders): side padding, section spacing, indent.
-import { launch, boot, seedScript, openTool, SCENES_4, settle } from './driver.mjs';
+import { launch, boot, seedScript, openTool, SCENES_4, settle, tokenDefault } from './driver.mjs';
 const SHOTS = '/tmp/claude-0/-home-user-ScriptCraft/e4449e3e-5198-5997-9e57-bd93d663743c/scratchpad';
 let pass = 0, fail = 0;
 const ok = (cond, label) => {
@@ -63,8 +63,17 @@ await page.evaluate(() => {
   s.resetDesignVar('focusPad'); s.resetDesignVar('focusSectionGap'); s.resetDesignVar('focusIndent');
 });
 await settle(page);
-ok(await page.evaluate(() => getComputedStyle(document.querySelector('.fs-typewriter')).paddingLeft) === '12px',
-  'reset returns the built-in value');
+/* v7.76: was pinned to '12px' — the built-in default as it stood before Derek's
+   Design values became the defaults (it is 29 now). The comment above had
+   already stopped requiring BEFORE to be a particular number for exactly this
+   reason and then left this line naming one.
+   Two halves, so it cannot pass by accident: reset must land back on precisely
+   what the panel showed before anything was touched, AND that must be the
+   token's own shipped default rather than some third number. */
+const resetPad = await page.evaluate(() => getComputedStyle(document.querySelector('.fs-typewriter')).paddingLeft);
+ok(resetPad === before.pad, `reset returns the panel to where it started (${before.pad} → ${resetPad})`);
+ok(resetPad === `${tokenDefault('focusPad')}px`,
+  `…and that is the shipped default (${tokenDefault('focusPad')}px)`);
 
 // the Design window lists the group
 await page.evaluate(() => window.__scStore.getState().openTool('design'));

@@ -66,7 +66,6 @@ export default function SpellCheckPanel({ editor }: SpellCheckPanelProps) {
         </div>
         <button
           className="fs-spellgram-settings"
-          title="Grammar & Spelling Settings"
           onClick={() => setGrammarRulesPanelOpen(true)}
         >
           Settings…

@@ -1,11 +1,12 @@
-import { settle } from './driver.mjs';
+import { settle, tokenDefault } from './driver.mjs';
 // devtools/check-ribbon-btngap.mjs — v5.18, Derek: "for two row section, add
 // bottom row button spacing and top row button spacing. currently 0 for button
 // spacing still has a decent gap."
 // The per-kind gap knob became per-ROW margins (negative-capable — at 0 the
 // boxes already touch; what he saw was glyph air inside the boxes). Three boots:
-//   A. defaults    — every adjacent pair renders the old model's 1px, and an
-//                    in-row user divider keeps its 7px-per-side air (parity).
+//   A. defaults    — every adjacent pair renders whatever designTokens.ts says
+//                    the default is, and an in-row user divider carries that
+//                    default plus its own 6px, equally on both sides (parity).
 //   B. four values — each knob moves ONLY its own row (8 / 0 / -6 overlap / 12).
 //   C. legacy key  — a saved ribBtnGapUntitled: 9 seeds BOTH untitled rows.
 import { chromium } from 'playwright-core';
@@ -72,13 +73,26 @@ const measure = (page) => page.evaluate(() => {
 });
 
 // ── A. defaults + in-row divider parity ─────────────────────────────────────
+/* v7.76: these four read the SHIPPED defaults out of designTokens.ts instead of
+   restating them. They were written as literals — "old default 1", "7px both
+   sides" — and Derek's preset moved three of the four (top-untitled 1→0,
+   bottom-untitled 1→-1), so all three went red saying nothing more than "the
+   number changed". The claim worth keeping is that whatever the default is, it
+   is what the ROW ACTUALLY RENDERS: the knob reaches the pixels.
+   The divider's +6px is not fitted to an observation — it is written into
+   03-toolbar.css:684 as `calc(var(--rib-btn-gap-top-k) + 6px)`, the air the
+   pre-ribbon toolbar gave a divider. Parity (equal on both sides) is asserted
+   separately, because that is the half a one-sided margin rule would break. */
 {
   const { ctx, page } = await boot({ divider: true, designVars: {} });
   const r = await measure(page);
-  check('A: titled top pair = old default 1', r.tiTop, [1]);
-  check('A: titled bottom pair = old default 1', r.tiBot, [1]);
-  check('A: untitled divider air 7px both sides', r.unTop, [7, 7]);
-  check('A: untitled bottom pair = old default 1', r.unBot, [1]);
+  const DIVIDER_AIR = 6;                                  // 03-toolbar.css:684–685
+  check('A: titled top pair renders its default', r.tiTop, [tokenDefault('ribBtnGapTopTitled')]);
+  check('A: titled bottom pair renders its default', r.tiBot, [tokenDefault('ribBtnGapBottomTitled')]);
+  check('A: untitled divider air = the default + 6px, both sides',
+    r.unTop, [tokenDefault('ribBtnGapTopUntitled') + DIVIDER_AIR, tokenDefault('ribBtnGapTopUntitled') + DIVIDER_AIR]);
+  check('A: …and the two sides match each other', r.unTop[0] === r.unTop[1], true);
+  check('A: untitled bottom pair renders its default', r.unBot, [tokenDefault('ribBtnGapBottomUntitled')]);
   await ctx.close();
 }
 
@@ -103,7 +117,8 @@ const measure = (page) => page.evaluate(() => {
   const r = await measure(page);
   check('C: legacy key seeds untitled TOP row (9)', r.unTop, [9]);
   check('C: legacy key seeds untitled BOTTOM row (9)', r.unBot, [9]);
-  check('C: titled rows stay at the default (1)', [r.tiTop, r.tiBot], [[1], [1]]);
+  check('C: titled rows stay at their defaults',
+    [r.tiTop, r.tiBot], [[tokenDefault('ribBtnGapTopTitled')], [tokenDefault('ribBtnGapBottomTitled')]]);
   await ctx.close();
 }
 

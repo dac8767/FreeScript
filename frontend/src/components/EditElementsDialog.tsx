@@ -155,7 +155,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
                 >+ New Transition</button>
                 <button
                   className="fs-dnd-headbtn"
-                  title="Show every built-in transition"
+                  title="Show all built-in transitions"
                   onClick={() => DEFAULT_TRANSITIONS.forEach((t) => setTransitionHidden(t, false))}
                 >Show All</button>
               </>),
@@ -184,7 +184,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
               headerExtra: (
                 <button
                   className="fs-dnd-headbtn"
-                  title="Hide every built-in transition (custom ones stay)"
+                  title="Hide built-in transitions"
                   onClick={() => DEFAULT_TRANSITIONS.forEach((t) => setTransitionHidden(t, true))}
                 >Hide All</button>
               ),
@@ -195,7 +195,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
                   content: (
                     <span className="fs-customize-tool">
                       {t}
-                      <button className="fs-dnd-rowbtn" title="Show this transition" onClick={() => setTransitionHidden(t, false)}>+</button>
+                      <button className="fs-dnd-rowbtn" title="Show transition" onClick={() => setTransitionHidden(t, false)}>+</button>
                     </span>
                   ),
                 })),
@@ -241,7 +241,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
             {
               id: 'shown', title: 'Shown',
               headerExtra: (
-                <button className="fs-dnd-headbtn" title="Show every element" onClick={() => setElementHidden([])}>Show All</button>
+                <button className="fs-dnd-headbtn" title="Show all elements" onClick={() => setElementHidden([])}>Show All</button>
               ),
               sections: [{
                 rows: visibleIds.map((id) => {
@@ -264,7 +264,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
             {
               id: 'hidden', title: 'Hidden', isHidden: true,
               headerExtra: (
-                <button className="fs-dnd-headbtn" title="Hide every non-required element" onClick={hideAll}>Hide All</button>
+                <button className="fs-dnd-headbtn" title="Hide all non-required elements" onClick={hideAll}>Hide All</button>
               ),
               sections: [{
                 label: 'Elements',
@@ -273,7 +273,7 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
                   content: (
                     <span className="fs-customize-tool">
                       {labelOf(id)}
-                      <button className="fs-dnd-rowbtn" title="Show this element" onClick={() => setEnabled(id, true)}>+</button>
+                      <button className="fs-dnd-rowbtn" title="Show element" onClick={() => setEnabled(id, true)}>+</button>
                     </span>
                   ),
                 })),

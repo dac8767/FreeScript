@@ -148,7 +148,7 @@ function SnippetList({ editor }: { editor: Editor | null }) {
           onClick={() => capture('copy')}
         ><FaCopy /> Copy selection</button>
       </ToolActionRow>
-      {visible.length === 0 && <div className="swn-hint">{ht('Select text in the Editor and press ⌥⌘X to cut it here, or ⌥⌘C to copy it over.')}</div>}
+      {visible.length === 0 && <div className="swn-hint">{ht('')}</div>}
       {dragId && visible.length > 0 && (
         <div
           className={'swn-drop-zone' + (startArmed ? ' armed' : '')}
@@ -174,7 +174,7 @@ function SnippetList({ editor }: { editor: Editor | null }) {
           headActions={(
             <button
               className="swn-x"
-              title="Insert this snippet into the script at the cursor"
+              title="Insert snippet into script"
               onClick={() => insertIntoScript(card.text || '')}
             ><LuFileInput /></button>
           )}
@@ -256,7 +256,7 @@ function NotesList({ perRow = 1 }: { perRow?: number }) {
     setEndArmed(false);
   };
 
-  const emptyHint = search.trim() ? ht('Nothing matches the search.') : ht('Notes to self, research links, themes to keep present. Hit + Add Note above.');
+  const emptyHint = search.trim() ? ht('Nothing matches the search.') : ht('No notes yet.');
 
   return (
     <div
@@ -321,14 +321,14 @@ export function StickyNotesTool(_props: EditorToolProps) {
             <span className="tool-action-label" id="sticky-cols-label">Notes per row:</span>
             <button
               className="tool-action-btn tool-action-icon"
-              title="Fewer notes per row (bigger cards)"
+              title="Fewer notes per row"
               disabled={perRow <= 1}
               onClick={() => setPerRow(perRow - 1)}
             ><CircleMinusIcon /></button>
             <span className="tool-action-count" aria-labelledby="sticky-cols-label">{perRow}</span>
             <button
               className="tool-action-btn tool-action-icon"
-              title="More notes per row (smaller cards)"
+              title="More notes per row"
               disabled={perRow >= 8}
               onClick={() => setPerRow(perRow + 1)}
             ><CirclePlusIcon /></button>
@@ -382,7 +382,6 @@ export function StickyControls() {
     <>
       <ControlDropdown
         label="Sort"
-        title="Manual lets you drag any order; Date Created shows newest first"
         current={sort === 'manual' ? undefined : STICKY_SORT_LABEL[sort]}
         items={(['manual', 'created'] as StickySort[]).map((v) => ({
           label: STICKY_SORT_LABEL[v], active: sort === v, onSelect: () => setSort(v),

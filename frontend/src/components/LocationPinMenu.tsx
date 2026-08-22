@@ -111,7 +111,7 @@ export default function LocationPinMenu({
             <button
               className="locmap-pin-menu-item"
               disabled={targets.scriptLocations.length === 0}
-              title={targets.scriptLocations.length ? undefined : 'This place already has every location'}
+              title={targets.scriptLocations.length ? undefined : ''}
               onClick={() => setSub('attach')}
             >Connect to location…</button>
             <button className="locmap-pin-menu-item" onClick={() => { void create(); }}>

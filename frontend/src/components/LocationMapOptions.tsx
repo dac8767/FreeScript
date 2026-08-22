@@ -137,7 +137,7 @@ export default function LocationMapOptions({ variant }: { variant?: 'header' } =
                 <button
                   className="char-upload-menu-item"
                   disabled={!currentProject}
-                  title={currentProject ? undefined : 'Save this script to a project to use the Asset Manager'}
+                  title={currentProject ? undefined : ''}
                   onClick={() => { setPos(null); void openAssetPicker(); }}
                 >From Asset Manager…</button>
               </>

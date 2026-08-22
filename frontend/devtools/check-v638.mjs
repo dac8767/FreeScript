@@ -111,7 +111,7 @@ try {
     return { n: cards.length, text: cards[cards.length - 1]?.text ?? '' };
   });
   ok(afterCopy.n >= 1 && afterCopy.text.length > 0, `Copy selection made a snippet ("${afterCopy.text.slice(0, 24)}…")`);
-  const insertBtn = await page.$('.fs-sticky-tool .swn-card button[title*="Insert this snippet"]');
+  const insertBtn = await page.$('.fs-sticky-tool .swn-card button[title*="Insert snippet into script"]');
   ok(!!insertBtn, 'each snippet card carries an insert-into-script button');
   const lenBefore = await page.evaluate(() => window.__scEditor.state.doc.content.size);
   await page.evaluate(() => window.__scEditor.chain().setTextSelection(4).run());

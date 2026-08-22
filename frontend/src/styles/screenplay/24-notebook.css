@@ -824,10 +824,10 @@
      v4.71: size and padding are Design knobs; the band height DERIVES from the
      font var (font + 1.5px = the original 9.5 → 11px) so every section — with
      or without a title — still reserves the identical strip at any size. */
-  font-size: var(--dz-rib-title-font, 9.5px);
-  line-height: calc(var(--dz-rib-title-font, 9.5px) + 1.5px);
+  font-size: var(--dz-rib-title-font, 10px);
+  line-height: calc(var(--dz-rib-title-font, 10px) + 1.5px);
   font-weight: 600;
-  height: calc(var(--dz-rib-title-font, 9.5px) + 1.5px);
+  height: calc(var(--dz-rib-title-font, 10px) + 1.5px);
   /* v4.71, Derek: gray, not full text color. */
   color: var(--fd-text-muted);
   /* v4.1: trimmed bottom padding so the title needs less vertical room. */
@@ -848,13 +848,13 @@
 /* v3.73, Derek: when a section HAS a title, nudge its first row of items down a
    few px to give the title more room above them.
    v4.84: that nudge is a Design knob — "Space below section title". */
-.rib-sec-title + .rib-row { margin-top: var(--dz-rib-title-gap, 5px); }
+.rib-sec-title + .rib-row { margin-top: var(--dz-rib-title-gap, 1px); }
 /* v4.14, Derek: when the WHOLE ribbon has no titles, collapse the reserved band
    (every section is empty-band here) and drop the title room from the min-height
    floor, so the rows shift up and the blank strip disappears. */
 .toolbar.toolbar-ribbon.rib-no-titles .rib-sec-title-empty { display: none; }
 .toolbar.toolbar-ribbon.rib-no-titles .rib-sec-title-empty + .rib-row { margin-top: 0; }
-.toolbar.toolbar-ribbon.rib-no-titles { min-height: calc(var(--rib-content-h, calc(var(--rib-rowh, 28px) * 2)) + var(--dz-rib-pad-top, 5px) + var(--dz-rib-pad-bottom, 2px)); }
+.toolbar.toolbar-ribbon.rib-no-titles { min-height: calc(var(--rib-content-h, calc(var(--rib-rowh, 28px) * 2)) + var(--dz-rib-pad-top, 6px) + var(--dz-rib-pad-bottom, 10px)); }
 /* v5.14, Derek: in a MIXED bar (some sections titled, some not) the reserved
    invisible band is GONE from untitled sections — their rows stretch to the
    titled total instead (the --rib-k-u auto-fill factor). This supersedes the
@@ -865,11 +865,11 @@
 /* The titled band scales with its section's factor, so a scaled titled
    section keeps its proportions instead of a fixed-size title over grown rows. */
 .toolbar.toolbar-ribbon .rib-kind-titled .rib-sec-title {
-  font-size: calc(var(--dz-rib-title-font, 9.5px) * var(--rib-k, 1));
-  line-height: calc((var(--dz-rib-title-font, 9.5px) + 1.5px) * var(--rib-k, 1));
-  height: calc((var(--dz-rib-title-font, 9.5px) + 1.5px) * var(--rib-k, 1));
+  font-size: calc(var(--dz-rib-title-font, 10px) * var(--rib-k, 1));
+  line-height: calc((var(--dz-rib-title-font, 10px) + 1.5px) * var(--rib-k, 1));
+  height: calc((var(--dz-rib-title-font, 10px) + 1.5px) * var(--rib-k, 1));
 }
-.toolbar.toolbar-ribbon .rib-kind-titled .rib-sec-title + .rib-row { margin-top: calc(var(--dz-rib-title-gap, 5px) * var(--rib-k, 1)); }
+.toolbar.toolbar-ribbon .rib-kind-titled .rib-sec-title + .rib-row { margin-top: calc(var(--dz-rib-title-gap, 1px) * var(--rib-k, 1)); }
 .rib-edit-sectitle-wrap { position: relative; display: flex; align-items: center; justify-content: center; gap: 3px; }
 .rib-edit-sectitle {
   /* v4.22, Derek: flex-BASIS 0 (was auto) so the input contributes NO intrinsic

@@ -79,8 +79,17 @@ try {
   ok(hits.every((h) => h !== null), `the whole edge strip is the resize target (hits at ${hits.join('/')}px in)`);
   const cursor = await page.evaluate(([right, y]) => getComputedStyle(document.elementFromPoint(right - 4, y)).cursor, [e.right, e.y]);
   ok(cursor === 'col-resize', `and it wears the col-resize cursor (${cursor})`);
-  const tip = await page.evaluate(([right, y]) => document.elementFromPoint(right - 4, y).getAttribute('title') ?? '', [e.right, e.y]);
-  ok(/width/i.test(tip), `and says what it does ("${tip}")`);
+  /* v7.76: this used to require the handle to carry a tooltip saying "width".
+     Derek's helper-text pass BLANKED it — one of the 45 he cleared — and the
+     blanks were then baked into the source, so there is no title attribute on
+     the handle at all now. That is his call, not a regression: the two
+     assertions above already prove the strip is grabbable and wears the
+     col-resize cursor, which is what tells a writer what it does. What is
+     still worth asserting is that it did not come back as an EMPTY title,
+     which is the shape a blanking override leaves behind and which reads to a
+     screen reader as an unlabelled control. */
+  const tip = await page.evaluate(([right, y]) => document.elementFromPoint(right - 4, y).getAttribute('title'), [e.right, e.y]);
+  ok(tip === null, `the handle carries no tooltip, not an empty one (${JSON.stringify(tip)})`);
   const glowBefore = await page.evaluate(([right, y]) =>
     getComputedStyle(document.elementFromPoint(right - 4, y), '::after').opacity, [e.right, e.y]);
   await page.mouse.move(e.right - 4, e.y);

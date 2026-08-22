@@ -562,7 +562,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
             trick as the header's pop-out chevron. */}
         <button
           className="fs-ob-iconbtn"
-          title="Open the Outline window (popped out)"
+          title="Open as a floating window"
           onClick={() => {
             const st = useEditorStore.getState();
             const side = toolConfigFor(st.toolConfig, 'beatboard').side;
@@ -578,7 +578,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
             (the same choice as the ◉ on the window's tabs — one setter). */}
         <AddMenu
           label={<FaLayerGroup />}
-          title="Choose which outline the bar shows"
+          title="Choose which outline variant shows in the outline toolbar"
           center
           onPick={(id) => useEditorStore.getState().setOutlineBarTab(id)}
           groups={[{
@@ -599,7 +599,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
             )) sendToScript();
           }}
           disabled={acts.length === 0}
-          title="Send to Script — put each section into the script as an annotation that keeps mirroring it"
+          title="Add all sections to the script as annotations"
         >
           <FaFileExport />
         </button>
@@ -663,7 +663,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
                       {i > 0 && (
                         <span
                           className="fs-ob-resize-l"
-                          title="Drag to move this boundary (resizes the previous section)"
+                          title="Drag to move"
                           onPointerDown={(e) => startActResize(e, acts[i - 1])}
                           onPointerMove={onPointerMove}
                           onPointerUp={onPointerUp}
@@ -672,7 +672,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
                       <span className="fs-ob-act-title">{a.title}</span>
                       <span
                         className="fs-ob-beat-resize"
-                        title="Drag to change this section's page budget"
+                        title="Drag to change this section's page amount"
                         onPointerDown={(e) => startActResize(e, a)}
                         onPointerMove={onPointerMove}
                         onPointerUp={onPointerUp}
@@ -747,7 +747,7 @@ export default function OutlineBar({ editor }: { editor: Editor | null }) {
           <div
             className="fs-ob-nav-thumb"
             style={{ left: navThumb.left, width: navThumb.width }}
-            title="Drag to scroll — drag an end to zoom"
+            title="Drag to scroll"
             onPointerDown={(e) => startNavDrag(e, 'move')}
             onPointerMove={onNavMove}
             onPointerUp={endNavDrag}

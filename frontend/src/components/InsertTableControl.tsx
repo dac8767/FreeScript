@@ -58,7 +58,7 @@ const InsertTableControl: React.FC<InsertTableControlProps> = ({ showPopups }) =
       <button
         className={`toolbar-btn${tableGridOpen ? ' active' : ''}`}
         disabled={!scrapbookPage}
-        title={scrapbookPage ? 'Insert Table (Scrapbook)' : 'Insert Table — select a Scrapbook page first'}
+        title={scrapbookPage ? 'Insert Table' : 'Select a Scrapbook page first'}
         onClick={(e) => {
           const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
           setTableGridPos({ top: r.bottom + 4, left: r.left });

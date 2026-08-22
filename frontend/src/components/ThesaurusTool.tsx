@@ -229,7 +229,7 @@ export default function ThesaurusTool({ editor }: { editor: Editor | null }) {
         )}
         {api && state.status === 'idle' && (
           <div className="thes-status">
-            {ht('Click a word in the script — or type one above — to see its synonyms.')}
+            {ht('Click a word in the script or type one above')}
           </div>
         )}
         {api && state.status === 'none' && (

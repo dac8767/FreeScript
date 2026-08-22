@@ -96,7 +96,7 @@ export default function UpdateBanner() {
       >Download</a>
       <button
         className="update-banner-x"
-        title="Not now — ask again when there's a newer version"
+        title="Not now. Ask again when there's a newer version"
         aria-label="Dismiss"
         onClick={() => { dismissVersion(found.version); setFound(null); }}
       ><FaTimes /></button>

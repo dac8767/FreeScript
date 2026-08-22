@@ -1032,8 +1032,8 @@ export default function PreferencesDialog({ open, onClose, editor, openTab }: {
           </div>
         </div>
         <div className="prefs-footer">
-          <button className="dialog-btn" title="Close and undo the changes made since opening Settings" onClick={cancelAndClose}>Cancel</button>
-          <button className="dialog-btn dialog-btn-primary" title="Close Settings — changes are already applied" onClick={saveAndClose}>Save</button>
+          <button className="dialog-btn" onClick={cancelAndClose}>Cancel</button>
+          <button className="dialog-btn dialog-btn-primary" onClick={saveAndClose}>Save</button>
         </div>
     </FloatingWindow>
   );

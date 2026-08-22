@@ -107,7 +107,7 @@
 .menu-bar.chrome-comfortable .menu-icon { font-size: 14px; }
 .menu-bar.chrome-comfortable .menu-item--more { padding: 10px 12px; min-height: 44px; }
 .menu-dropdown {
-  position: fixed; min-width: var(--dz-menu-dd-minw, 260px);
+  position: fixed; min-width: var(--dz-menu-dd-minw, 325px);
   background: var(--fd-dropdown-bg); border: 1px solid var(--fd-border);
   border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.4);
   padding: 4px 0; z-index: 2147483647;

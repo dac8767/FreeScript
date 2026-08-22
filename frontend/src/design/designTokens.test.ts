@@ -79,7 +79,12 @@ describe('design token registry', () => {
         expect(fallbacks, `${t.id} default '${defCss}' is not a fallback anywhere`).toContain(defCss);
         continue;
       }
-      const re = new RegExp(`var\\(${t.cssVar},\\s*([0-9.]+)(px|in|pt)?\\)`, 'g');
+      /* v7.76: the minus is part of the number. Derek's Design values are the
+         app's defaults now and three ribbon gaps are NEGATIVE (-1, -2, -3 —
+         rows that overlap by a pixel), which this pattern could not see at all:
+         it reported "no var() usage with a numeric fallback" for a token whose
+         fallback was right there, reading -2px. */
+      const re = new RegExp(`var\\(${t.cssVar},\\s*(-?[0-9.]+)(px|in|pt)?\\)`, 'g');
       const fallbacks = [...ALL_CSS.matchAll(re)].map((m) => parseFloat(m[1]));
       expect(fallbacks.length, `${t.id} has no var() usage with a numeric fallback`).toBeGreaterThan(0);
       expect(fallbacks, `${t.id} default ${t.def} is not a fallback anywhere`).toContain(t.def);

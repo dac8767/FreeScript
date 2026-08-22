@@ -128,7 +128,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         {onView && (
           <button
             className="dialog-btn dialog-btn-sm"
-            title="Open this template's page setup"
+            title="Open template page setup"
             onClick={onView}
           >
             View
@@ -141,7 +141,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         )}
         <button
           className="dialog-btn dialog-btn-sm"
-          title={isSystem ? 'Make an editable copy of this template' : 'Make a copy of this template'}
+          title={isSystem ? 'Make a copy of this template' : 'Make a copy of this template'}
           onClick={async () => {
             const dup = await duplicateTemplate(t.id);
             onDuplicated?.(dup);

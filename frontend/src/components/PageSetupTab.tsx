@@ -166,7 +166,7 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
       </div>
       <button
         className="fs-dnd-rowbtn"
-        title={isShown ? 'Hide from the New Script picker' : 'Show in the New Script picker'}
+        title={isShown ? 'Hide from list when creating a New Script' : 'Show in the list when creating a New Script'}
         onClick={() => setShown(isShown ? shownIds.filter((x) => x !== t.id) : [...shownIds, t.id])}
       >{isShown ? '×' : '+'}</button>
     </div>
@@ -179,7 +179,7 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
       headerExtra: (
         <button
           className="fs-dnd-headbtn"
-          title="Show every template in the New Script picker"
+          title="Show all templates when creating a New Script"
           onClick={() => setShown(all.map((t) => t.id))}
         >Show All</button>
       ),
@@ -194,7 +194,6 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
           className="fs-dnd-headbtn"
           /* The ≥1 rule lives in setShown — New Script must always have
              something to offer, so Hide All leaves Industry Standard. */
-          title="Hide every template except Industry Standard"
           onClick={() => setShown([])}
         >Hide All</button>
       ),
@@ -240,7 +239,7 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
           <div className="pst-newrow">
             <button
               className="dialog-btn"
-              title="Start a new template from scratch — or use Duplicate on a row above to base one on it"
+              title="Start a new template from scratch, or use Duplicate on a row above to base one on it"
               onClick={() => { void createBlank(); }}
             >
               + Create Template

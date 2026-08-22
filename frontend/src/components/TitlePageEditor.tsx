@@ -705,7 +705,7 @@ const TitlePageEditor: React.FC<Props> = ({ editor, onClose }) => {
               <button
                 type="button"
                 className={`tp-pan-toggle${panMode ? ' active' : ''}`}
-                title={panMode ? 'Hand tool off' : 'Hand tool — drag to pan the preview'}
+                title={panMode ? '' : 'Drag to pan'}
                 onClick={() => setPanMode((v) => !v)}
               ><FaRegHandPaper /></button>
               <button type="button" title="Zoom out" onClick={() => setTpZoom(Math.max(0.12, Math.round((tpScale / 1.25) * 1000) / 1000))}><LuZoomOut /></button>

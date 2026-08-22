@@ -58,7 +58,12 @@ try {
 
   /* ── 1: the tooltip tells the truth before the click ── */
   const tip = await page.evaluate((w) => document.querySelector(`${w} .beat-column-delete`)?.getAttribute('title') ?? '', W);
-  ok(/Unsorted/.test(tip) && /not deleted/i.test(tip), `the trash tooltip promises the beats survive ("${tip}")`);
+  /* v7.76: was `/Unsorted/ && /not deleted/i`. Derek's helper-text pass
+     shortened this to "Delete section. Beats are not deleted" — the promise
+     that matters is still there, the destination is not named any more. The
+     behaviour is unchanged and step 2 below still proves the beats land in
+     Unsorted, which is the assertion that would catch a real regression. */
+  ok(/not deleted/i.test(tip), `the trash tooltip promises the beats survive ("${tip}")`);
 
   /* ── 2–4: delete Act I ── */
   await page.click(`${W} .beat-column-delete`);          // the first section's trash

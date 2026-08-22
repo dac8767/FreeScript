@@ -88,7 +88,7 @@ const SynopsisModal: React.FC<SynopsisModalProps> = ({ sceneHeading, synopsis, s
             className="synopsis-modal-textarea"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Write a synopsis for this scene..."
+            placeholder="Synopsis..."
           />
           {/* Timing editor */}
           <div className="synopsis-timing-section">

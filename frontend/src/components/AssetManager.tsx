@@ -37,7 +37,7 @@ const AssetThumb: React.FC<{ projectId: string; asset: Asset; onPreview: () => v
   const { url, missing, onError } = useAssetDisplayUrl(projectId, asset.id, asset.filename, asset.mime_type);
   if (missing) {
     return (
-      <span className="asset-thumb-missing" title="Image file not found on disk — re-upload this asset">
+      <span className="asset-thumb-missing" title="Image file not found on disk. Re-upload this asset">
         {getMimeIcon(asset.mime_type)}
       </span>
     );
@@ -341,7 +341,7 @@ const AssetManager: React.FC<AssetManagerProps> = ({ projectId, embedded = false
               <input
                 id="asset-stage-tags"
                 type="text"
-                placeholder={'tag1, tag2, \u2026'}
+                placeholder={'tag1, tag2….'}
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void commitStaged(); }}

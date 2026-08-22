@@ -102,7 +102,6 @@ export default function ThemesTab() {
               <button
                 key={b}
                 className={editing.base === b ? 'active' : ''}
-                title="Re-seeds the colors below from this base"
                 onClick={() => setEditing({ ...editing, base: b, vars: seedVarsFromBase(b) })}
               >{b[0].toUpperCase() + b.slice(1)}</button>
             ))}
@@ -279,7 +278,7 @@ export default function ThemesTab() {
                      it to Shown, since the active theme can never be hidden. */
                   <span
                     className="fs-customize-tool fs-theme-click"
-                    title="Switch to this theme (moves it to Shown)"
+                    title="Switch to this theme"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('button')) return;
                       setThemeHidden(id, false);

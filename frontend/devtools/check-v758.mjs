@@ -118,7 +118,9 @@ const catalog = JSON.parse(readFileSync(new URL('../src/data/helperTextCatalog.j
 const texts = new Set(catalog.map((c) => c.text));
 ok('the Helper Text window lists them',
   texts.has('This feature is still in development.'), '');
-ok('…including the state one', texts.has('Turn scene numbers on first (View ▸ Scene Numbers).'), '');
+// v7.76: Derek's helper-text pass shortened this one; the claim is that a
+// menu item's DATA-supplied reason reaches the catalog at all, not its wording.
+ok('…including the state one', texts.has('Turn scene numbers on first'), '');
 /* The harvest rule must be exact, not broad. `tooltip:` was chosen over
    `title:` because on a data object `title` usually means a HEADING — and the
    sibling-label test keeps the Helper Text window's own kind-label map

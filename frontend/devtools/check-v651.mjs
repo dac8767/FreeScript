@@ -13,7 +13,12 @@ const { browser, page } = await launch({ width: 1500, height: 950 });
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  ✓', m); } else { fail++; console.log('  ✗ FAIL', m); } };
 const W = '.tool-window[data-tool="beatboard"]';
-const CHECKED_ARM = 'The Outline Bar shows this tab. To change that, switch to another tab and check the box there.';
+/* v7.76: both arms and the ? body are Derek's rewrites now — his helper-text
+   pass shortened all three, and v7.76 baked them into the source. The check is
+   about the MECHANISM (a dynamic tooltip is listed, overridable per arm, and
+   swaps live), so what has to follow his wording is the default string it keys
+   on: an override keyed to text no element carries can never match. */
+const CHECKED_ARM = 'The Outline Bar shows this tab';
 const UNCHECKED_ARM = 'Show this tab in the Outline Bar';
 
 try {
@@ -57,7 +62,7 @@ try {
 
   // ── 4: the ? popover body rides ht() ──
   await page.evaluate(() => window.__scStore.getState().setHelperTextOverride(
-    'Create sections (Act 1, Act 2…) and drop beats into them — or pick a Preset. The header tabs are separate arrangements of the SAME beats; "Show this outline in the outline bar" picks which tab the Outline Bar mirrors. Double-click a tab to rename it. Freeform turns the board into a mind map: drag cards anywhere; to connect two, push a card\'s link button, then drag from that card onto the other. Click a line and press Delete to remove it.',
+    'Create sections (Act 1, Act 2…) and drop beats into them. Create manually or pick a Preset.',
     'MY OWN OUTLINE HELP'));
   await page.click(`${W} .fs-help-btn`);
   await settle(page);

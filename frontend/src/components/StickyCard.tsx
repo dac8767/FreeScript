@@ -116,7 +116,7 @@ export function ColorDots({ card, onUpdate, surface }: { card: ShelfCard; onUpda
           visibility: open ? 'hidden' : 'visible',
           ...(ring ? { borderColor: ring } : {}),
         }}
-        title="Sticky color"
+        title="Note color picker"
         onClick={() => setOpen(true)}
       />
       {open && (

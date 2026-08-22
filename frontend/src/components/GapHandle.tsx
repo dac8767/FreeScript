@@ -86,7 +86,7 @@ const GapHandle: React.FC<{ bar: 'menu' | 'toolbar' | 'bigbtn' }> = ({ bar }) =>
   return (
     <span
       className="fs-gap-handle"
-      title={twoAxis ? 'Drag sideways: item spacing · drag up/down: bar size' : 'Drag to adjust the spacing between items'}
+      title={twoAxis ? 'Drag horizontally: change item spacing. Drag vertically: change bar size.' : 'Drag to adjust the spacing between items'}
       onPointerDown={(e) => {
         e.preventDefault(); e.stopPropagation();
         const el = e.currentTarget as HTMLElement;

@@ -489,38 +489,59 @@ export function normalizeToolbarZones(
    Design scale knobs (%) multiply each kind independently. */
 export interface RibbonKindVars { kTitled: number; kUntitled: number; contentH: number }
 
+/* v7.76 — WHY EVERY KNOB BELOW IS REQUIRED, AND HAS NO DEFAULT HERE.
+   Each one used to be optional with a `?? literal` fallback, and Toolbar.tsx
+   passes `designVars.ribTitleGap` and friends — the OVERRIDE map, which is
+   undefined for any knob the user has not moved. So those fallbacks were a
+   SECOND statement of a default the CSS also states
+   (`var(--dz-rib-title-gap, 1px)`), and the two had drifted: this file still
+   said titleGap 5 / rowGaps 0 / padTopUntitled 0 while the stylesheet painted
+   1 / -2 / -3 / 2.
+
+   Nothing could show it while Derek's numbers arrived as OVERRIDES, because
+   then both paths read the same map. v7.76 made his numbers the defaults and
+   emptied the map — and the auto-fill immediately started sizing untitled rows
+   against a titled section that does not exist: its rows overflowed their own
+   padding box by 2.6px at each end, and ribPadTopUntitled / ribPadBottomUntitled
+   stopped reserving space (they still shifted the rows, but not by what they
+   said — the silent no-op in its quietest form).
+
+   Required, rather than re-defaulted from designTokens, because this module is
+   deliberately dependency-free — the store, the Toolbar and Customize all
+   import it. A caller must resolve override-or-default first, which is what
+   designValue() is for. There is then only one list of defaults in the app. */
 export function ribbonKindVars(opts: {
   rowH: number;
   anyTitle: boolean;
   /** any UNTITLED section on the bar (default true) — contentH only counts
    *  the kinds that exist, or an all-titled bar would size to a phantom. */
   anyUntitled?: boolean;
-  titleFont?: number;   // --dz-rib-title-font, def 9.5
-  /** --dz-rib-title-gap, def 5 — the ONE title↔buttons spacing. May be
-   *  NEGATIVE (v5.17): 0 is the true structural zero, and what remains at 0
-   *  is text descender + button centering — physics, not margin — so the
-   *  knob dips below zero to tuck the buttons optically under the title. */
-  titleGap?: number;
-  rowGapTitled?: number;    // --dz-rib-row-gap-titled, def 0
-  rowGapUntitled?: number;  // --dz-rib-row-gap-untitled, def 0
+  titleFont: number;   // --dz-rib-title-font
+  /** --dz-rib-title-gap — the ONE title↔buttons spacing. May be NEGATIVE
+   *  (v5.17): 0 is the true structural zero, and what remains at 0 is text
+   *  descender + button centering — physics, not margin — so the knob dips
+   *  below zero to tuck the buttons optically under the title. */
+  titleGap: number;
+  rowGapTitled: number;    // --dz-rib-row-gap-titled
+  rowGapUntitled: number;  // --dz-rib-row-gap-untitled
   /** v5.17, Derek: "increasing the section bottom padding can push the title
    *  behind the top bar… the height of the bar should adjust instead."
    *  Per-kind paddings are part of each kind's TOTAL now, so contentH (and
    *  with it the bar's min-height) grows with them — padding can never
    *  overflow a section past the bar's edges again. */
-  padTopTitled?: number;
-  padBottomTitled?: number;
-  padTopUntitled?: number;
-  padBottomUntitled?: number;
+  padTopTitled: number;
+  padBottomTitled: number;
+  padTopUntitled: number;
+  padBottomUntitled: number;
   scaleTitledPct?: number;    // Design: ribScaleTitled, def 100
   scaleUntitledPct?: number;  // Design: ribScaleUntitled, def 100
 }): RibbonKindVars {
-  const titleFont = opts.titleFont ?? 9.5;
-  const titleGap = opts.titleGap ?? 5;
-  const gT = opts.rowGapTitled ?? 0;
-  const gU = opts.rowGapUntitled ?? 0;
-  const padT = (opts.padTopTitled ?? 0) + (opts.padBottomTitled ?? 0);
-  const padU = (opts.padTopUntitled ?? 0) + (opts.padBottomUntitled ?? 0);
+  const titleFont = opts.titleFont;
+  const titleGap = opts.titleGap;
+  const gT = opts.rowGapTitled;
+  const gU = opts.rowGapUntitled;
+  const padT = opts.padTopTitled + opts.padBottomTitled;
+  const padU = opts.padTopUntitled + opts.padBottomUntitled;
   // Every SCALED term mirrors a CSS rule that multiplies by --rib-k: the band
   // (font + 1.5), the title gap, the row heights and the row gap. Paddings
   // are deliberately unscaled insets, in CSS and here alike.

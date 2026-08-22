@@ -292,7 +292,7 @@
    everywhere; the per-shape fullscreen restyle is gone. */
 .char-profiles-list.char-view-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--dz-char-card-minw, 320px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--dz-char-card-minw, 310px), 1fr));
   /* v4.50, Derek: rows size to their CONTENT — without this the auto tracks
      bound to the container's height, locking every card to an equal slice of
      the editor window with the overflow clipped (overflow:hidden zeroes a
@@ -306,7 +306,7 @@
   margin-bottom: 0;
   /* v4.50: the Design height knob is back — a MINIMUM, so content can always
      exceed it; 0 = purely content-sized. */
-  min-height: var(--dz-char-card-minh, 0px);
+  min-height: var(--dz-char-card-minh, 480px);
 }
 .char-profiles-empty {
   padding: 20px 12px;
@@ -329,7 +329,7 @@
      v6.13, Derek: quieter outline — dimmer color, tighter radius default. */
   border: var(--dz-char-card-border, 1px) solid var(--fd-border);
   border-color: color-mix(in srgb, var(--fd-text-muted) 22%, transparent);
-  border-radius: var(--dz-char-card-radius, 4px);
+  border-radius: var(--dz-char-card-radius, 14px);
   margin-bottom: 4px;
   overflow: hidden;
   transition: border-color .15s;
@@ -372,7 +372,7 @@
 .char-profile-header-right {
   display: flex;
   align-items: center;
-  gap: var(--dz-char-header-gap, 8px);
+  gap: var(--dz-char-header-gap, 15px);
 }
 .char-profile-color {
   width: 20px;
@@ -548,15 +548,15 @@
   /* v4.26 kept the 8/10/12 rhythm with hidden +2/+4 offsets; v5.16 (Derek:
      "0 is actually 0") replaces the additive offsets with RATIOS — the same
      10/12 at the default 8, and a true zero at zero. */
-  padding: var(--dz-char-detail-pad, 8px)
-           calc(var(--dz-char-detail-pad, 8px) * 1.25)
-           calc(var(--dz-char-detail-pad, 8px) * 1.5);
+  padding: var(--dz-char-detail-pad, 14px)
+           calc(var(--dz-char-detail-pad, 14px) * 1.25)
+           calc(var(--dz-char-detail-pad, 14px) * 1.5);
   border-top: 1px solid var(--fd-border);
   display: flex;
   flex-direction: column;
   /* v4.23, Derek: the vertical gap between a character card's field rows is a
      Design knob — dial it down to fit more into a small window. */
-  gap: var(--dz-char-field-gap, 8px);
+  gap: var(--dz-char-field-gap, 9px);
 }
 /* v4.24 batch 5: no image attached — reserve the same footprint a photo
    would take, so cards in Cards view keep a uniform layout.
@@ -564,7 +564,7 @@
    max-height rules read the SAME var, so slot and photo track together. */
 .char-profile-image-placeholder {
   width: 100%;
-  height: var(--dz-char-image-h, 200px);
+  height: var(--dz-char-image-h, 225px);
   display: flex;
   flex-direction: column;   /* v4.28 batch-v6 #3: icon over the add label */
   gap: 10px;
@@ -591,11 +591,11 @@
   color: var(--fd-text-muted);
 }
 /* Top section: description+meta and images — stacks in side panel, side-by-side in fullscreen */
-.char-profile-detail-top { display: flex; flex-direction: column; gap: var(--dz-char-field-gap, 8px); }
+.char-profile-detail-top { display: flex; flex-direction: column; gap: var(--dz-char-field-gap, 9px); }
 /* Fullscreen card view: top row is 50/50 side-by-side */
 .char-profile-detail-fs .char-profile-detail-top {
   flex-direction: row;
-  gap: var(--dz-char-field-gap, 16px);
+  gap: var(--dz-char-field-gap, 9px);
 }
 .char-profile-detail-fs .char-profile-detail-top > * {
   flex: 1;
@@ -610,7 +610,7 @@
   -webkit-box-orient: vertical;
   /* v4.26: clamp line count is a Design knob — -webkit-line-clamp takes a bare
      number, so the token is unitless. */
-  -webkit-line-clamp: var(--dz-char-desc-lines, 2);
+  -webkit-line-clamp: var(--dz-char-desc-lines, 1);
   overflow: hidden;
   /* -webkit-box clamp paints overflow text into the padding box — swap the
      bottom padding for margin (margins never paint content) so no ghost
@@ -1029,7 +1029,7 @@
 
 .char-profile-image-main {
   width: 100%;
-  max-height: var(--dz-char-image-h, 200px); /* v4.26: image-slot Design knob */
+  max-height: var(--dz-char-image-h, 225px); /* v4.26: image-slot Design knob */
   object-fit: cover;
   display: block;
   cursor: pointer;
@@ -1204,23 +1204,23 @@
    margins, and the description box had NONE — it sat flush against the
    gender/age row while other blocks get ~10px. Match the photo-row rhythm. */
 .char-profile-detail-stacked .mini-rt-wrapper {
-  margin-bottom: var(--dz-char-field-gap, 10px);
+  margin-bottom: var(--dz-char-field-gap, 9px);
 }
 /* v4.28 batch-v6 #1, Derek: the seam ABOVE Description (the meta row's bottom
    edge) had no margin at all in the stacked layout, so the Design field-gap
    knob moved every row EXCEPT that one. Every stacked seam rides it now. */
 .char-profile-detail-stacked .char-profile-meta-row-3 {
-  margin-bottom: var(--dz-char-field-gap, 10px);
+  margin-bottom: var(--dz-char-field-gap, 9px);
 }
 .char-profile-detail-stacked .char-profile-name-row {
-  margin-bottom: var(--dz-char-field-gap, 8px);
+  margin-bottom: var(--dz-char-field-gap, 9px);
 }
 .char-profile-photo-row {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--dz-char-field-gap, 8px);
-  margin-bottom: var(--dz-char-field-gap, 10px);
+  gap: var(--dz-char-field-gap, 9px);
+  margin-bottom: var(--dz-char-field-gap, 9px);
 }
 /* Full-width character image with slideshow + delete. */
 .char-profile-image-display {
@@ -1237,7 +1237,7 @@
      the stacked layout (higher specificity), so it must read the same Design
      knob or the slider would be a dead no-op for actual photos. Its own 360px
      fallback keeps today's roomier stacked look until the knob moves. */
-  max-height: var(--dz-char-image-h, 360px);
+  max-height: var(--dz-char-image-h, 225px);
   object-fit: contain;
   /* v4.26 batch-v5 #3: clicking opens the source menu, not the zoom lightbox */
   cursor: pointer;

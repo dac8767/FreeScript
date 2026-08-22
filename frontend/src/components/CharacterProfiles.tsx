@@ -1201,7 +1201,6 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
             <MiniRichText
               value={prof.speechPattern || ''}
               onChange={(html) => upsertCharacterProfile(charName, { speechPattern: html })}
-              placeholder="Short sentences, formal tone, uses contractions..."
               minHeight={40}
             />
             <label className="char-profile-label">Vocabulary</label>
@@ -1215,14 +1214,12 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
             <MiniRichText
               value={prof.verbalTics || ''}
               onChange={(html) => upsertCharacterProfile(charName, { verbalTics: html })}
-              placeholder="Says 'you see' often, clears throat before lying..."
               minHeight={40}
             />
             <label className="char-profile-label">Sample Dialogue</label>
             <MiniRichText
               value={prof.sampleDialogue || ''}
               onChange={(html) => upsertCharacterProfile(charName, { sampleDialogue: html })}
-              placeholder="3-5 representative lines from the script..."
               minHeight={40}
             />
           </div>
@@ -1236,7 +1233,6 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
         <MiniRichText
           value={prof.description}
           onChange={(html) => upsertCharacterProfile(charName, { description: html })}
-          placeholder="A weary detective in his 50s, haunted by a cold case..."
           minHeight={isModal ? 80 : 50}
         />
 
@@ -1245,7 +1241,6 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
         <MiniRichText
           value={prof.backstory}
           onChange={(html) => upsertCharacterProfile(charName, { backstory: html })}
-          placeholder="Character history, motivations, secrets..."
           minHeight={isModal ? 100 : 60}
         />
 
@@ -1254,7 +1249,6 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
         <MiniRichText
           value={prof.arc || ''}
           onChange={(html) => upsertCharacterProfile(charName, { arc: html })}
-          placeholder="How does this character change through the story..."
           minHeight={isModal ? 80 : 50}
         />
 
@@ -1606,7 +1600,6 @@ const CharacterProfiles: React.FC<CharacterProfilesProps> = ({ editor, projectId
                         <MiniRichText
                           value={profile.description}
                           onChange={(html) => upsertCharacterProfile(name, { description: html })}
-                          placeholder="A weary detective in his 50s, haunted by a cold case..."
                           minHeight={0}
                         />
                       </div>

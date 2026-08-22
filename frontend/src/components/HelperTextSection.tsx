@@ -120,12 +120,12 @@ function HelperRow({ entry }: { entry: HelperEntry }) {
         )}
         <button
           className="ht-iconbtn ht-hide"
-          title={hidden ? 'Put this item back in the list' : 'Hide this item — it moves to the Hidden view'}
+          title={hidden ? '' : ''}
           onClick={() => toggleHidden(entry.text)}
         >{hidden ? <FaRegEye /> : <FaRegEyeSlash />}</button>
         <button
           className="dz-reset"
-          title={edited ? 'Reset to the app’s own text' : 'Default'}
+          title={edited ? '' : 'Default'}
           disabled={!edited}
           onClick={() => {
             setDraft(null);
@@ -135,7 +135,7 @@ function HelperRow({ entry }: { entry: HelperEntry }) {
         ><LuRotateCcw /></button>
       </div>
       <div className="ht-where">Found in: {foundIn}</div>
-      {edited && <div className="ht-default" title="The app’s own text">{entry.text}</div>}
+      {edited && <div className="ht-default">{entry.text}</div>}
       {/* v6.24, Derek: line breaks allowed — a TEXTAREA that grows with
           its content. Enter = a new line; blur commits; Escape reverts.
           Multi-line shows wherever the text renders as content or in the
@@ -253,15 +253,14 @@ export function HelperTextSection({ entries }: { entries: HelperEntry[] }) {
           ))}
           <button
             className={`dz-choice ht-hiddenchip${showHidden ? ' on' : ''}`}
-            title="Items you've hidden from the list"
             onClick={() => setShowHidden((v) => !v)}
           >Hidden ({hiddenList.length})</button>
           {showHidden && (
             <button
               className="dz-foot-btn ht-bulk-hidden"
               title={hiddenList.length > 0
-                ? 'Put every hidden item back in the main list'
-                : 'Move every item to the Hidden view'}
+                ? ''
+                : ''}
               onClick={handleBulkHidden}
             >{hiddenList.length > 0 ? `Show all (${hiddenList.length})` : 'Hide all'}</button>
           )}

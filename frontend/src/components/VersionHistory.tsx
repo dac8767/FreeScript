@@ -349,7 +349,7 @@ const VersionHistory: React.FC = () => {
             className="version-compare-btn"
             disabled={!currentScriptId || versions.length < 2}
             title={!currentScriptId || versions.length < 2
-              ? 'You need an open script and at least two snapshots to compare'
+              ? 'You need at least two snapshots to compare'
               : 'Compare two snapshots side by side'}
             onClick={() => { setCompareSelection([]); setCompareMode(true); }}
           >Compare…</button>
@@ -394,7 +394,7 @@ const VersionHistory: React.FC = () => {
               <button
                 className="version-deleteall-btn"
                 onClick={() => void handleDeleteAll()}
-                title="Delete every snapshot of this project (your script is not touched)"
+                title="Delete all snapshots"
               >Delete All…</button>
             </div>
           )}
@@ -453,7 +453,7 @@ const VersionHistory: React.FC = () => {
                       e.stopPropagation();
                       void handleDelete(v);
                     }}
-                    title="Delete this snapshot (your script is not touched)"
+                    title="Delete snapshot"
                   >
                     Delete
                   </button>

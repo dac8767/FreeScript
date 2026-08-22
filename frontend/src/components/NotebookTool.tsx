@@ -798,7 +798,7 @@ function SectionRow({ node, depth, orderIndex }: { node: Extract<NbNode, { type:
             {node.name}
           </button>
         )}
-        <button className="fs-nb-rowdel" title="Delete section (pages move to the top level)" onClick={async () => {
+        <button className="fs-nb-rowdel" title="Delete section" onClick={async () => {
           if (await confirmDialog('Delete this section? Pages inside it move back to the top level.', { title: 'Delete Section', confirmLabel: 'Delete', danger: true })) deleteSection(node.id);
         }}><FaRegTrashAlt /></button>
       </div>
@@ -857,7 +857,7 @@ export function NotebookHeaderExtra() {
           buttons keep to the RIGHT. */}
       <button
         className={`fs-nb-declutter${declutter ? ' active' : ''}`}
-        title={declutter ? 'Decluttered — click to show the other tools and the outline bar again' : 'Declutter — hide every other tool and the outline bar'}
+        title={declutter ? 'Show all tools' : 'Hide all other tools'}
         onClick={() => setDeclutter(!declutter)}
       >{declutter ? <FaRegEyeSlash /> : <FaRegEye />}</button>
       <span className="fs-nb-side-btns">
@@ -983,7 +983,7 @@ export function NotebookSurface() {
           ribbon's Return to Editor runs. */}
       <button
         className="tool-window-close fs-nb-close"
-        title="Close the Scrapbook"
+        title="Close Scrapbook"
         onClick={() => closeNotebook()}
       ><CloseIcon /></button>
       <div className="fs-nb-takeover-head">

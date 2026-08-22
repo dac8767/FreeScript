@@ -74,19 +74,21 @@ try {
   // row is always available.
   const annRow = list.find((r) => r.label === 'Annotation Presets');
   ok(!annRow.disabled && annRow.checked, 'Annotation Presets is always available — six ship by default');
-  /* v7.70: Design and Helper Text ship with content now — Derek's 81 design
-     values and his hidden helper strings are the app's defaults — so they are
-     available from the first launch, the way Annotation Presets already was.
-     Keyboard Shortcuts is the one that still starts empty, and it is what
-     keeps this line meaning something: a row with nothing behind it is
-     disabled rather than quietly exporting an empty file. */
-  for (const n of ['Design', 'Helper Text']) {
+  /* v7.70 made these two available from first launch, because Derek's 81 design
+     values and his helper-text edits shipped as SEEDED OVERRIDES.
+     v7.76 reversed that on purpose: "take these settings and add them directly
+     into the app code", so the numbers are the tokens' own defaults and the
+     strings are the source. A fresh profile therefore overrides NOTHING, and
+     these two rows are empty again — which is the correct offer, because
+     exporting them would write a file of changes the writer has not made.
+     They join Keyboard Shortcuts, and the three together are what keeps this
+     section meaning something: a row with nothing behind it is disabled rather
+     than quietly exporting an empty file. */
+  for (const n of ['Design', 'Helper Text', 'Keyboard Shortcuts']) {
     const row = list.find((r) => r.label === n);
-    ok(row && !row.disabled, `${n} ships with content, so its row is available`);
+    ok(row?.disabled === true && !row.checked,
+      `${n} starts empty on a fresh profile, so it is disabled and unticked`);
   }
-  const shortcutRow = list.find((r) => r.label === 'Keyboard Shortcuts');
-  ok(shortcutRow?.disabled === true && !shortcutRow.checked,
-    'Keyboard Shortcuts starts empty, so it is disabled until you rebind something');
 
   /* ── 4: select all / none ── */
   await page.click('.fs-presets-all');
@@ -133,7 +135,8 @@ try {
     const b = [...document.querySelectorAll(`${p} .fs-presets-btn`)].find((x) => /Export/.test(x.textContent));
     return { disabled: b.disabled, title: b.getAttribute('title') };
   }, P);
-  ok(deadBtn.disabled && /tick at least one/i.test(deadBtn.title),
+  // v7.76: the wording is Derek's ("Check at least one item to export").
+  ok(deadBtn.disabled && /at least one/i.test(deadBtn.title),
     `Export is disabled with nothing ticked, and says why ("${deadBtn.title}")`);
 
   /* ── 8: the rows say what each item is, in Derek's words not mine ── */

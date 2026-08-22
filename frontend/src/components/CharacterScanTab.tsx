@@ -43,7 +43,7 @@ export function CharacterScanTab({
                       <button
                         className="char-unmatched-add"
                         onClick={() => onApply(r)}
-                        title="Add as a character with the detected description and age"
+                        title="Add as a character"
                       >
                         + Add
                       </button>

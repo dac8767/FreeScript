@@ -1,8 +1,10 @@
-import { settle } from './driver.mjs';
+import { settle, placeTool, tokenDefault } from './driver.mjs';
 // devtools/check-ribbon-kinds.mjs — v5.14: mixed titled/untitled ribbon.
-// Untitled two-row sections auto-stretch to a titled section's total height:
-// bases level, untitled button tops level with the titled TITLE's top. The
-// Design knobs then scale each kind separately.
+// Untitled two-row sections auto-stretch so their TOTAL height equals a titled
+// section's. The Design knobs then scale each kind separately.
+// v7.76: "bases level / tops level with the titled TITLE" was the v5.14 wording
+// and only ever held while the two kinds' paddings matched — see the note at
+// the assertions.
 import { chromium } from 'playwright-core';
 
 const results = [];
@@ -62,6 +64,9 @@ const read = () => page.evaluate(() => {
     unBandHidden: !un.querySelector('.rib-sec-title-empty') || getComputedStyle(un.querySelector('.rib-sec-title-empty')).display === 'none',
     unBtnH: R(unBtn).h, tiBtnH: R(tiBtn).h,
     unRowH: R(unRows[0]).h, tiRowH: R(tiRows[0]).h,
+    // v7.76: the section BOXES and their own paddings — what the two kinds are
+    // actually promised to share is a total height, not a top edge.
+    unBoxTop: R(un).top, unBoxH: R(un).h, tiBoxTop: R(ti).top, tiBoxH: R(ti).h,
   };
 });
 
@@ -69,19 +74,58 @@ await page.screenshot({ path: new URL('./last-ribbon-kinds.png', import.meta.url
 let r = await read();
 console.log(`     untitled rows ${r.unFirstRowTop.toFixed(1)}→${r.unLastRowBottom.toFixed(1)}  titled ${r.tiTitleTop.toFixed(1)}→${r.tiLastRowBottom.toFixed(1)}  btnH ${r.unBtnH}/${r.tiBtnH}`);
 check('untitled reserved band is gone', r.unBandHidden, true);
-check('untitled TOP = titled TITLE top', r.unFirstRowTop, r.tiTitleTop);
-check('bases level', r.unLastRowBottom, r.tiLastRowBottom);
+/* v7.76 — WHAT THESE TWO USED TO SAY, AND WHY THEY DON'T ANY MORE.
+   They were `untitled TOP = titled TITLE top` and `bases level`, written in
+   v5.14 when both kinds shipped with the SAME paddings. Level tops and level
+   bases are true only while padTopUntitled == padTopTitled and
+   padBottomUntitled == padBottomTitled — so as literal edge comparisons they
+   were really asserting that Derek never uses the per-kind padding knobs. He
+   does: his shipped defaults are 2/5 untitled against 0/1 titled. Kept as they
+   were, they would have failed on every one of his presets forever, which is
+   how an assertion stops being read.
+   What auto-fill actually promises — and what the alignment IS — is that the
+   two kinds' section TOTALS match, and that each kind's rows sit its own
+   padding inside its own box. Those hold at any knob values, and they are
+   strictly stronger: the stale-defaults bug this version fixed spilled the
+   untitled rows 2.6px OUT of their padding box, which the old edge comparison
+   waved through (it was within its own 1.5px tolerance, in the wrong
+   direction) and which the second assertion below catches by name. */
+check('the two kinds fill the same total height', r.unBoxH, r.tiBoxH);
+check('…from the same top', r.unBoxTop, r.tiBoxTop);
+/* THE FILL ITSELF, against the formula rather than against a remembered pixel
+   count — this is the assertion the v7.76 bug walks straight into. When the
+   maths ran on stale defaults the untitled rows came out 36px instead of 32,
+   and every edge comparison in this file waved it through because the section
+   BOX was still self-consistent; only the rows inside it were wrong.
+   The knob values come from designTokens, the same place the stylesheet's
+   fallbacks come from, so the two cannot be made to agree by accident. */
+const ROW_H = 28;                                  // compact bar: 33 − 5, Toolbar.tsx
+const BAND = tokenDefault('ribTitleFont') + 1.5;
+const INNER_T = BAND + tokenDefault('ribTitleGap') + 2 * ROW_H + tokenDefault('ribRowGapTitled');
+const INNER_U = 2 * ROW_H + tokenDefault('ribRowGapUntitled');
+const PAD_T = tokenDefault('ribPadTopTitled') + tokenDefault('ribPadBottomTitled');
+const PAD_U = tokenDefault('ribPadTopUntitled') + tokenDefault('ribPadBottomUntitled');
+const wantUnRowH = ROW_H * ((PAD_T + INNER_T - PAD_U) / INNER_U);
+console.log(`     fill: untitled row ${r.unRowH.toFixed(2)}px, formula says ${wantUnRowH.toFixed(2)}px`);
+check('untitled rows are stretched by exactly the auto-fill factor',
+  Math.abs(r.unRowH - wantUnRowH) < 0.1, true);
+check('…and titled rows are not stretched at all', r.tiRowH, ROW_H);
 check('untitled rows are TALLER (auto-fill)', r.unRowH > r.tiRowH, true);
 check('untitled buttons grew with their rows', r.unBtnH > r.tiBtnH, true);
 
 // ── the Design knobs scale each kind separately ──
-await page.$eval('.tool-dock-item', () => {});   // app idle tick
-const openDesign = async () => {
-  const rows = await page.$$('.tool-dock-item');
-  for (const row of rows) { if (((await row.textContent()) || '').includes('Design')) { await row.click(); break; } }
-  await page.waitForSelector('.dz-group', { timeout: 8000 });
-};
-await openDesign();
+/* v7.76: this half of the check had stopped running altogether. It used to
+   find the Design row by scanning .tool-dock-item for the word "Design" — and
+   since the shipped defaults became Derek's preset, Design is not in the dock
+   at all (it is one of the six his profile leaves out, and showUnreleasedTools
+   is off). The scan silently matched nothing, the click never happened, and
+   the check DIED on the waitForSelector below — so every assertion after this
+   line, ten of them about the Design knobs, has been reporting nothing while
+   the file still looked like it covered them. driver.placeTool exists for
+   exactly this; where Design sits by default is not what this check is about. */
+await placeTool(page, 'design', 'right');
+await page.evaluate(() => window.__scStore.getState().openTool('design'));
+await page.waitForSelector('.dz-group', { timeout: 8000 });
 // v5.15: knobs live in per-kind GROUPS and share labels ("Section scale (%)"
 // in both Titled and Untitled) — so scope to the group, then the row.
 const openGroup = async (groupLabel) => {
@@ -128,13 +172,25 @@ check('titled TOP row button spacing applies', await rowPair(0), 7);
 check('titled BOTTOM row spacing independent', await rowPair(1), 3);
 await openGroup('Ribbon: Untitled Sections');
 await setKnob('Ribbon: Untitled Sections', 'Row spacing', 9);
-// v5.17: row spacing renders ×kind-factor (Section scale scales the WHOLE
-// section, auto-fill included). With gapU 9 the fill is 72/(56+9), so the
-// rendered margin is 9 × 72/65 ≈ 9.97 — the formula, not the raw knob.
+/* v5.17: row spacing renders ×kind-factor (Section scale scales the WHOLE
+   section, auto-fill included), so the rendered margin is the formula, not the
+   raw knob.
+   v7.76: the formula is spelled out from the token defaults rather than as the
+   two literals `72 / 65` it used to carry — those were the v5.14 inner heights,
+   and by now the real ones are 66.5 titled / 53 untitled. Fitting the expected
+   number to the old geometry is how this line would have gone on passing while
+   measuring the wrong thing. */
+const GAP_U = 9;                                   // the knob just set, above
+// Same pieces as the fill assertion at the top, with the untitled inner height
+// re-derived for the gap this knob just changed.
+const fill = (PAD_T + INNER_T - PAD_U) / (2 * ROW_H + GAP_U);
 const unMt = parseFloat(await page.$eval('.rib-kind-untitled:not(.rib-single) .rib-row + .rib-row, .rib-kind-untitled:not(.rib-single) .rib-row-line + .rib-row', (el) => getComputedStyle(el).marginTop));
-check('untitled row spacing applies ×fill (and only there)', Math.abs(unMt - 9 * (72 / 65)) < 0.05, true);
-check('titled row spacing still 0',
-  await page.$eval('.rib-kind-titled:not(.rib-single) .rib-row + .rib-row, .rib-kind-titled:not(.rib-single) .rib-row-line + .rib-row', (el) => getComputedStyle(el).marginTop), '0px');
+check('untitled row spacing applies ×fill (and only there)',
+  Math.abs(unMt - GAP_U * fill) < 0.05, true);
+// "and only there": the titled kind stays on its OWN default, whatever that is.
+check('titled row spacing untouched, still at its default',
+  await page.$eval('.rib-kind-titled:not(.rib-single) .rib-row + .rib-row, .rib-kind-titled:not(.rib-single) .rib-row-line + .rib-row', (el) => getComputedStyle(el).marginTop),
+  `${tokenDefault('ribRowGapTitled')}px`);
 await openGroup('Ribbon: Single-Row Sections');
 await setKnob('Ribbon: Single-Row Sections', 'Top padding', 6);
 check('single-row top padding applies',

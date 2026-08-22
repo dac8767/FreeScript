@@ -73,7 +73,7 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // the page from the pageLayout store) and changing it reflows pagination,
       // so it belongs to that dialog, not a free design slider. Only chrome-ish
       // surface knobs live here.
-      { id: 'editorMainPadTop', label: 'Space above first page', cssVar: '--dz-editor-main-pad-top', unit: 'px', min: 0, max: 120, step: 2, def: 30 },
+      { id: 'editorMainPadTop', label: 'Space above first page', cssVar: '--dz-editor-main-pad-top', unit: 'px', min: 0, max: 120, step: 2, def: 42 },
       /* v7.25: the "Saved" flash on the page. Its SIZE is a knob; its drop
          below the ruler is not — that one is measured in the page's own inch
          (SavedFlash.tsx, so it holds at any zoom) and a css-var knob nothing
@@ -94,7 +94,7 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // driven here through that same store field.
       { id: 'menuSpacing', label: 'Item spacing', unit: 'px', min: 0, max: 32, step: 1, def: 0,
         store: { get: (s) => s.chromeGapPx.menu, set: (v) => useEditorStore.getState().setChromeGap('menu', v) } },
-      { id: 'menuDropdownMinW', label: 'Dropdown min width', cssVar: '--dz-menu-dd-minw', unit: 'px', min: 160, max: 400, step: 5, def: 260 },
+      { id: 'menuDropdownMinW', label: 'Dropdown min width', cssVar: '--dz-menu-dd-minw', unit: 'px', min: 160, max: 400, step: 5, def: 325 },
     ],
   },
   {
@@ -108,13 +108,13 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       { id: 'toolbarSpacing', label: 'Section spacing', unit: 'px', min: 0, max: 32, step: 1, def: 2,
         store: { get: (s) => s.chromeGapPx.toolbar, set: (v) => useEditorStore.getState().setChromeGap('toolbar', v) },
         hint: 'Gap between sections (and between big buttons).' },
-      { id: 'ribPadTop', label: 'Bar top padding', cssVar: '--dz-rib-pad-top', unit: 'px', min: 0, max: 30, step: 1, def: 5 },
-      { id: 'ribPadBottom', label: 'Bar bottom padding', cssVar: '--dz-rib-pad-bottom', unit: 'px', min: 0, max: 30, step: 1, def: 2 },
+      { id: 'ribPadTop', label: 'Bar top padding', cssVar: '--dz-rib-pad-top', unit: 'px', min: 0, max: 30, step: 1, def: 6 },
+      { id: 'ribPadBottom', label: 'Bar bottom padding', cssVar: '--dz-rib-pad-bottom', unit: 'px', min: 0, max: 30, step: 1, def: 10 },
       /* v5.16, Derek: far-left / far-right bar padding. Setting the LEFT one
          takes over from the automatic menu-bar icon alignment (which writes
          an inline padding-left) — otherwise the knob would be a silent no-op
          whenever the auto-alignment is active. Reset to restore auto. */
-      { id: 'ribPadLeft', label: 'Bar left padding', cssVar: '--dz-rib-pad-left', unit: 'px', min: 0, max: 40, step: 1, def: 8,
+      { id: 'ribPadLeft', label: 'Bar left padding', cssVar: '--dz-rib-pad-left', unit: 'px', min: 0, max: 40, step: 1, def: 10,
         hint: 'Overrides the automatic menu-bar alignment; Reset restores it.' },
       { id: 'ribPadRight', label: 'Bar right padding', cssVar: '--dz-rib-pad-right', unit: 'px', min: 0, max: 40, step: 1, def: 12 },
       { id: 'toolbarBtnRadius', label: 'Button corner radius', cssVar: '--dz-toolbar-btn-radius', unit: 'px', min: 0, max: 12, step: 1, def: 5 },
@@ -130,10 +130,10 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'ribbonTitled',
     label: 'Ribbon: Titled Sections',
     tokens: [
-      { id: 'ribPadXTitled', label: 'Side padding', cssVar: '--dz-rib-pad-x-titled', unit: 'px', min: 0, max: 24, step: 1, def: 0 },
+      { id: 'ribPadXTitled', label: 'Side padding', cssVar: '--dz-rib-pad-x-titled', unit: 'px', min: 0, max: 24, step: 1, def: 13 },
       { id: 'ribPadTopTitled', label: 'Top padding (above the title)', cssVar: '--dz-rib-pad-top-titled', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
-      { id: 'ribPadBottomTitled', label: 'Bottom padding', cssVar: '--dz-rib-pad-bottom-titled', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
-      { id: 'ribRowGapTitled', label: 'Row spacing', cssVar: '--dz-rib-row-gap-titled', unit: 'px', min: -14, max: 24, step: 1, def: 0,
+      { id: 'ribPadBottomTitled', label: 'Bottom padding', cssVar: '--dz-rib-pad-bottom-titled', unit: 'px', min: 0, max: 16, step: 1, def: 1 },
+      { id: 'ribRowGapTitled', label: 'Row spacing', cssVar: '--dz-rib-row-gap-titled', unit: 'px', min: -14, max: 24, step: 1, def: -2,
         hint: 'Negative pulls the two rows together.' },
       /* v5.18, Derek: per ROW, and negative-capable — at 0 the button BOXES
          already touch; the air he still saw is each box's slack around its
@@ -143,9 +143,9 @@ export const DESIGN_GROUPS: DesignGroup[] = [
         hint: 'Boxes touch at 0 — remaining air is inside each button; negative overlaps them.' },
       { id: 'ribBtnGapBottomTitled', label: 'Bottom row button spacing', cssVar: '--dz-rib-btn-gap-bottom-titled', unit: 'px', min: -10, max: 20, step: 1, def: 1,
         hint: 'Boxes touch at 0 — remaining air is inside each button; negative overlaps them.' },
-      { id: 'ribTitleGap', label: 'Space between title and buttons', cssVar: '--dz-rib-title-gap', unit: 'px', min: -10, max: 20, step: 1, def: 5,
+      { id: 'ribTitleGap', label: 'Space between title and buttons', cssVar: '--dz-rib-title-gap', unit: 'px', min: -10, max: 20, step: 1, def: 1,
         hint: '0 removes the margin; what remains is the text\u2019s own descender and button centering \u2014 go negative to tuck the buttons under the title.' },
-      { id: 'ribTitleFont', label: 'Title font size', cssVar: '--dz-rib-title-font', unit: 'px', min: 7, max: 16, step: 0.5, def: 9.5,
+      { id: 'ribTitleFont', label: 'Title font size', cssVar: '--dz-rib-title-font', unit: 'px', min: 7, max: 16, step: 0.5, def: 10,
         hint: 'The title band grows with the font so rows stay aligned.' },
       { id: 'ribTitleAlign', label: 'Title alignment', cssVar: '--dz-rib-title-align', unit: '', min: 0, max: 2, step: 1, def: 1,
         choices: [
@@ -162,14 +162,14 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'ribbonUntitled',
     label: 'Ribbon: Untitled Sections',
     tokens: [
-      { id: 'ribPadXUntitled', label: 'Side padding', cssVar: '--dz-rib-pad-x-untitled', unit: 'px', min: 0, max: 24, step: 1, def: 0 },
-      { id: 'ribPadTopUntitled', label: 'Top padding', cssVar: '--dz-rib-pad-top-untitled', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
-      { id: 'ribPadBottomUntitled', label: 'Bottom padding', cssVar: '--dz-rib-pad-bottom-untitled', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
-      { id: 'ribRowGapUntitled', label: 'Row spacing', cssVar: '--dz-rib-row-gap-untitled', unit: 'px', min: -14, max: 24, step: 1, def: 0,
+      { id: 'ribPadXUntitled', label: 'Side padding', cssVar: '--dz-rib-pad-x-untitled', unit: 'px', min: 0, max: 24, step: 1, def: 7 },
+      { id: 'ribPadTopUntitled', label: 'Top padding', cssVar: '--dz-rib-pad-top-untitled', unit: 'px', min: 0, max: 16, step: 1, def: 2 },
+      { id: 'ribPadBottomUntitled', label: 'Bottom padding', cssVar: '--dz-rib-pad-bottom-untitled', unit: 'px', min: 0, max: 16, step: 1, def: 5 },
+      { id: 'ribRowGapUntitled', label: 'Row spacing', cssVar: '--dz-rib-row-gap-untitled', unit: 'px', min: -14, max: 24, step: 1, def: -3,
         hint: 'Negative pulls the two rows together.' },
-      { id: 'ribBtnGapTopUntitled', label: 'Top row button spacing', cssVar: '--dz-rib-btn-gap-top-untitled', unit: 'px', min: -10, max: 20, step: 1, def: 1,
+      { id: 'ribBtnGapTopUntitled', label: 'Top row button spacing', cssVar: '--dz-rib-btn-gap-top-untitled', unit: 'px', min: -10, max: 20, step: 1, def: 0,
         hint: 'Boxes touch at 0 — remaining air is inside each button; negative overlaps them.' },
-      { id: 'ribBtnGapBottomUntitled', label: 'Bottom row button spacing', cssVar: '--dz-rib-btn-gap-bottom-untitled', unit: 'px', min: -10, max: 20, step: 1, def: 1,
+      { id: 'ribBtnGapBottomUntitled', label: 'Bottom row button spacing', cssVar: '--dz-rib-btn-gap-bottom-untitled', unit: 'px', min: -10, max: 20, step: 1, def: -1,
         hint: 'Boxes touch at 0 — remaining air is inside each button; negative overlaps them.' },
       { id: 'ribScaleUntitled', label: 'Section scale (%)', unit: '', min: 50, max: 200, step: 5, def: 100,
         hint: 'On top of auto-matching the titled sections\u2019 height',
@@ -180,10 +180,10 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'ribbonSingle',
     label: 'Ribbon: Single-Row Sections',
     tokens: [
-      { id: 'ribPadXSingle', label: 'Side padding', cssVar: '--dz-rib-pad-x-single', unit: 'px', min: 0, max: 24, step: 1, def: 0 },
+      { id: 'ribPadXSingle', label: 'Side padding', cssVar: '--dz-rib-pad-x-single', unit: 'px', min: 0, max: 24, step: 1, def: 6 },
       { id: 'ribPadTopSingle', label: 'Top padding', cssVar: '--dz-rib-pad-top-single', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
       { id: 'ribPadBottomSingle', label: 'Bottom padding', cssVar: '--dz-rib-pad-bottom-single', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
-      { id: 'toolbarBigIcon', label: 'Icon size', cssVar: '--dz-toolbar-big-icon', unit: 'px', min: 16, max: 40, step: 1, def: 26 },
+      { id: 'toolbarBigIcon', label: 'Icon size', cssVar: '--dz-toolbar-big-icon', unit: 'px', min: 16, max: 40, step: 1, def: 28 },
       { id: 'toolbarBigLabel', label: 'Label font size', cssVar: '--dz-toolbar-big-label', unit: 'px', min: 7, max: 16, step: 0.5, def: 10 },
     ],
   },
@@ -194,18 +194,18 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // Panel WIDTHS are dragged (local state / resize handle) — that handle is
       // their single source. These are the fixed design details:
       { id: 'dockEdgeW', label: 'Dock edge grip width', cssVar: '--dz-dock-edge-w', unit: 'px', min: 2, max: 16, step: 1, def: 6 },
-      { id: 'toolWinRadius', label: 'Tool window radius', cssVar: '--dz-toolwin-radius', unit: 'px', min: 0, max: 20, step: 1, def: 8 },
+      { id: 'toolWinRadius', label: 'Tool window radius', cssVar: '--dz-toolwin-radius', unit: 'px', min: 0, max: 20, step: 1, def: 12 },
       // v4.46, Derek: header padding is FOUR per-side knobs now (was one
       // vertical-only toolWinHeaderPad — a saved override migrates into
       // top+bottom in designSlice). The docked strip rides the same vars
       // with its own tighter fallbacks (4/8 vs the frame's 6/10).
-      { id: 'toolWinPadTop', label: 'Header padding — top', cssVar: '--dz-toolwin-pad-top', unit: 'px', min: 0, max: 20, step: 1, def: 6 },
+      { id: 'toolWinPadTop', label: 'Header padding — top', cssVar: '--dz-toolwin-pad-top', unit: 'px', min: 0, max: 20, step: 1, def: 4 },
       { id: 'toolWinPadBottom', label: 'Header padding — bottom', cssVar: '--dz-toolwin-pad-bottom', unit: 'px', min: 0, max: 20, step: 1, def: 6 },
-      { id: 'toolWinPadLeft', label: 'Header padding — left', cssVar: '--dz-toolwin-pad-left', unit: 'px', min: 0, max: 28, step: 1, def: 10 },
+      { id: 'toolWinPadLeft', label: 'Header padding — left', cssVar: '--dz-toolwin-pad-left', unit: 'px', min: 0, max: 28, step: 1, def: 18 },
       { id: 'toolWinPadRight', label: 'Header padding — right', cssVar: '--dz-toolwin-pad-right', unit: 'px', min: 0, max: 28, step: 1, def: 10 },
       // v4.47, Derek: the air between the window's name and its tabs (the
       // header's 8px column-gap sits on top of this margin).
-      { id: 'toolWinTitleGap', label: 'Space after window name', cssVar: '--dz-toolwin-title-gap', unit: 'px', min: 0, max: 40, step: 1, def: 10 },
+      { id: 'toolWinTitleGap', label: 'Space after window name', cssVar: '--dz-toolwin-title-gap', unit: 'px', min: 0, max: 40, step: 1, def: 27 },
       /* v7.02 (remaining #4): 13px is the PANEL-title step of the scale
          (16 window / 13 panel / 11.5 section). */
       { id: 'toolWinTitleFont', label: 'Tool window title font', cssVar: '--dz-toolwin-title-font', unit: 'px', min: 9, max: 20, step: 0.5, def: 13 },
@@ -213,7 +213,7 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // the air between the header and the window's content, every shape.
       { id: 'toolWinBarFont', label: 'Header bar font size', cssVar: '--dz-toolwin-bar-font', unit: 'px', min: 9, max: 18, step: 0.5, def: 12,
         hint: 'Sizes the header bar\u2019s controls (Filter/Sort/View\u2026) and tabs; the title has its own knob.' },
-      { id: 'toolWinBodyGap', label: 'Space above window content', cssVar: '--dz-toolwin-body-gap', unit: 'px', min: 0, max: 32, step: 1, def: 0,
+      { id: 'toolWinBodyGap', label: 'Space above window content', cssVar: '--dz-toolwin-body-gap', unit: 'px', min: 0, max: 32, step: 1, def: 8,
         hint: 'Extra space between the header bar and the window\u2019s content \u2014 docked, popped out, and fullscreen alike.' },
     ],
   },
@@ -226,26 +226,26 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'characters',
     label: 'Characters',
     tokens: [
-      { id: 'charCardRadius', label: 'Card corner radius', cssVar: '--dz-char-card-radius', unit: 'px', min: 0, max: 20, step: 1, def: 4 },
+      { id: 'charCardRadius', label: 'Card corner radius', cssVar: '--dz-char-card-radius', unit: 'px', min: 0, max: 20, step: 1, def: 14 },
       { id: 'charCardBorder', label: 'Card outline width', cssVar: '--dz-char-card-border', unit: 'px', min: 0, max: 6, step: 1, def: 1 },
       // v4.22, Derek: spacing of the character card header's right-side items
       // (line/scene count, the % ring, the expand button).
-      { id: 'charHeaderGap', label: 'Header item spacing', cssVar: '--dz-char-header-gap', unit: 'px', min: 0, max: 32, step: 1, def: 8 },
+      { id: 'charHeaderGap', label: 'Header item spacing', cssVar: '--dz-char-header-gap', unit: 'px', min: 0, max: 32, step: 1, def: 15 },
       // v4.23, Derek: vertical gap between a character card's field rows — dial
       // it down to pack the card into a small window.
-      { id: 'charFieldGap', label: 'Field row spacing', cssVar: '--dz-char-field-gap', unit: 'px', min: 0, max: 24, step: 1, def: 8 },
-      { id: 'charDetailPad', label: 'Card detail padding', cssVar: '--dz-char-detail-pad', unit: 'px', min: 0, max: 24, step: 1, def: 8,
+      { id: 'charFieldGap', label: 'Field row spacing', cssVar: '--dz-char-field-gap', unit: 'px', min: 0, max: 24, step: 1, def: 9 },
+      { id: 'charDetailPad', label: 'Card detail padding', cssVar: '--dz-char-detail-pad', unit: 'px', min: 0, max: 24, step: 1, def: 14,
         hint: 'Around the expanded card body — sides/bottom keep their +2/+4px rhythm.' },
       { id: 'charInputH', label: 'Input field height', cssVar: '--dz-char-input-h', unit: 'px', min: 20, max: 40, step: 1, def: 28,
         hint: 'Each field keeps its own built-in height until this moves; then all match.' },
       // Drives the no-photo slot exactly AND caps the photo max-heights (the
       // stacked-layout photo falls back to its own 360px until the knob moves).
-      { id: 'charImageH', label: 'Image slot height', cssVar: '--dz-char-image-h', unit: 'px', min: 60, max: 480, step: 5, def: 200 },
-      { id: 'charCardMinW', label: 'Cards view — min card width', cssVar: '--dz-char-card-minw', unit: 'px', min: 240, max: 520, step: 10, def: 320 },
+      { id: 'charImageH', label: 'Image slot height', cssVar: '--dz-char-image-h', unit: 'px', min: 60, max: 480, step: 5, def: 225 },
+      { id: 'charCardMinW', label: 'Cards view — min card width', cssVar: '--dz-char-card-minw', unit: 'px', min: 240, max: 520, step: 10, def: 310 },
       // v4.50: charCardMinH is BACK (Derek asked for it) — a min-height on the
       // cards-view card in every shape; 0 keeps cards purely content-sized.
-      { id: 'charCardMinH', label: 'Cards view — min card height', cssVar: '--dz-char-card-minh', unit: 'px', min: 0, max: 800, step: 10, def: 0 },
-      { id: 'charDescLines', label: 'Cards view — description lines', cssVar: '--dz-char-desc-lines', unit: '', min: 1, max: 6, step: 1, def: 2,
+      { id: 'charCardMinH', label: 'Cards view — min card height', cssVar: '--dz-char-card-minh', unit: 'px', min: 0, max: 800, step: 10, def: 480 },
+      { id: 'charDescLines', label: 'Cards view — description lines', cssVar: '--dz-char-desc-lines', unit: '', min: 1, max: 6, step: 1, def: 1,
         hint: 'Lines the description shows before clamping; clicking in still lifts it.' },
       // Store-bound (menuSpacing precedent): the size the Characters window
       // opens at, riding the SAME toolSizes entry the window's own resize drag
@@ -314,8 +314,8 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'dialogs',
     label: 'Dialogs',
     tokens: [
-      { id: 'dialogRadius', label: 'Dialog corner radius', cssVar: '--dz-dialog-radius', unit: 'px', min: 0, max: 20, step: 1, def: 8 },
-      { id: 'dialogHeaderPadY', label: 'Header padding', cssVar: '--dz-dialog-header-pady', unit: 'px', min: 4, max: 28, step: 1, def: 14 },
+      { id: 'dialogRadius', label: 'Dialog corner radius', cssVar: '--dz-dialog-radius', unit: 'px', min: 0, max: 20, step: 1, def: 6 },
+      { id: 'dialogHeaderPadY', label: 'Header padding', cssVar: '--dz-dialog-header-pady', unit: 'px', min: 4, max: 28, step: 1, def: 13 },
       { id: 'dialogHeaderFont', label: 'Header font size', cssVar: '--dz-dialog-header-font', unit: 'px', min: 12, max: 24, step: 0.5, def: 16 },
       { id: 'dialogBodyPad', label: 'Body padding', cssVar: '--dz-dialog-body-pad', unit: 'px', min: 4, max: 40, step: 1, def: 20 },
       { id: 'dialogBtnHeight', label: 'Button height', cssVar: '--dz-dialog-btn-h', unit: 'px', min: 24, max: 48, step: 1, def: 34 },
@@ -360,7 +360,7 @@ export const DESIGN_GROUPS: DesignGroup[] = [
          what surfaced it, and the no-dead-knobs test is what refused to let it
          through. A stale persisted override is harmless: applyDesignVars
          ignores ids it does not know. */
-      { id: 'navScenePadY', label: 'Scene row padding', cssVar: '--dz-nav-scene-pady', unit: 'px', min: 2, max: 24, step: 1, def: 10 },
+      { id: 'navScenePadY', label: 'Scene row padding', cssVar: '--dz-nav-scene-pady', unit: 'px', min: 2, max: 24, step: 1, def: 2 },
       { id: 'navSceneFont', label: 'Scene heading font', cssVar: '--dz-nav-scene-font', unit: 'px', min: 10, max: 20, step: 0.5, def: 14 },
       { id: 'navSynopsisFont', label: 'Scene synopsis font', cssVar: '--dz-nav-synopsis-font', unit: 'px', min: 8, max: 18, step: 0.5, def: 11 },
       { id: 'navBadge', label: 'Scene number badge size', cssVar: '--dz-nav-badge', unit: 'px', min: 14, max: 32, step: 1, def: 22 },
@@ -369,13 +369,13 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       { id: 'scenesTableMin', label: 'Scenes: min width for full table', unit: 'px', min: 300, max: 2000, step: 10, def: 700,
         hint: 'Narrower than this, the scene list compresses to caret rows',
         store: { get: (s) => s.scenesTableMinW, set: (v) => useEditorStore.getState().setScenesTableMinW(v) } },
-      { id: 'obPad', label: 'Outline bar padding', cssVar: '--dz-ob-pad', unit: 'px', min: 0, max: 16, step: 1, def: 4 },
+      { id: 'obPad', label: 'Outline bar padding', cssVar: '--dz-ob-pad', unit: 'px', min: 0, max: 16, step: 1, def: 0 },
       /* v7.04: 'Outline title font' is GONE. Its only consumer was `.fs-ob-title`,
          a rule no component has rendered for some time — so the Design window was
          offering a slider that moved nothing. The dead-CSS sweep removed the rule
          and the no-dead-knobs test immediately caught the orphaned token, which is
          exactly what that test is for. */
-      { id: 'obIconBtn', label: 'Outline icon button size', cssVar: '--dz-ob-iconbtn', unit: 'px', min: 18, max: 36, step: 1, def: 26 },
+      { id: 'obIconBtn', label: 'Outline icon button size', cssVar: '--dz-ob-iconbtn', unit: 'px', min: 18, max: 36, step: 1, def: 23 },
     ],
   },
   {
@@ -385,11 +385,11 @@ export const DESIGN_GROUPS: DesignGroup[] = [
     id: 'focus',
     label: 'Focus Tool',
     tokens: [
-      { id: 'focusPad', label: 'Side padding', cssVar: '--dz-focus-pad', unit: 'px', min: 0, max: 32, step: 1, def: 12 },
+      { id: 'focusPad', label: 'Side padding', cssVar: '--dz-focus-pad', unit: 'px', min: 0, max: 32, step: 1, def: 29 },
       { id: 'focusRowGap', label: 'Row spacing', cssVar: '--dz-focus-row-gap', unit: 'px', min: 0, max: 24, step: 1, def: 8 },
-      { id: 'focusSectionGap', label: 'Section spacing (above)', cssVar: '--dz-focus-section-gap', unit: 'px', min: 0, max: 32, step: 1, def: 6 },
-      { id: 'focusSectionBelow', label: 'Section spacing (below)', cssVar: '--dz-focus-section-below', unit: 'px', min: 0, max: 32, step: 1, def: 10 },
-      { id: 'focusIndent', label: 'Sub-option indent', cssVar: '--dz-focus-indent', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
+      { id: 'focusSectionGap', label: 'Section spacing (above)', cssVar: '--dz-focus-section-gap', unit: 'px', min: 0, max: 32, step: 1, def: 10 },
+      { id: 'focusSectionBelow', label: 'Section spacing (below)', cssVar: '--dz-focus-section-below', unit: 'px', min: 0, max: 32, step: 1, def: 31 },
+      { id: 'focusIndent', label: 'Sub-option indent', cssVar: '--dz-focus-indent', unit: 'px', min: 0, max: 40, step: 1, def: 26 },
     ],
   },
   {
@@ -403,14 +403,14 @@ export const DESIGN_GROUPS: DesignGroup[] = [
         hint: 'Scale of the annotation icons in the page margin.',
         store: { get: (s) => s.markupIconScalePct, set: (v) => useEditorStore.getState().setMarkupIconScalePct(v) } },
       // v5.29, Derek: the annotation window's head row (Icon:/Highlight: groups)
-      { id: 'annoHeadGap', label: 'Window: label-to-swatch spacing', cssVar: '--dz-anno-head-gap', unit: 'px', min: 0, max: 20, step: 1, def: 6 },
-      { id: 'annoGroupGap', label: 'Window: icon-to-highlight spacing', cssVar: '--dz-anno-group-gap', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
+      { id: 'annoHeadGap', label: 'Window: label-to-swatch spacing', cssVar: '--dz-anno-head-gap', unit: 'px', min: 0, max: 20, step: 1, def: 3 },
+      { id: 'annoGroupGap', label: 'Window: icon-to-highlight spacing', cssVar: '--dz-anno-group-gap', unit: 'px', min: 0, max: 40, step: 1, def: 13 },
       { id: 'annoHeadPad', label: 'Window: top row padding', cssVar: '--dz-anno-head-pad', unit: 'px', min: 0, max: 24, step: 1, def: 0 },
       // v5.42, Derek: the In Navigator / In Script section — all four sides
-      { id: 'annoPrevPadTop', label: 'Previews: top padding', cssVar: '--dz-anno-prev-pad-top', unit: 'px', min: 0, max: 32, step: 1, def: 8 },
-      { id: 'annoPrevPadRight', label: 'Previews: right padding', cssVar: '--dz-anno-prev-pad-right', unit: 'px', min: 0, max: 32, step: 1, def: 0 },
-      { id: 'annoPrevPadBottom', label: 'Previews: bottom padding', cssVar: '--dz-anno-prev-pad-bottom', unit: 'px', min: 0, max: 32, step: 1, def: 0 },
-      { id: 'annoPrevPadLeft', label: 'Previews: left padding', cssVar: '--dz-anno-prev-pad-left', unit: 'px', min: 0, max: 32, step: 1, def: 0 },
+      { id: 'annoPrevPadTop', label: 'Previews: top padding', cssVar: '--dz-anno-prev-pad-top', unit: 'px', min: 0, max: 32, step: 1, def: 15 },
+      { id: 'annoPrevPadRight', label: 'Previews: right padding', cssVar: '--dz-anno-prev-pad-right', unit: 'px', min: 0, max: 32, step: 1, def: 13 },
+      { id: 'annoPrevPadBottom', label: 'Previews: bottom padding', cssVar: '--dz-anno-prev-pad-bottom', unit: 'px', min: 0, max: 32, step: 1, def: 5 },
+      { id: 'annoPrevPadLeft', label: 'Previews: left padding', cssVar: '--dz-anno-prev-pad-left', unit: 'px', min: 0, max: 32, step: 1, def: 9 },
     ],
   },
   {
@@ -421,22 +421,22 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // plus the window paddings. All plain css-var knobs on fb-* rules.
       // (v6.94 removed fbHelpGap with the ? itself; a stale persisted value
       // is ignored by applyDesignVars — the designed-for orphan case.)
-      { id: 'fbNameGap', label: 'Space after "Name:"', cssVar: '--dz-fb-name-gap', unit: 'px', min: 0, max: 24, step: 1, def: 5 },
-      { id: 'fbEditGap', label: 'Name to Edit button', cssVar: '--dz-fb-edit-gap', unit: 'px', min: 0, max: 32, step: 1, def: 8 },
-      { id: 'fbTypeGap', label: '"Type:" to its dropdown', cssVar: '--dz-fb-type-gap', unit: 'px', min: 0, max: 32, step: 1, def: 8 },
-      { id: 'fbDescGap', label: '"Description:" to the text box', cssVar: '--dz-fb-desc-gap', unit: 'px', min: 0, max: 24, step: 1, def: 4 },
-      { id: 'fbHeadGap', label: 'Label to attach buttons', cssVar: '--dz-fb-head-gap', unit: 'px', min: 0, max: 40, step: 1, def: 10 },
-      { id: 'fbBtnGap', label: 'Between attach buttons', cssVar: '--dz-fb-btn-gap', unit: 'px', min: 0, max: 24, step: 1, def: 6 },
-      { id: 'fbHeadRowGap', label: 'Header to wrapped button row', cssVar: '--dz-fb-headrow-gap', unit: 'px', min: 0, max: 24, step: 1, def: 6,
+      { id: 'fbNameGap', label: 'Space after "Name:"', cssVar: '--dz-fb-name-gap', unit: 'px', min: 0, max: 24, step: 1, def: 13 },
+      { id: 'fbEditGap', label: 'Name to Edit button', cssVar: '--dz-fb-edit-gap', unit: 'px', min: 0, max: 32, step: 1, def: 15 },
+      { id: 'fbTypeGap', label: '"Type:" to its dropdown', cssVar: '--dz-fb-type-gap', unit: 'px', min: 0, max: 32, step: 1, def: 12 },
+      { id: 'fbDescGap', label: '"Description:" to the text box', cssVar: '--dz-fb-desc-gap', unit: 'px', min: 0, max: 24, step: 1, def: 7 },
+      { id: 'fbHeadGap', label: 'Label to attach buttons', cssVar: '--dz-fb-head-gap', unit: 'px', min: 0, max: 40, step: 1, def: 6 },
+      { id: 'fbBtnGap', label: 'Between attach buttons', cssVar: '--dz-fb-btn-gap', unit: 'px', min: 0, max: 24, step: 1, def: 0 },
+      { id: 'fbHeadRowGap', label: 'Header to wrapped button row', cssVar: '--dz-fb-headrow-gap', unit: 'px', min: 0, max: 24, step: 1, def: 17,
         hint: 'Only visible when a narrow window wraps the buttons onto their own row.' },
       { id: 'fbAttachGap', label: 'Extra space above the attach box', cssVar: '--dz-fb-attach-gap', unit: 'px', min: 0, max: 32, step: 1, def: 0,
         hint: 'Adds to the row spacing between the text box and the attach box.' },
-      { id: 'fbRowGap', label: 'Between rows', cssVar: '--dz-fb-row-gap', unit: 'px', min: 0, max: 32, step: 1, def: 10 },
+      { id: 'fbRowGap', label: 'Between rows', cssVar: '--dz-fb-row-gap', unit: 'px', min: 0, max: 32, step: 1, def: 9 },
       { id: 'fbSubmitGap', label: 'Extra space above Submit', cssVar: '--dz-fb-submit-gap', unit: 'px', min: 0, max: 40, step: 1, def: 0,
         hint: 'Adds to the row spacing between the attach box and the Submit row.' },
-      { id: 'fbPadSide', label: 'Window side padding', cssVar: '--dz-fb-pad-side', unit: 'px', min: 0, max: 40, step: 1, def: 16 },
-      { id: 'fbPadTop', label: 'Window top padding', cssVar: '--dz-fb-pad-top', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
-      { id: 'fbPadBottom', label: 'Window bottom padding', cssVar: '--dz-fb-pad-bottom', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
+      { id: 'fbPadSide', label: 'Window side padding', cssVar: '--dz-fb-pad-side', unit: 'px', min: 0, max: 40, step: 1, def: 17 },
+      { id: 'fbPadTop', label: 'Window top padding', cssVar: '--dz-fb-pad-top', unit: 'px', min: 0, max: 40, step: 1, def: 8 },
+      { id: 'fbPadBottom', label: 'Window bottom padding', cssVar: '--dz-fb-pad-bottom', unit: 'px', min: 0, max: 40, step: 1, def: 0 },
     ],
   },
   {
@@ -448,10 +448,10 @@ export const DESIGN_GROUPS: DesignGroup[] = [
       // section). v6.98 moved the title INSIDE the box, so "title to first
       // item" is the h3's own margin and top padding is the box's again.
       { id: 'prefsPadTop', label: 'Section top padding', cssVar: '--dz-prefs-pad-top', unit: 'px', min: 0, max: 40, step: 1, def: 12 },
-      { id: 'prefsTitleGap', label: 'Title to first item', cssVar: '--dz-prefs-title-gap', unit: 'px', min: 0, max: 32, step: 1, def: 10 },
-      { id: 'prefsPadBottom', label: 'Section bottom padding', cssVar: '--dz-prefs-pad-bottom', unit: 'px', min: 0, max: 40, step: 1, def: 13 },
-      { id: 'prefsPadSide', label: 'Section side padding', cssVar: '--dz-prefs-pad-side', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
-      { id: 'prefsSectionGap', label: 'Space between sections', cssVar: '--dz-prefs-section-gap', unit: 'px', min: 0, max: 48, step: 1, def: 18 },
+      { id: 'prefsTitleGap', label: 'Title to first item', cssVar: '--dz-prefs-title-gap', unit: 'px', min: 0, max: 32, step: 1, def: 15 },
+      { id: 'prefsPadBottom', label: 'Section bottom padding', cssVar: '--dz-prefs-pad-bottom', unit: 'px', min: 0, max: 40, step: 1, def: 14 },
+      { id: 'prefsPadSide', label: 'Section side padding', cssVar: '--dz-prefs-pad-side', unit: 'px', min: 0, max: 40, step: 1, def: 17 },
+      { id: 'prefsSectionGap', label: 'Space between sections', cssVar: '--dz-prefs-section-gap', unit: 'px', min: 0, max: 48, step: 1, def: 25 },
     ],
   },
   {
@@ -472,6 +472,34 @@ const BY_ID: Record<string, DesignToken> = Object.fromEntries(DESIGN_TOKENS.map(
 
 export function designToken(id: string): DesignToken | undefined {
   return BY_ID[id];
+}
+
+/**
+ * What a knob is set to RIGHT NOW: the override if one exists, otherwise the
+ * token's own default.
+ *
+ * v7.76. Almost nothing needs this — the CSS resolves it for free, because
+ * applyDesignVars writes overrides onto :root and every rule falls back to
+ * `var(--dz-x, <the same default>)`. But anything that computes a LENGTH IN
+ * JAVASCRIPT has no such fallback, and reading `designVars[id]` alone silently
+ * treats "unchanged" as "zero" or as whatever literal that caller happens to
+ * carry.
+ *
+ * That is precisely how the ribbon's auto-fill broke: Toolbar.tsx handed the
+ * raw override map to ribbonKindVars, whose own `??` numbers had drifted from
+ * the stylesheet's. It could not surface while Derek's values arrived as
+ * overrides — the map was full, so the fallbacks never ran — and it appeared
+ * the moment those values became the defaults and the map emptied.
+ *
+ * So: JS that needs a design length calls this. Never designVars[id].
+ */
+export function designValue(vars: Record<string, number>, id: string): number {
+  const t = BY_ID[id];
+  if (!t) throw new Error(`designValue: no design token with id '${id}'`);
+  const v = vars[id];
+  // Same clamp the panel applies on commit — a hand-edited preset can carry a
+  // value no control could reach, and this is a second read path for it.
+  return typeof v === 'number' && !Number.isNaN(v) ? clampTokenValue(t, v) : t.def;
 }
 
 /** Format a numeric value with its unit for a CSS declaration. Choice tokens

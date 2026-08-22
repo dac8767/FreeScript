@@ -107,8 +107,14 @@ ok('…and reached the store before it read its defaults',
   && fresh.chromeGapPx === fresh.wantChromeGapPx, JSON.stringify(fresh));
 ok('…his annotation presets came too', fresh.markupPresets === BUNDLE.parts.annotations.length,
   `${fresh.markupPresets} vs ${BUNDLE.parts.annotations.length}`);
-ok('…and his design values', fresh.designVars === Object.keys(BUNDLE.parts.design).length,
-  `${fresh.designVars} vs ${Object.keys(BUNDLE.parts.design).length}`);
+/* v7.76 REVERSED this one. It used to read "his 81 design values arrived as
+   overrides" — and they did, until "add these settings directly into the app
+   code" made them the tokens' own defaults. A fresh profile now overrides
+   NOTHING, which is the stronger claim: the app paints his numbers with an
+   empty map. (That it still paints them is check-v776's half; here the point
+   is only that seeding no longer smuggles them in as overrides.) */
+ok('…and NO design overrides, because those are the code now', fresh.designVars === 0,
+  `${fresh.designVars} overrides`);
 ok('…and his ribbon, button for button',
   fresh.toolbarLeft === fresh.wantToolbarLeft && PRESET_VS.toolbarLeft.length > 20,
   `${fresh.toolbarLeft?.length} vs ${fresh.wantToolbarLeft?.length}`);

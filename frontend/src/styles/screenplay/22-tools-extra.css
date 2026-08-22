@@ -516,7 +516,7 @@ label.fs-presets-row { cursor: pointer; }
    from the body, per Derek's Airtable reference. The pop-out button is gone;
    dragging the row out of the panel floats the window. */
 .tool-inline { position: relative; background: var(--fd-bg); }   /* v4.44: window body = editor-area color */
-.tool-inline-body { padding-top: var(--dz-toolwin-body-gap, 0px); }   /* v4.45: Design knob */
+.tool-inline-body { padding-top: var(--dz-toolwin-body-gap, 8px); }   /* v4.45: Design knob */
 .tool-dock-item-header {
   border-bottom: var(--fd-hairline-w, 1px) solid var(--fd-hairline);
   background: rgba(128, 128, 128, 0.22);
@@ -595,7 +595,7 @@ label.fs-presets-row { cursor: pointer; }
      instead of sliding underneath. It has to live in this shorthand — a
      separate padding-right rule in 20-tool-dock.css loses to it, which is
      exactly how the controls ended up running under the buttons. */
-  padding: var(--dz-toolwin-pad-top, 4px) calc(var(--dz-toolwin-pad-right, 8px) + var(--tool-actions-w, 0px)) var(--dz-toolwin-pad-bottom, 4px) var(--dz-toolwin-pad-left, 8px);
+  padding: var(--dz-toolwin-pad-top, 4px) calc(var(--dz-toolwin-pad-right, 8px) + var(--tool-actions-w, 0px)) var(--dz-toolwin-pad-bottom, 4px) var(--dz-toolwin-pad-left, 18px);
   border-bottom: var(--fd-hairline-w, 1px) solid var(--fd-hairline);
   background: var(--fd-navigator-bg);
   flex-shrink: 0;
@@ -1055,11 +1055,11 @@ input.fs-switch:checked::after { left: 15px; }
   border: 1px solid var(--fd-border);
   border-radius: 6px;
   background: var(--fd-overlay-subtle, var(--fd-overlay-light));
-  padding: var(--dz-prefs-pad-top, 12px) var(--dz-prefs-pad-side, 14px) var(--dz-prefs-pad-bottom, 13px);
-  margin-bottom: var(--dz-prefs-section-gap, 18px);
+  padding: var(--dz-prefs-pad-top, 12px) var(--dz-prefs-pad-side, 17px) var(--dz-prefs-pad-bottom, 14px);
+  margin-bottom: var(--dz-prefs-section-gap, 25px);
 }
 .prefs-general h3 {
-  margin: 0 0 var(--dz-prefs-title-gap, 10px);
+  margin: 0 0 var(--dz-prefs-title-gap, 15px);
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -1644,8 +1644,8 @@ input.fs-switch:checked::after { left: 15px; }
 .feedback-tool-wrap {
   display: flex; flex-direction: column; height: 100%; min-height: 0;
   /* v6.93: paddings + row gap are Design-panel knobs */
-  padding: var(--dz-fb-pad-top, 14px) var(--dz-fb-pad-side, 16px) var(--dz-fb-pad-bottom, 14px);
-  gap: var(--dz-fb-row-gap, 10px);
+  padding: var(--dz-fb-pad-top, 8px) var(--dz-fb-pad-side, 17px) var(--dz-fb-pad-bottom, 0px);
+  gap: var(--dz-fb-row-gap, 9px);
   overflow-y: auto;
   font-size: 12.5px; color: var(--fd-text);
 }
@@ -1689,16 +1689,16 @@ input.fs-switch:checked::after { left: 15px; }
 }
 .fb-input:focus { outline: none; border-color: var(--fd-accent); }
 .fb-who { color: var(--fd-text-muted); }
-.fb-who strong { color: var(--fd-text); margin-left: var(--dz-fb-name-gap, 5px); }
+.fb-who strong { color: var(--fd-text); margin-left: var(--dz-fb-name-gap, 13px); }
 .fb-signout {
-  margin-left: var(--dz-fb-edit-gap, 8px); background: none; border: none; cursor: pointer;
+  margin-left: var(--dz-fb-edit-gap, 15px); background: none; border: none; cursor: pointer;
   color: var(--fd-accent); font-size: 11.5px; padding: 0;
 }
 .fb-label { display: flex; flex-direction: column; gap: 4px; color: var(--fd-text-muted); }
-.fb-label-grow { flex: 1; min-height: 0; gap: var(--dz-fb-desc-gap, 4px); }
+.fb-label-grow { flex: 1; min-height: 0; gap: var(--dz-fb-desc-gap, 7px); }
 /* v6.92: "Type:" sits on one row with its dropdown (v6.94: the ? and its
    how-to text are gone — Derek: "that text is not needed"). */
-.fb-type-row { flex-direction: row; align-items: center; gap: var(--dz-fb-type-gap, 8px); }
+.fb-type-row { flex-direction: row; align-items: center; gap: var(--dz-fb-type-gap, 12px); }
 .fb-select {
   height: var(--dz-select-h, 28px); padding: 0 8px; align-self: flex-start; min-width: 140px;
   background: var(--fd-input-bg); color: var(--fd-text);
@@ -1733,7 +1733,7 @@ input.fs-switch:checked::after { left: 15px; }
      separates the two only while they share a row, and it is still the same
      Design knob. */
   display: flex; align-items: center; flex-wrap: wrap;
-  gap: var(--dz-fb-headrow-gap, 6px) var(--dz-fb-head-gap, 10px);
+  gap: var(--dz-fb-headrow-gap, 17px) var(--dz-fb-head-gap, 6px);
   font-size: 11.5px; font-weight: 600; color: var(--fd-text);
 }
 .fb-attach-head svg { color: var(--fd-text-muted); }
@@ -1742,7 +1742,7 @@ input.fs-switch:checked::after { left: 15px; }
 .fb-attach-title { margin-left: 0; }
 .fb-attach-btns {
   display: flex; align-items: center; flex-wrap: wrap;
-  gap: var(--dz-fb-btn-gap, 6px);
+  gap: var(--dz-fb-btn-gap, 0px);
 }
 .fb-file { display: none; }
 /* v6.89: several chips wrap in a row */

@@ -1065,7 +1065,7 @@ const SceneNavigator: React.FC<SceneNavigatorProps> = ({ editor, scrollContainer
                     className="scene-synopsis-field"
                     key={`${scene.id}:${scene.synopsis}`}
                     defaultValue={scene.synopsis}
-                    title={scene.synopsis || 'Add a synopsis for this scene'}
+                    title={scene.synopsis || 'Add a synopsis'}
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
                       e.stopPropagation();
@@ -1170,7 +1170,7 @@ const SceneNavigator: React.FC<SceneNavigatorProps> = ({ editor, scrollContainer
             <button
               ref={addBtnRef}
               className="dialog-btn dialog-btn-primary fs-pages-addpage"
-              title="Add a custom page — the script flows around it"
+              title="Add a custom page"
               onClick={() => { setAfterPageNum(''); setAddPageOpen((v) => !v); }}
             >+ Add Custom Page</button>
           )}
@@ -1851,7 +1851,7 @@ export function ScenesReorderControl() {
   return (
     <button
       className={`dialog-btn dialog-btn-primary scene-reorder-btn${reorder ? ' active' : ''}`}
-      title={reorder ? 'Exit reorder mode (discards unapplied order)' : 'Drag scenes into a new order'}
+      title={reorder ? 'Exit reorder mode' : 'Drag scenes into a new order'}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={() => setReorder(!reorder)}
     >Change Order</button>

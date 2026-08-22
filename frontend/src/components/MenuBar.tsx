@@ -170,7 +170,7 @@ export const IN_DEVELOPMENT = 'This feature is still in development.';
  * restored, these were the items left silent while the ones beside them
  * explained themselves, and "why is Bold gray" is the question they invite.
  */
-export const FORMAT_LOCKED = 'The script format locks this element’s formatting (Format ▸ Script Format).';
+export const FORMAT_LOCKED = '';
 
 
 interface MenuItem {
@@ -1444,7 +1444,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
              development" here would send Derek away from a switch he can
              throw in the next menu along. */
           tooltip: sceneNumbersVisible ? undefined
-            : 'Turn scene numbers on first (View ▸ Scene Numbers).',
+            : 'Turn scene numbers on first',
           note: sceneNumbersVisible ? undefined : 'scene numbers off',
         },
         // v1.34: Lock Pages is UNRELEASED — same Developer toggle as Help's.

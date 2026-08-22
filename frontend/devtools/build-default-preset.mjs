@@ -68,6 +68,28 @@ export const EXCLUDED_VIEWSTATE = {
      and merges it on every load. */
   workspaces: 'a second copy of parts.workspaces, and the stale one',
   workspaceOrder: 'ditto — the order lives with the workspaces it orders',
+  /* v7.76: the same three ride INSIDE this blob as well as in their own parts,
+     and it is the blob that actually seeds them. Dropping only the parts would
+     have left a fresh install with all 81 design overrides and all 141
+     helper-text overrides anyway — see EXCLUDED_PARTS for why none of them
+     should be there now. */
+  designVars: 'the token defaults are in designTokens.ts and the CSS now',
+  helperTextOverrides: 'the source strings say it themselves now',
+  helperTextHidden: 'only ever governed the Helper Text window\'s own list',
+};
+
+/** Whole PARTS that no longer belong in the shipped bundle (v7.76).
+ *
+ *  Derek: "take these settings and add them directly into the app code." Design
+ *  values are the tokens' own defaults now and helper text is the source
+ *  strings, so shipping them as SEEDED OVERRIDES as well would mean a fresh
+ *  install starts with 81 design overrides and 141 helper-text overrides that
+ *  say exactly what the code already says — "Reset Design" would report 81
+ *  changes that change nothing, and the helper-text MutationObserver would run
+ *  for a map with no effect. The code is the one place now. */
+export const EXCLUDED_PARTS = {
+  design: 'the token defaults in src/design/designTokens.ts and the CSS fallbacks',
+  helpertext: 'the source strings themselves',
 };
 
 /** The transform, as a function — check-v770 imports the two lists above to
@@ -92,14 +114,21 @@ export function buildDefaultPreset(bundle) {
     settings['opendraft:viewState'] = JSON.stringify(vs);
   }
 
+  const parts = { ...bundle.parts, settings };
+  for (const id of Object.keys(EXCLUDED_PARTS)) {
+    if (id in parts) { delete parts[id]; dropped.push(`parts.${id}`); }
+  }
+  const includes = (bundle.includes ?? []).filter((id) => !(id in EXCLUDED_PARTS));
+
   return {
     doc: {
       ...bundle,
+      includes,
       /* Stamped so a future reader knows which export this came from and that
          it went through here rather than being pasted in whole. */
       sourceExportedAt: bundle.exportedAt,
       builtBy: 'devtools/build-default-preset.mjs',
-      parts: { ...bundle.parts, settings },
+      parts,
     },
     dropped,
   };

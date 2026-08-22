@@ -390,7 +390,7 @@ const BeatPagesField: React.FC<{
 }> = ({ beat, onUpdate }) => (
   <label
     className="beat-card-pages"
-    title="Page estimate — how many pages this beat spans on the Outline Bar"
+    title="Page estimate"
     onClick={(e) => e.stopPropagation()}
   >
     {/* v2.20: never blank — a beat with no span can't be grabbed on the
@@ -1039,8 +1039,8 @@ const FreeBeatCard: React.FC<FreeBeatCardProps & {
       <button
         className={`beat-card-linkbtn${armed ? ' active' : ''}`}
         title={armed
-          ? 'Placing a connection — click this card\'s edge to set the starting point (Escape cancels)'
-          : 'Connect — click, then click this card\'s edge and the other card\'s edge'}
+          ? ''
+          : 'Connect beats'}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onToggleArm(beat.id); }}
       ><FaLink /></button>
@@ -1435,7 +1435,7 @@ export function OutlineBarCheck() {
     <label
       className={`beat-bar-check${isBarTab ? ' on' : ''}`}
       title={isBarTab
-        ? 'The Outline Bar shows this tab. To change that, switch to another tab and check the box there.'
+        ? 'The Outline Bar shows this tab'
         : 'Show this tab in the Outline Bar'}
     >
       <input
@@ -1528,7 +1528,7 @@ export function OutlineHeaderControls() {
           the TypewriterTool convention this popover had missed. */}
       {helpOpen && helpPos && createPortal(
         <div className="fs-help-pop" style={{ top: helpPos.top, left: helpPos.left }}>
-          {ht('Create sections (Act 1, Act 2…) and drop beats into them — or pick a Preset. The header tabs are separate arrangements of the SAME beats; "Show this outline in the outline bar" picks which tab the Outline Bar mirrors. Double-click a tab to rename it. Freeform turns the board into a mind map: drag cards anywhere; to connect two, push a card\'s link button, then drag from that card onto the other. Click a line and press Delete to remove it.')}
+          {ht('Create sections (Act 1, Act 2…) and drop beats into them. Create manually or pick a Preset.')}
         </div>,
         document.body,
       )}
@@ -1562,7 +1562,7 @@ export function useOutlineTabs(): ToolChromeTab[] {
     onSelect: () => switchOutlineTab(t.id),
     onRename: (name: string) => renameOutlineTab(t.id, name),
     onClose: outlineTabs.length > 1 ? () => { void confirmDeleteOutlineTab(t.id, t.name); } : undefined,
-    closeTitle: 'Delete this outline variation (beats are kept)',
+    closeTitle: 'Delete this outline variation. Beats are not deleted',
   }));
 }
 
@@ -1797,7 +1797,7 @@ const BeatBoard: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
               {outlineTabs.length > 1 && (
                 <button
                   className="beat-tab-x"
-                  title="Delete this outline variation (beats are kept)"
+                  title="Delete this outline variation. Beats are not deleted"
                   onClick={(e) => { e.stopPropagation(); void confirmDeleteOutlineTab(t.id, t.name); }}
                 >×</button>
               )}
@@ -1846,7 +1846,7 @@ const BeatBoard: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
                 {/* v6.61: Unsorted resizes from its right edge like any other
                     column — a column you can see but can't drag would be a
                     control that does nothing. */}
-                <div className="beat-column-resize-handle" title="Drag to change this column's width" onPointerDown={unsortedResizePointerDown} style={{ touchAction: 'none' }} />
+                <div className="beat-column-resize-handle" onPointerDown={unsortedResizePointerDown} style={{ touchAction: 'none' }} />
               </div>
             )}
             {sortedColumns.map((col) => {
@@ -1946,7 +1946,7 @@ const BeatColumnView: React.FC<BeatColumnViewProps> = ({
             title={isMaximized ? 'Restore section' : 'Maximize section'}
           >{isMaximized ? <ShrinkIcon /> : <ExpandIcon />}</button>
         )}
-        <button className="beat-column-delete" onClick={() => onDeleteColumn(col.id)} title="Delete section — its beats move to Unsorted, they are not deleted"><FaRegTrashAlt /></button>
+        <button className="beat-column-delete" onClick={() => onDeleteColumn(col.id)} title="Delete section. Beats are not deleted"><FaRegTrashAlt /></button>
       </div>
       <SortableContext items={colBeats.map((b) => b.id)} strategy={verticalListSortingStrategy}>
         <div ref={setDropRef} className={`beat-column-cards${isSingleColumn ? ' beat-column-cards-wrap' : ''}`}>
@@ -1957,7 +1957,7 @@ const BeatColumnView: React.FC<BeatColumnViewProps> = ({
       </SortableContext>
       <button className="beat-add-btn" onClick={() => onAddBeat('New Beat', col.id)}>+ Add Beat</button>
       {/* Column resize handle (right edge) */}
-      {!isSingleColumn && !isMaximized && <div className="beat-column-resize-handle" title="Drag to change this column's width" onPointerDown={colResizePointerDown} style={{ touchAction: 'none' }} />}
+      {!isSingleColumn && !isMaximized && <div className="beat-column-resize-handle" onPointerDown={colResizePointerDown} style={{ touchAction: 'none' }} />}
     </div>
   );
 };
