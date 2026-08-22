@@ -38,6 +38,12 @@ const KEEP_FILES = [
      would turn a true statement into a false one, which is the same
      reason the changelog and the About window are here. */
   'README.md',
+  /* v7.78: the updater doc explains why publishing has its OWN workflow rather
+     than living in release.yml — because release.yml is upstream's, and builds
+     Android, iOS, a Mac App Store target and a Docker image this product does
+     not ship. That provenance IS the reason; sweeping the name would leave the
+     decision looking arbitrary. */
+  'docs/UPDATING.md',
   'devtools/brand-sweep.mjs',           // this file names what it protects
   'frontend/devtools/check-brand.mjs',  // and so does its guard
   /* v7.37/v7.39 — DEVTOOLS THAT EXPLAIN WHAT THEY REPLACED. Each of these

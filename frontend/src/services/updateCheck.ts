@@ -27,10 +27,29 @@ export interface UpdateManifest {
   notes?: string;
   /** Optional ISO date, shown in the tooltip. */
   date?: string;
+  /**
+   * v7.78 — the per-machine installers, keyed the way Tauri's updater keys
+   * them: `darwin-aarch64`, `darwin-x86_64`, `windows-x86_64`, `linux-x86_64`.
+   *
+   * ONE FILE SERVES BOTH READERS, which is the point. Tauri's updater reads
+   * `version`, `notes`, `pub_date` and `platforms` and ignores everything else;
+   * this module reads `version`, `url`, `notes` and `date` and ignores
+   * `platforms` except to answer "is there something to install here". Two
+   * manifests would mean two version numbers, and a version number written
+   * twice is the subject of v7.62, v7.63 and half of §4.
+   */
+  platforms?: Record<string, { url: string; signature: string }>;
 }
 
 export type UpdateResult =
-  | { kind: 'update'; version: string; url: string; notes?: string; date?: string }
+  | {
+    kind: 'update';
+    version: string;
+    url: string;
+    notes?: string;
+    date?: string;
+    platforms?: Record<string, { url: string; signature: string }>;
+  }
   | { kind: 'current'; version: string }
   | { kind: 'error'; message: string };
 
@@ -77,7 +96,42 @@ export function parseManifest(raw: unknown): UpdateManifest | null {
     url,
     notes: typeof m.notes === 'string' ? m.notes : undefined,
     date: typeof m.date === 'string' ? m.date : undefined,
+    platforms: parsePlatforms(m.platforms),
   };
+}
+
+/**
+ * The `platforms` map, kept only where every entry is complete (v7.78).
+ *
+ * A half-written entry is worse than a missing one: it is what decides whether
+ * the app offers "Install and Restart" rather than a download link, so an entry
+ * with a url and no signature would put a button on screen that cannot finish.
+ * Same reason the url must be https — this file came off the internet, and
+ * `platforms[x].url` is handed to a downloader.
+ */
+function parsePlatforms(raw: unknown): Record<string, { url: string; signature: string }> | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const out: Record<string, { url: string; signature: string }> = {};
+  for (const [target, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== 'object') continue;
+    const v = value as Record<string, unknown>;
+    const url = typeof v.url === 'string' ? v.url.trim() : '';
+    const signature = typeof v.signature === 'string' ? v.signature.trim() : '';
+    if (!url || !signature || !/^https:\/\//i.test(url)) continue;
+    out[target] = { url, signature };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/** Does the release carry something THIS machine can install? (v7.78)
+ *
+ *  `target` is the manifest's own spelling — darwin-aarch64, windows-x86_64 —
+ *  which only the Rust side can supply; see updater_target in lib.rs for why
+ *  the webview cannot be asked. An unknown target answers false, which is the
+ *  answer that keeps a dead button off the screen. */
+export function hasInstallerFor(result: UpdateResult, target: string | null): boolean {
+  if (result.kind !== 'update' || !target) return false;
+  return Boolean(result.platforms?.[target]);
 }
 
 /** Decide from a manifest and the running version. Pure — the tests drive this. */
@@ -85,7 +139,9 @@ export function evaluateManifest(raw: unknown, current: string): UpdateResult {
   const m = parseManifest(raw);
   if (!m) return { kind: 'error', message: 'The update manifest could not be read.' };
   return compareVersions(m.version, current) > 0
-    ? { kind: 'update', version: m.version, url: m.url, notes: m.notes, date: m.date }
+    ? {
+      kind: 'update', version: m.version, url: m.url, notes: m.notes, date: m.date, platforms: m.platforms,
+    }
     : { kind: 'current', version: current };
 }
 

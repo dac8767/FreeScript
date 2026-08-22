@@ -932,6 +932,30 @@ async fn set_window_title(window: tauri::WebviewWindow, title: String) -> Result
     Ok(())
 }
 
+/// Which key in the update manifest's `platforms` map describes THIS machine.
+///
+/// v7.78. The frontend has to answer one question before it may offer an
+/// "Install and Restart" button: does the published release actually carry an
+/// artifact this computer can install? A button that offers to install a build
+/// that does not exist for the machine it is running on is the silent no-op
+/// this app treats as the cardinal sin, and the release matrix is genuinely
+/// uneven — an Apple Silicon Mac and an Intel Mac are two different downloads.
+///
+/// It has to come from Rust. The webview cannot tell: WebKit reports "Intel
+/// Mac OS X" in navigator.userAgent on Apple Silicon too, so asking the browser
+/// gets a confident wrong answer rather than no answer.
+///
+/// The spelling is Tauri's, not Rust's — the manifest keys are `darwin-*`,
+/// while std::env::consts::OS says "macos".
+#[tauri::command]
+fn updater_target() -> String {
+    let os = match std::env::consts::OS {
+        "macos" => "darwin",
+        other => other,
+    };
+    format!("{}-{}", os, std::env::consts::ARCH)
+}
+
 /// Open a URL in the user's default browser.
 #[tauri::command]
 fn open_url(url: String) -> Result<(), String> {
@@ -1171,6 +1195,8 @@ pub fn run() {
         // (WKWebView has no in-webview road to printing a generated PDF).
         .plugin(tauri_plugin_opener::init())
         // ── Asset protocol: serve local files for convertFileSrc() URLs ──
+        // (the updater/process plugins are registered further down — they are
+        //  desktop-only and go on behind a cfg, see `builder` below)
         .register_uri_scheme_protocol("asset", |ctx, request| {
             let uri = request.uri();
             let raw_path = uri.path();
@@ -1255,7 +1281,22 @@ pub fn run() {
             set_window_title,
             open_url,
             print_pdf_dialog,
+            updater_target,
         ]);
+
+        /* ── In-app updating (desktop only) ────────────────────────────
+           v7.78. Both plugins are behind #[cfg(desktop)] because they are
+           desktop-only crates — see the scoped dependency table in Cargo.toml.
+           Registering them here rather than in the all-platforms chain above
+           keeps that fact in one shape: the cfg on the dependency and the cfg
+           on the registration say the same thing in the same place.
+
+           The updater DOWNLOADS AND REPLACES THE BUNDLE; process supplies the
+           restart afterwards, which the updater deliberately does not do. */
+        #[cfg(desktop)]
+        let builder = builder
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            .plugin(tauri_plugin_process::init());
 
         // ── Native menu (desktop only) ────────────────────────────────
         // macOS: App menu + Edit menu (Cmd+C/V/X/A/Z) + Window menu.

@@ -16,7 +16,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   compareVersions, parseManifest, evaluateManifest, checkForUpdate,
-  shouldAnnounce, dismissVersion,
+  shouldAnnounce, dismissVersion, hasInstallerFor,
 } from './updateCheck';
 
 describe('compareVersions', () => {
@@ -178,5 +178,74 @@ describe('shouldAnnounce — dismissing one version must not silence the next', 
   it('and never announces "current" or an error', () => {
     expect(shouldAnnounce({ kind: 'current', version: '7.62' })).toBe(false);
     expect(shouldAnnounce({ kind: 'error', message: 'nope' })).toBe(false);
+  });
+});
+
+/* ── v7.78: the installers, and the button they decide ────────────────────
+   The manifest gained a `platforms` map so ONE file can serve both the banner
+   and Tauri's own updater. What is worth pinning is not the shape but the
+   DECISION it drives: hasInstallerFor is the only thing standing between a
+   writer and an "Install and Restart" button that cannot install anything. */
+describe('platforms, and whether this machine can install', () => {
+  const withPlatforms = (platforms: unknown) => ({
+    version: '7.79', url: 'https://x.test/r', platforms,
+  });
+  const ARM = { url: 'https://x.test/a.tar.gz', signature: 'sig' };
+
+  it('keeps a complete entry', () => {
+    const m = parseManifest(withPlatforms({ 'darwin-aarch64': ARM }));
+    expect(m?.platforms?.['darwin-aarch64']).toEqual(ARM);
+  });
+
+  /* A url with no signature is the dangerous shape: it reads as installable
+     and dies at the last step, after the download, having verified nothing. */
+  it('drops an entry with no signature', () => {
+    const m = parseManifest(withPlatforms({ 'darwin-aarch64': { url: 'https://x.test/a' } }));
+    expect(m?.platforms).toBeUndefined();
+  });
+
+  it('drops an entry whose url is not https — it is handed to a downloader', () => {
+    const m = parseManifest(withPlatforms({ 'darwin-aarch64': { url: 'http://x.test/a', signature: 's' } }));
+    expect(m?.platforms).toBeUndefined();
+  });
+
+  it('a manifest with no platforms at all still parses — that is the notify-only release', () => {
+    const m = parseManifest({ version: '7.79', url: 'https://x.test/r' });
+    expect(m?.version).toBe('7.79');
+    expect(m?.platforms).toBeUndefined();
+  });
+
+  it('carries platforms through evaluateManifest onto the result', () => {
+    const r = evaluateManifest(withPlatforms({ 'darwin-aarch64': ARM }), '7.78');
+    expect(r.kind).toBe('update');
+    expect(hasInstallerFor(r, 'darwin-aarch64')).toBe(true);
+  });
+
+  it('says no for a machine the release has no artifact for', () => {
+    const r = evaluateManifest(withPlatforms({ 'darwin-aarch64': ARM }), '7.78');
+    expect(hasInstallerFor(r, 'windows-x86_64')).toBe(false);
+  });
+
+  /* null is what updaterTarget answers in a browser, and off the desktop there
+     is nothing to install into — this is the assertion that keeps the button
+     out of the web build. */
+  it('says no when the target is unknown', () => {
+    const r = evaluateManifest(withPlatforms({ 'darwin-aarch64': ARM }), '7.78');
+    expect(hasInstallerFor(r, null)).toBe(false);
+  });
+
+  it('says no when there is no update to install', () => {
+    expect(hasInstallerFor({ kind: 'current', version: '7.78' }, 'darwin-aarch64')).toBe(false);
+    expect(hasInstallerFor({ kind: 'error', message: 'x' }, 'darwin-aarch64')).toBe(false);
+  });
+
+  /* THE v7.63 TRAP, one file along. Tauri parses the manifest version with the
+     semver crate, which rejects two-component "7.79" — so the published
+     manifest carries 7.79.0 while APP_VERSION is 7.79. The banner's comparator
+     has to call those equal, or every install would be offered forever. */
+  it('treats the manifest\'s semver form as equal to APP_VERSION\'s short form', () => {
+    expect(compareVersions('7.79.0', '7.79')).toBe(0);
+    expect(evaluateManifest({ version: '7.79.0', url: 'https://x.test/r' }, '7.79').kind).toBe('current');
+    expect(evaluateManifest({ version: '7.80.0', url: 'https://x.test/r' }, '7.79').kind).toBe('update');
   });
 });

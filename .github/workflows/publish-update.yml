@@ -1,0 +1,229 @@
+# Publish a desktop release, and the manifest every running copy polls.
+#
+# v7.78. This is the pipeline the UPDATER needs, and it is a separate workflow
+# from release.yml on purpose. release.yml is inherited from upstream OpenDraft:
+# it builds Android, iOS, a Mac App Store target and a Docker image, and its
+# publish job verifies seven assets this product does not ship. Bending it into
+# shape is its own job. This one does exactly what in-app updating requires,
+# and nothing else, so it can be read in one sitting.
+#
+# WHY IT PUBLISHES SOMEWHERE ELSE. The source repo is private. raw.github-
+# usercontent.com will not serve a file from a private repo without a token,
+# and a token shipped inside the app is a token anybody has — which is the whole
+# reason services/updateCheck.ts points at a separate public repo. So the
+# artifacts and the manifest go to dac8767/ScriptCraft-releases, and that needs
+# a token with write access to it: GITHUB_TOKEN is scoped to THIS repo only.
+#
+# ── What must exist before this can run ──────────────────────────────────────
+#
+#   dac8767/ScriptCraft-releases           a PUBLIC repo, holding latest.json
+#                                          on main plus the installers on its
+#                                          Releases
+#
+#   secrets.TAURI_SIGNING_PRIVATE_KEY      from `npm run tauri signer generate`
+#   secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD   its passphrase, if one was set
+#                                          (see src-tauri/UPDATER.md — losing
+#                                          this key means no installed copy can
+#                                          ever accept another update)
+#
+#   secrets.RELEASES_REPO_TOKEN            a fine-grained PAT with Contents:
+#                                          write on ScriptCraft-releases only
+#
+#   secrets.APPLE_*                        optional. Without them the macOS
+#                                          build is UNSIGNED — it still updates
+#                                          itself, but Gatekeeper will refuse
+#                                          the first download. See §6 of
+#                                          CLAUDE.md.
+name: Publish Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish, e.g. v7.78'
+        required: true
+      prerelease:
+        description: 'Mark the release as a pre-release'
+        type: boolean
+        default: false
+
+# Deliberately NOT `on: push: tags` — release.yml already fires on those, and
+# two workflows building the same tag would race each other for the release.
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Gate first, on one cheap runner ────────────────────────────────────────
+  # A build matrix that takes half an hour and then cannot publish because the
+  # signing key was never configured is half an hour nobody gets back.
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: npm ci --prefix frontend
+      - name: The updater is fully configured
+        # --release turns the "no signing key yet" note into a hard failure.
+        # Everything it checks is a file in the repo; nothing here needs a
+        # browser or a build.
+        run: node frontend/devtools/check-updater-config.mjs --release
+      - name: The tag matches the version in the tree
+        run: |
+          TAG="${{ inputs.tag }}"
+          APP=$(node -e "process.stdout.write(require('./frontend/devtools/sync-version.mjs').readAppVersion())" 2>/dev/null \
+                || grep -oE "APP_VERSION = '[^']+'" frontend/src/data/changelog.ts | grep -oE "[0-9.]+")
+          case "$TAG" in
+            "v$APP"|"v$APP".0|"$APP") ;;
+            *) echo "::error::tag $TAG does not match app version $APP"; exit 1 ;;
+          esac
+
+  build:
+    needs: preflight
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-26
+            target: aarch64-apple-darwin
+            label: macOS-arm64
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            label: Windows-x64
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            label: Linux-x64
+    runs-on: ${{ matrix.platform }}
+    name: Build (${{ matrix.label }})
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Linux build dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            librsvg2-dev patchelf libayatana-appindicator3-dev
+
+      - run: npm ci --prefix frontend
+
+      - name: Build with updater artifacts
+        # The overlay is what turns signing on — see src-tauri/UPDATER.md for
+        # why it is not in tauri.conf.json. Every artifact comes out with a
+        # detached .sig beside it, and the app refuses anything unsigned.
+        run: >
+          npx --prefix frontend tauri build
+          --target ${{ matrix.target }}
+          --config src-tauri/tauri.release.conf.json
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Apple's signing, which is a different question from Tauri's — one
+          # says "will macOS open this", the other "is this really ours".
+          # Absent secrets leave the bundle unsigned rather than failing.
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+
+      - name: Collect the installers and their signatures
+        shell: bash
+        run: |
+          mkdir -p dist-update
+          BUNDLE="src-tauri/target/${{ matrix.target }}/release/bundle"
+          # The updater artifacts and the plain installers are both wanted: the
+          # first are what the app downloads, the second what a person does.
+          # -print0/-d '' so a space in a filename cannot split one into two.
+          find "$BUNDLE" \( \
+            -name '*.app.tar.gz' -o -name '*.app.tar.gz.sig' \
+            -o -name '*-setup.exe' -o -name '*-setup.exe.zip' -o -name '*-setup.exe.zip.sig' \
+            -o -name '*.msi' -o -name '*.msi.zip' -o -name '*.msi.zip.sig' \
+            -o -name '*.AppImage' -o -name '*.AppImage.tar.gz' -o -name '*.AppImage.tar.gz.sig' \
+            -o -name '*.dmg' -o -name '*.deb' \
+          \) -print0 | while IFS= read -r -d '' f; do cp "$f" dist-update/; done
+          ls -la dist-update
+
+      - uses: actions/upload-artifact@v5
+        with:
+          # The target triple travels in the NAME because the manifest
+          # generator reads the architecture off the path, and refuses to guess
+          # when it cannot — a macOS artifact labelled with the wrong chip is an
+          # update that silently cannot run on the machine that accepted it.
+          name: update-${{ matrix.target }}
+          path: dist-update/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Publish to ScriptCraft-releases
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: npm ci --prefix frontend
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: update-*
+          path: artifacts
+
+      # download-artifact flattens each artifact into artifacts/<name>/, and
+      # <name> carries the target triple — which is exactly what the generator
+      # reads to tell an Apple Silicon build from an Intel one.
+      - name: Build latest.json from what was actually built
+        run: |
+          node frontend/devtools/build-release-manifest.mjs \
+            --artifacts artifacts \
+            --base-url "https://github.com/dac8767/ScriptCraft-releases/releases/download/${{ inputs.tag }}" \
+            --url "https://github.com/dac8767/ScriptCraft-releases/releases/tag/${{ inputs.tag }}" \
+            -o latest.json
+          cat latest.json
+
+      - name: Publish the release and the manifest
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+          REPO: dac8767/ScriptCraft-releases
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          FLAGS=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then FLAGS="--prerelease"; fi
+
+          # The RELEASE first: latest.json points at these urls, so a manifest
+          # published before the files it names would send every running copy
+          # to a 404 for as long as the gap lasted.
+          gh release create "$TAG" --repo "$REPO" --title "ScriptCraft $TAG" \
+            --notes "$(node -e "
+              const l=require('./frontend/src/data/changelog.json');
+              const v='$TAG'.replace(/^v/,'');
+              const e=l.find(x=>x.version===v);
+              process.stdout.write((e?.changes||[]).map(c=>'- '+c).join('\n')||'ScriptCraft $TAG');
+            ")" $FLAGS || echo "release already exists — adding assets to it"
+          find artifacts -type f -print0 \
+            | xargs -0 gh release upload "$TAG" --repo "$REPO" --clobber
+
+          # …and only THEN the manifest, which is what makes the update live.
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" releases-repo
+          cp latest.json releases-repo/latest.json
+          cd releases-repo
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest.json
+          git commit -m "ScriptCraft $TAG" || { echo "manifest unchanged"; exit 0; }
+          git push

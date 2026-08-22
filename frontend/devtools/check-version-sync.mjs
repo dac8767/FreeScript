@@ -91,7 +91,22 @@ const manifest = JSON.parse(
   execFileSync('node', [fileURLToPath(new URL('build-release-manifest.mjs', import.meta.url))],
     { encoding: 'utf8' }),
 );
-ok(manifest.version === app, 'latest.json would be published with APP_VERSION', manifest.version);
+/* v7.78: SEMVER, not APP_VERSION verbatim. Tauri's updater now reads this same
+   file and parses the version with the `semver` crate, which rejects a
+   two-component "7.78" — the identical trap that stopped the app launching in
+   v7.63, one file along. Both halves are asserted, because either alone lets
+   the wrong thing through: the shape (three components, so Tauri can parse it)
+   AND that it is derived from APP_VERSION (so it is still one number in one
+   place, which is what this whole file is about). */
+ok(/^\d+\.\d+\.\d+$/.test(manifest.version ?? ''),
+  'latest.json carries a full semver version, which Tauri requires', manifest.version);
+ok(manifest.version === toSemver(app),
+  'latest.json would be published with APP_VERSION', `${manifest.version} vs ${toSemver(app)}`);
+/* The third claim — that the APP reads 7.78.0 as equal to its own 7.78, or the
+   banner would offer the same install forever — lives in
+   services/updateCheck.test.ts, next to the comparator that makes it true.
+   Re-implementing compareVersions here to assert it would be the second copy
+   this file exists to prevent. */
 /* parseManifest() in services/updateCheck.ts drops anything that is not https
    — a manifest url ends up in an anchor the user is invited to click. A
    generator that emits a url the app then refuses is a silent dead feature. */

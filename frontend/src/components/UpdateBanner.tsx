@@ -6,8 +6,16 @@
  * three-week-old build and reporting bugs that were fixed a fortnight ago.
  * This is the smallest thing that stops that.
  *
- * NOTIFY ONLY, on purpose. See services/updateCheck.ts for why installing waits
- * for a Developer ID.
+ * v7.78: it INSTALLS now, where it can. Derek asked for the full thing, having
+ * been told the risk — a macOS bundle that replaces itself while still unsigned
+ * is the one failure a tester cannot walk back. The mitigation is that the
+ * install path is never the only path: the Download link stays on the banner,
+ * and the button that installs is rendered ONLY when the published manifest
+ * carries an artifact for this exact machine (hasInstallerFor, whose target
+ * comes from Rust because the webview cannot tell an Apple Silicon Mac from an
+ * Intel one). Everywhere else — the browser, a platform with no artifact, a
+ * build with no signing key — this is exactly the v7.62 banner it has always
+ * been. See services/desktopUpdater.ts.
  *
  * TWO CHECKS, TWO DIFFERENT MANNERS — the distinction is the whole design:
  *
@@ -25,9 +33,10 @@ import React from 'react';
 import { FaTimes, FaArrowUp } from 'react-icons/fa';
 import { APP_VERSION } from '../data/changelog';
 import {
-  checkForUpdate, dismissVersion, shouldAnnounce,
+  checkForUpdate, dismissVersion, shouldAnnounce, hasInstallerFor,
   type UpdateResult,
 } from '../services/updateCheck';
+import { installUpdate, updaterTarget, type InstallProgress } from '../services/desktopUpdater';
 import { showToast } from './Toast';
 
 /** Wait for the app to finish opening before touching the network. */
@@ -46,6 +55,10 @@ export function requestUpdateCheck(): void {
 export default function UpdateBanner() {
   const [found, setFound] = React.useState<UpdateResult | null>(null);
   const [busy, setBusy] = React.useState(false);
+  /** This machine's manifest key, from Rust. null off the desktop — and null is
+   *  what keeps the Install button off the screen everywhere it cannot work. */
+  const [target, setTarget] = React.useState<string | null>(null);
+  const [progress, setProgress] = React.useState<InstallProgress | null>(null);
 
   /** `announce` false = the automatic pass: good news only. */
   const run = React.useCallback(async (announce: boolean) => {
@@ -67,14 +80,46 @@ export default function UpdateBanner() {
     manualCheckHandler = () => { void run(true); };
     const first = setTimeout(() => { void run(false); }, STARTUP_DELAY_MS);
     const repeat = setInterval(() => { void run(false); }, RECHECK_MS);
+    /* Asked once, on mount, not per render — it is a constant for the life of
+       the process and it costs an IPC round trip. */
+    let alive = true;
+    void updaterTarget().then((t) => { if (alive) setTarget(t); });
     return () => {
+      alive = false;
       manualCheckHandler = null;
       clearTimeout(first);
       clearInterval(repeat);
     };
   }, [run]);
 
+  /* v7.78: install, with every failure landing back on the download link.
+     `installing` is a separate state from `busy` ("checking"), and it is what
+     DISABLES the button — downloadAndInstall is not re-entrant, and a second
+     press would leave two downloads fighting over one bundle. The early return
+     below is belt to that braces: unreachable through the DOM while the button
+     is disabled, and the guard if this is ever called any other way.
+     Break-tested — removing `disabled` is what turns the assertion red. */
+  const installing = progress !== null;
+  const doInstall = React.useCallback(async () => {
+    if (installing) return;
+    setProgress({ downloaded: 0, total: 0 });
+    const outcome = await installUpdate((p) => setProgress(p));
+    /* 'installed' never gets here — relaunch() does not return. Reaching this
+       line at all means it failed, so the banner comes back with its link. */
+    setProgress(null);
+    if (outcome.kind === 'failed') showToast(outcome.message, 'error');
+  }, [installing]);
+
   if (!found || found.kind !== 'update') return null;
+
+  /* THE ONE CONDITION. Not "are we on the desktop" — that would offer to
+     install a build the release does not carry for this machine. The manifest
+     must name an artifact for this exact target, and the target comes from
+     Rust because WebKit reports Intel on Apple Silicon. */
+  const canInstall = hasInstallerFor(found, target);
+  const pct = progress && progress.total > 0
+    ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
+    : null;
 
   return (
     <div className="update-banner" role="status">
@@ -84,9 +129,25 @@ export default function UpdateBanner() {
         {found.notes ? ` — ${found.notes}` : ''}
         <span className="update-banner-have"> (you have {APP_VERSION})</span>
       </span>
-      {/* A LINK, not a button that pretends to install. It opens the release
-          page in the browser; the writer drags the new app over the old one,
-          which is the macOS idiom anyway. */}
+      {canInstall && (
+        <button
+          className="update-banner-btn update-banner-install"
+          disabled={installing}
+          title={installing
+            ? 'Downloading the new version'
+            : 'Download it, replace this copy, and reopen. Your work is saved first.'}
+          onClick={() => { void doInstall(); }}
+        >
+          {installing
+            ? (pct === null ? 'Downloading…' : `Downloading ${pct}%`)
+            : 'Install and Restart'}
+        </button>
+      )}
+      {/* The link NEVER goes away, even beside the install button. It is the
+          way out of every failure the install path can hit, and on an unsigned
+          build it is also the way a writer keeps control of what replaces
+          their app. It opens the release page; dragging the new app over the
+          old one is the macOS idiom anyway. */}
       <a
         className="update-banner-btn"
         href={found.url}
@@ -98,6 +159,7 @@ export default function UpdateBanner() {
         className="update-banner-x"
         title="Not now. Ask again when there's a newer version"
         aria-label="Dismiss"
+        disabled={installing}
         onClick={() => { dismissVersion(found.version); setFound(null); }}
       ><FaTimes /></button>
       {busy && <span className="update-banner-busy">Checking…</span>}

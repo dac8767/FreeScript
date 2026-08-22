@@ -120,6 +120,8 @@
           "path": "$APPDATA/print/**"
         }
       ]
-    }
+    },
+    "updater:default",
+    "process:allow-restart"
   ]
 }

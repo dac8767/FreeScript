@@ -1,5 +1,16 @@
 [
   {
+    "version": "7.78",
+    "date": "2026-08-22",
+    "changes": [
+      "The app can install its own updates now. When a new version is out, the banner offers \"Install and Restart\" \u2014 it downloads the build, checks the signature, replaces this copy and reopens. The Download link stays right beside it, and it is still the only thing you get if anything at all goes wrong.",
+      "It only offers to install when the release really has a build for your machine. The button is decided by what was actually published for your exact architecture, not by \"you're on a desktop\" \u2014 an Apple Silicon Mac and an Intel Mac are two different downloads, and offering the wrong one would hand you something that cannot run. Your machine's identity comes from the Rust side, because Safari reports \"Intel\" on Apple Silicon and would answer confidently and wrongly.",
+      "Found while wiring it: the update check has been pointing at a repository that does not exist since v7.62, so \"Check for Updates\" has always answered \"the update server answered 404\". The automatic check swallows errors by design, so nothing ever surfaced it. Three things still have to be set up before an update can reach anyone \u2014 the public releases repo, the signing key, and a token \u2014 and docs/UPDATING.md lists all three.",
+      "One manifest serves both the banner and the installer, so there is still one version number in one place. A new Publish Update workflow builds all three platforms, generates that file from what was actually built, and publishes the installers before the manifest that names them.",
+      "The suite says out loud that the signing key is not set up yet, on every run, and refuses to let a release be cut without it."
+    ]
+  },
+  {
     "version": "7.77",
     "date": "2026-08-22",
     "changes": [

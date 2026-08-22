@@ -1021,6 +1021,24 @@
   "icon": "FaDownload"
  },
  {
+  "text": "Download it, replace this copy, and reopen. Your work is saved first.",
+  "kind": "tooltip",
+  "sites": 1,
+  "area": "Everything Else",
+  "where": [
+   "components/UpdateBanner.tsx"
+  ]
+ },
+ {
+  "text": "Downloading the new version",
+  "kind": "tooltip",
+  "sites": 1,
+  "area": "Everything Else",
+  "where": [
+   "components/UpdateBanner.tsx"
+  ]
+ },
+ {
   "text": "Drag horizontally: change item spacing. Drag vertically: change bar size.",
   "kind": "tooltip",
   "sites": 1,

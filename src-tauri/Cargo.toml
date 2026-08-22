@@ -3,7 +3,7 @@
 # BINARY, so "Hide freedraft" lingered despite productName being ScriptCraft.
 # The com.freedraft.app identifier stays: identifiers persist user data.
 name = "scriptcraft"
-version = "7.77.0"
+version = "7.78.0"
 description = "ScriptCraft - Professional Screenwriting Application"
 authors = ["ScriptCraft"]
 edition = "2021"
@@ -32,6 +32,20 @@ tauri-plugin-dialog = "=2.7.0"
 tauri-plugin-opener = "=2.5.4"
 reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
 percent-encoding = "2"
+
+# v7.78, in-app updating — DESKTOP ONLY, and the scoping is not optional.
+# tauri-plugin-updater supports Windows, macOS and Linux; it does not build for
+# Android or iOS, and this repo's CI still builds both. Left in the plain
+# [dependencies] table it would break those jobs on a feature they can never
+# use — the mobile stores do their own updating.
+# Versions pinned exactly, for the same reason as the opener note above:
+# updater 2.10.1 requires tauri ^2.10 and process 2.3.1 requires ^2.8.2, both
+# satisfied by the =2.10.3 pin, and neither is free to float past it.
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "=2.10.1"
+# The restart that follows an install. A separate crate in Tauri v2 because the
+# updater swaps the bundle on disk and stops there — it relaunches nothing.
+tauri-plugin-process = "=2.3.1"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"

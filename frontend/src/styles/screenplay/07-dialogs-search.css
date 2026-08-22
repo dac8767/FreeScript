@@ -47,6 +47,29 @@
   white-space: nowrap;
 }
 .update-banner-btn:hover { filter: brightness(1.1); }
+/* v7.78: two buttons now, and they must not read as the same offer. Install is
+   the filled one (it is what most people want); Download drops to an outline
+   beside it so the pair has one obvious action rather than two competing ones.
+   Download alone — every browser, and any platform the release has no artifact
+   for — is still the filled button, because then it IS the action. */
+.update-banner-install ~ .update-banner-btn {
+  background: transparent;
+  color: var(--fd-accent);
+}
+.update-banner-install {
+  cursor: pointer;
+  font-family: inherit;
+  /* Fixed width across "Install and Restart" → "Downloading 7%" → "100%", or
+     the Download button beside it shuffles sideways on every progress tick. */
+  min-width: 132px;
+  text-align: center;
+}
+.update-banner-install:disabled {
+  cursor: default;
+  filter: none;
+  opacity: 0.85;
+}
+.update-banner-x:disabled { opacity: 0.4; cursor: default; }
 .update-banner-x {
   display: inline-flex;
   border: none;
