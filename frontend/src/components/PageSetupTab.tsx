@@ -24,6 +24,7 @@ import { SYSTEM_TEMPLATE_LIST, useFormattingTemplateStore } from '../stores/form
 import type { FormattingTemplate } from '../stores/formattingTypes';
 import { INDUSTRY_STANDARD_ID } from '../stores/formattingTypes';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useEditorStore } from '../stores/editorStore';
 import TemplateEditorDialog from './TemplateEditorDialog';
 import PageSetupDialog from './PageSetupDialog';
 import TemplateCard from './TemplateCard';
@@ -44,10 +45,29 @@ import { showToast } from './Toast';
    The built-ins are why the layout is stored in the STORE and not on the
    template: the six system templates are immutable constants, so writing to
    one through updateTemplate() would be a silent no-op. */
-function TemplatePageSetup({ t, onClose }: { t: FormattingTemplate; onClose: () => void }) {
+/* v7.77, Derek: "the grayed out sections on the ruler (which shows the margins)
+   should adjust when the page settings and margin sizes adjust."
+
+   The rulers were fine. Measured across every page setting — left/right
+   margins, top/bottom margins and page size — the shaded bands track the
+   document's layout exactly, at every zoom. What did not move was the PAGE:
+   saving here wrote the template's stored layout and stopped, so editing the
+   margins of the template your script is using changed nothing on screen and
+   still said "Page setup saved". Nothing to see is indistinguishable from a
+   ruler that does not follow, and it is the silent no-op the v7.10 comment on
+   useApplyTemplate warns about — it just moved one door along, from choosing a
+   template to editing the one already chosen.
+
+   So: if this IS the script's template, its measurements go onto the script,
+   through the same one line applyTemplate uses. If it is any other template,
+   the script must NOT move — a page setup you edited for a format you are not
+   writing in has no business reflowing the draft — and the toast says which of
+   the two happened rather than reporting the same success for both. */
+function TemplatePageSetup({ t, isActive, onClose }: { t: FormattingTemplate; isActive: boolean; onClose: () => void }) {
   const getLayout = useFormattingTemplateStore((s) => s.getTemplatePageLayout);
   const getBase = useFormattingTemplateStore((s) => s.getTemplateBasePageLayout);
   const setLayout = useFormattingTemplateStore((s) => s.setTemplatePageLayout);
+  const setPageLayout = useEditorStore((s) => s.setPageLayout);
   // Subscribed so Reset Default in another surface re-renders this one.
   useFormattingTemplateStore((s) => s.templatePageLayouts[t.id]);
   return (
@@ -61,7 +81,12 @@ function TemplatePageSetup({ t, onClose }: { t: FormattingTemplate; onClose: () 
             resetTo={getBase(t.id)}
             onSave={(next) => {
               setLayout(t.id, next);
-              showToast(`Page setup saved for ${t.name}.`, 'success');
+              if (isActive) {
+                setPageLayout(next);
+                showToast(`Page setup saved for ${t.name}, and applied to this script.`, 'success');
+              } else {
+                showToast(`Page setup saved for ${t.name}. New scripts will use it.`, 'success');
+              }
             }}
             onClose={onClose}
           />
@@ -275,7 +300,13 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
 
       {conflictDialog}
 
-      {viewing && <TemplatePageSetup t={viewing} onClose={() => setViewing(null)} />}
+      {viewing && (
+        <TemplatePageSetup
+          t={viewing}
+          isActive={viewing.id === activeId}
+          onClose={() => setViewing(null)}
+        />
+      )}
 
       {editing && (
         <TemplateEditorDialog

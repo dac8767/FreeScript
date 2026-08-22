@@ -1,5 +1,13 @@
 [
   {
+    "version": "7.77",
+    "date": "2026-08-22",
+    "changes": [
+      "Fix: editing a template's page setup now moves the script. Settings \u25b8 Page Setup \u25b8 [a row] \u25b8 View gives you a full page of margin fields, and pressing Apply used to save them to the template and stop there \u2014 so if you edited the margins of the template your script is already using, nothing on the page moved, the ruler's grey bands stayed where they were, and it still said \"Page setup saved\". Now, when it is the template this script uses, the measurements go onto the script the same way choosing a template does. A template you are NOT writing in still leaves the draft alone, and the message says which of the two just happened.",
+      "The rulers themselves were fine. The grey margin bands were measured off the canvas against every page setting there is \u2014 left and right margins, top and bottom margins, and page size \u2014 and every one of them tracks, at every zoom. They had nothing to follow because the page was not moving."
+    ]
+  },
+  {
     "version": "7.76",
     "date": "2026-08-22",
     "changes": [
