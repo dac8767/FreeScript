@@ -64,7 +64,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-      - run: npm ci --prefix frontend
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
       - name: The updater is fully configured
         # --release turns the "no signing key yet" note into a hard failure.
         # Everything it checks is a file in the repo; nothing here needs a
@@ -72,9 +73,16 @@ jobs:
         run: node frontend/devtools/check-updater-config.mjs --release
       - name: The tag matches the version in the tree
         run: |
+          set -euo pipefail
           TAG="${{ inputs.tag }}"
-          APP=$(node -e "process.stdout.write(require('./frontend/devtools/sync-version.mjs').readAppVersion())" 2>/dev/null \
-                || grep -oE "APP_VERSION = '[^']+'" frontend/src/data/changelog.ts | grep -oE "[0-9.]+")
+          # Read APP_VERSION straight out of the source of truth. The first cut
+          # here called require() on sync-version.mjs — an ES module, so it
+          # always threw, and the answer only ever came from the `||` fallback.
+          # A check that works because its first branch reliably fails is one
+          # nobody can reason about the day it stops failing.
+          APP=$(sed -n "s/.*APP_VERSION = '\([^']*\)'.*/\1/p" frontend/src/data/changelog.ts | head -1)
+          if [ -z "$APP" ]; then echo "::error::could not read APP_VERSION"; exit 1; fi
+          echo "tag=$TAG  APP_VERSION=$APP"
           case "$TAG" in
             "v$APP"|"v$APP".0|"$APP") ;;
             *) echo "::error::tag $TAG does not match app version $APP"; exit 1 ;;
@@ -114,19 +122,41 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
-            librsvg2-dev patchelf libayatana-appindicator3-dev
+          # The exact list release.yml already builds Linux with. It had been
+          # written from memory here, with libayatana-appindicator3-dev in place
+          # of libappindicator3-dev — a substitution that may well work and has
+          # never been proven on this runner, which is not a thing to discover
+          # inside a three-platform matrix.
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
 
-      - run: npm ci --prefix frontend
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
 
       - name: Build with updater artifacts
         # The overlay is what turns signing on — see src-tauri/UPDATER.md for
         # why it is not in tauri.conf.json. Every artifact comes out with a
         # detached .sig beside it, and the app refuses anything unsigned.
-        run: >
-          npx --prefix frontend tauri build
-          --target ${{ matrix.target }}
-          --config src-tauri/tauri.release.conf.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          # AN EMPTY SIGNING IDENTITY IS NOT THE SAME AS NONE. A secret that
+          # does not exist arrives as "", and Apple's four are not configured
+          # yet (§6 of CLAUDE.md — the Developer ID is still open), so every
+          # one of them is "" on this runner. Rather than trust that the
+          # bundler reads "" as "do not sign", unset them — which is exactly
+          # what build-desktop.sh --local already does, and it does it because
+          # this bit them once already.
+          if [ -z "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            unset APPLE_SIGNING_IDENTITY APPLE_ID APPLE_TEAM_ID APPLE_PASSWORD
+            echo "no Apple identity configured — building UNSIGNED"
+          fi
+          npx --prefix frontend tauri build \
+            --target ${{ matrix.target }} \
+            --config src-tauri/tauri.release.conf.json
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -176,7 +206,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-      - run: npm ci --prefix frontend
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
 
       - uses: actions/download-artifact@v5
         with:
