@@ -106,11 +106,21 @@ function cap(line) {
    --mac-target, not a default. */
 const TARGET_BY_EXT = [
   [/\.app\.tar\.gz$/, macTargets],
-  // Windows: NSIS is what this app bundles (see bundle.windows.nsis).
-  [/-setup\.exe\.zip$|\.nsis\.zip$/, () => ['windows-x86_64']],
-  [/\.msi\.zip$/, () => ['windows-x86_64']],
+  /* Windows: THE NSIS INSTALLER ITSELF, not a zip of it.
+     v7.80: these three were written in Tauri v1's shapes — `-setup.exe.zip`,
+     `.msi.zip`, `.AppImage.tar.gz` — and v2 does not produce any of them. It
+     wraps only macOS (`.app.tar.gz`); every other platform's updater artifact
+     is the installer with a detached `.sig` beside it. So the first real run
+     matched macOS and silently found nothing for the other two: a manifest with
+     one platform in it, which is not an error anywhere — the app just quietly
+     offers Windows and Linux the download link forever.
+     NSIS and not `.msi`, deliberately: both are built and both would claim
+     windows-x86_64, and NSIS is the one `bundle.windows.nsis` configures and
+     the one `plugins.updater.windows.installMode` describes. The `.msi` still
+     ships on the release for people who want it; it is just not the update. */
+  [/-setup\.exe$/, () => ['windows-x86_64']],
   // Linux: AppImage is the only self-updating format Tauri supports.
-  [/\.AppImage\.tar\.gz$/, () => ['linux-x86_64']],
+  [/\.AppImage$/, () => ['linux-x86_64']],
 ];
 
 function macTargets(path) {

@@ -209,11 +209,16 @@ jobs:
           # The updater artifacts and the plain installers are both wanted: the
           # first are what the app downloads, the second what a person does.
           # -print0/-d '' so a space in a filename cannot split one into two.
+          # v7.80: the .sig names were v1's (`-setup.exe.zip.sig`,
+          # `.AppImage.tar.gz.sig`). Tauri v2 signs the installers themselves,
+          # so those globs matched nothing and Windows' and Linux' signatures
+          # were never even uploaded — which is why the first manifest came out
+          # with only macOS in it.
           find "$BUNDLE" \( \
             -name '*.app.tar.gz' -o -name '*.app.tar.gz.sig' \
-            -o -name '*-setup.exe' -o -name '*-setup.exe.zip' -o -name '*-setup.exe.zip.sig' \
-            -o -name '*.msi' -o -name '*.msi.zip' -o -name '*.msi.zip.sig' \
-            -o -name '*.AppImage' -o -name '*.AppImage.tar.gz' -o -name '*.AppImage.tar.gz.sig' \
+            -o -name '*-setup.exe' -o -name '*-setup.exe.sig' \
+            -o -name '*.msi' -o -name '*.msi.sig' \
+            -o -name '*.AppImage' -o -name '*.AppImage.sig' \
             -o -name '*.dmg' -o -name '*.deb' \
           \) -print0 | while IFS= read -r -d '' f; do cp "$f" dist-update/; done
           ls -la dist-update
