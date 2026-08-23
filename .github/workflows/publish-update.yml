@@ -61,6 +61,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # THE TAG, not the branch this was dispatched from. The build jobs
+          # below check out the tag, so a gate reading the branch would be
+          # certifying a different tree than the one that ships — passing on a
+          # signing key that is on the branch and not in the release.
+          ref: ${{ inputs.tag }}
       - uses: actions/setup-node@v5
         with:
           node-version: 20
