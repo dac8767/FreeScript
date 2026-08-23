@@ -47,8 +47,26 @@ if [ "$LOCAL" = "0" ]; then
         echo "    ./build-desktop.sh --local"
         exit 1
     fi
-    # Signing identity — used by Tauri for app bundle
-    export APPLE_SIGNING_IDENTITY="Developer ID Application: Base Information Management Pvt. Ltd. (335RGMFDB6)"
+    # Signing identity — used by Tauri for the app bundle. READ FROM .env,
+    # like the other three, rather than written here.
+    #
+    # v7.79: this line used to hardcode
+    #   "Developer ID Application: Base Information Management Pvt. Ltd. (335RGMFDB6)"
+    # — Proteus's certificate, from upstream OpenDraft, whose private key this
+    # project has never had. Every release build therefore asked the keychain
+    # for a certificate that is not in it. Naming it here also meant that the
+    # day a real identity existed, signing would still fail until someone
+    # noticed the constant.
+    if [ -z "$APPLE_SIGNING_IDENTITY" ]; then
+        echo "Error: APPLE_SIGNING_IDENTITY not set."
+        echo "Add it to .env (project root), exactly as `security find-identity -v -p codesigning` prints it:"
+        echo '    APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"'
+        echo ""
+        echo "To build for YOURSELF without an Apple account:"
+        echo "    ./build-desktop.sh --local"
+        exit 1
+    fi
+    export APPLE_SIGNING_IDENTITY
 else
     # Tauri signs when these are set, so they must be UNSET, not empty —
     # an empty APPLE_SIGNING_IDENTITY still trips its signing path.

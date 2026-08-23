@@ -142,6 +142,33 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      # v7.79: WITHOUT THIS, APPLE_SIGNING_IDENTITY NAMES A CERTIFICATE THAT IS
+      # NOT ON THE RUNNER. A GitHub macOS runner starts with an empty keychain;
+      # release.yml gets away with passing only env vars because tauri-action
+      # imports the .p12 itself, and this workflow calls `tauri build` directly.
+      # So the identity would resolve to nothing and the build would fail at the
+      # very end, after twenty minutes of compiling. Lifted from release.yml,
+      # which already does exactly this and works.
+      - name: Import the Apple Developer certificate
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE" ]; then
+            echo "No Apple certificate configured — the build will be unsigned"
+            exit 0
+          fi
+          echo "$APPLE_CERTIFICATE" | base64 --decode > $RUNNER_TEMP/certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import $RUNNER_TEMP/certificate.p12 -k build.keychain \
+            -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          rm $RUNNER_TEMP/certificate.p12
+          echo "Apple Developer certificate imported"
+
       - name: Build with updater artifacts
         # The overlay is what turns signing on — see src-tauri/UPDATER.md for
         # why it is not in tauri.conf.json. Every artifact comes out with a
