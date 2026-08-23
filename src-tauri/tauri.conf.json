@@ -110,7 +110,7 @@
       "endpoints": [
         "https://raw.githubusercontent.com/dac8767/ScriptCraft-releases/main/latest.json"
       ],
-      "pubkey": "",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ5MUI4QzEyMzRGQjdGNjYKUldSbWYvczBFb3diU2NqUmdPNUxnbmhpUEc2VzkwOHA0aWd5aDU4WkdIamVIRHd2aWd0YkV1bnIK",
       "windows": {
         "installMode": "passive"
       }
