@@ -69,23 +69,85 @@ Without `--artifacts` it emits no `platforms` at all, which is the correct
 output before a signed build exists: an empty map would put an Install button
 on screen with nothing behind it.
 
-## Cutting a release
+## Shipping a change — the whole loop
 
-Run the **Publish Update** workflow (`.github/workflows/publish-update.yml`)
-from the Actions tab and give it the tag. It:
+Most of this is Claude's half. Derek's part is four commands and a button.
 
-1. gates on `check-updater-config --release`, which refuses to go on without a
-   signing key;
-2. builds macOS, Windows and Linux with `--config src-tauri/tauri.release.conf.json`,
-   which is what turns updater artifacts and signing on;
-3. generates `latest.json` from what was actually built;
-4. uploads the installers to the **public** releases repo, **then** pushes the
-   manifest — in that order, because a manifest published before the files it
-   names sends every running copy to a 404.
+### 1. Claude — the change itself
 
-It is a separate workflow from `release.yml` on purpose: that one is inherited
-from upstream OpenDraft, builds Android/iOS/Mac App Store/Docker, and its
-publish job verifies seven assets this product does not ship.
+Make the change, then, in the same commit:
+
+- bump `APP_VERSION` in `frontend/src/data/changelog.ts`
+- add the entry to `frontend/src/data/changelog.json` (its **first sentence**
+  becomes the note in the update banner, so it leads with the point)
+- `node frontend/devtools/sync-version.mjs` — writes the version into
+  `tauri.conf.json`, `Cargo.toml` and `Cargo.lock`
+- run the gates, commit, push to `claude/v0_32`
+
+### 2. Derek — pull and test
+
+```bash
+cd /Users/dcarl/ScriptCraft && npm run desktop
+```
+
+Nothing is published yet. Nothing reaches anybody until step 3.
+
+### 3. Derek — tag it
+
+```bash
+git pull
+git tag v7.79
+git push origin v7.79
+```
+
+The tag must match `APP_VERSION`; preflight accepts `v7.79`, `v7.79.0` or
+`7.79` and fails the run otherwise. It has to point at a commit that already
+contains the change — tag after pulling, not before.
+
+### 4. Derek — publish
+
+**https://github.com/dac8767/ScriptCraft/actions** → **Publish Update** →
+**Run workflow** → tag `v7.79` → green button.
+
+Use **Run workflow**, not the **Re-run jobs** button inside an old run: a re-run
+replays the original commit and will not pick up anything new.
+
+~15 minutes. It gates, builds all three platforms, generates `latest.json` from
+what was actually built, uploads the installers to the public repo and pushes
+the manifest **last** — a manifest published before the files it names would
+send every running copy to a 404.
+
+### 5. It is live
+
+```bash
+curl -s https://raw.githubusercontent.com/dac8767/ScriptCraft-releases/main/latest.json
+```
+
+Three platform keys and the new version number means everyone is covered.
+
+## What users see, and when
+
+Each copy checks **4 seconds after launch** and **every 6 hours** after that.
+So someone who quits and reopens sees it within seconds; someone who leaves the
+app open for days sees it within six hours. There is no push — nothing wakes a
+running app sooner than its next check.
+
+The banner then offers **Install and Restart** on any platform the release
+carries a build for, and a **Download** link always.
+
+Dismissing is per-version: a writer who dismissed 7.78 is still told about 7.79.
+That is why the dismissal stores a version rather than a boolean.
+
+## The one way to get this wrong
+
+**Ship without bumping `APP_VERSION`.** Every gate passes — the tag matches the
+version, the build succeeds, the manifest publishes — and not one user is
+notified, because the app only offers an update when the manifest's version is
+GREATER than the running one. Equal is "you are up to date".
+
+So the failure looks exactly like success, all the way through, and shows up
+only as nobody ever updating. If a release goes out and no one sees it, check
+`APP_VERSION` first.
 
 ---
 
