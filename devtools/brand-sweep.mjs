@@ -44,6 +44,12 @@ const KEEP_FILES = [
      not ship. That provenance IS the reason; sweeping the name would leave the
      decision looking arbitrary. */
   'docs/UPDATING.md',
+  /* v7.82: the note above the signing identity says whose certificate used to
+     be hardcoded there and where it came from. That provenance IS the content
+     — "a certificate from upstream OpenDraft whose private key we never had"
+     is the whole reason the constant was wrong, and sweeping the name leaves a
+     comment that explains nothing. Same rule as docs/UPDATING.md. */
+  'build-desktop.sh',
   'devtools/brand-sweep.mjs',           // this file names what it protects
   'frontend/devtools/check-brand.mjs',  // and so does its guard
   /* v7.37/v7.39 — DEVTOOLS THAT EXPLAIN WHAT THEY REPLACED. Each of these
