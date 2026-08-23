@@ -223,7 +223,13 @@ jobs:
           \) -print0 | while IFS= read -r -d '' f; do cp "$f" dist-update/; done
           ls -la dist-update
 
-      - uses: actions/upload-artifact@v5
+      # v7.81: v5 runs on node20, which GitHub is retiring — the runners already
+      # force it onto node24 and say so on every job. v7/v8 target node24
+      # natively. Checked before bumping two majors: every input used here still
+      # exists, and the defaults that decide the LAYOUT are unchanged
+      # (archive: true, skip-decompress: false). A layout change would have
+      # emptied `platforms` again, which is the failure that reports success.
+      - uses: actions/upload-artifact@v7
         with:
           # The target triple travels in the NAME because the manifest
           # generator reads the architecture off the path, and refuses to guess
@@ -247,7 +253,7 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           pattern: update-*
           path: artifacts
