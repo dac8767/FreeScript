@@ -612,28 +612,62 @@ fn get_opened_file(state: tauri::State<PendingFile>) -> Option<String> {
 // These bypass the fs plugin scope so the user can save/open files anywhere
 // via the native dialog.
 
+/// v7.87 (security review D3) — write a file the way that cannot lose the old
+/// one. `std::fs::write` opens the target with O_TRUNC, destroying the existing
+/// bytes the instant it starts; a failure partway (disk full, a revoked
+/// permission, a cloud-sync lock, power loss) then leaves the file EMPTY. This
+/// writes a sibling temp file, flushes it to disk, and renames it over the
+/// target — an atomic replace on the same filesystem, so the target is only
+/// ever the complete old file or the complete new one.
+static ATOMIC_SAVE_SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+fn atomic_write(path: &str, bytes: &[u8]) -> Result<(), String> {
+    use std::io::Write;
+    let target = std::path::Path::new(path);
+    let parent = match target.parent() {
+        Some(p) if !p.as_os_str().is_empty() => p.to_path_buf(),
+        _ => std::path::PathBuf::from("."),
+    };
+    // v6.42/v7.17: missing parent folders are created (Auto Saves subfolder,
+    // mirrored copies, screenshots pick a folder that may not exist yet).
+    std::fs::create_dir_all(&parent)
+        .map_err(|e| format!("Failed to create {}: {}", parent.display(), e))?;
+
+    // A sibling temp file, so the rename stays on the same filesystem (a
+    // cross-device rename is not atomic and would fail). The seq + pid keep
+    // concurrent saves (autosave overlapping a manual save) from colliding.
+    let seq = ATOMIC_SAVE_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let stem = target.file_name().and_then(|n| n.to_str()).unwrap_or("scriptcraft");
+    let tmp = parent.join(format!(".{}.tmp{}-{}", stem, std::process::id(), seq));
+
+    let written = (|| -> std::io::Result<()> {
+        let mut f = std::fs::File::create(&tmp)?;
+        f.write_all(bytes)?;
+        f.sync_all()?; // durability: the bytes are on disk before the rename
+        Ok(())
+    })();
+    if let Err(e) = written {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(format!("Failed to write {}: {}", path, e));
+    }
+
+    // std::fs::rename replaces an existing target atomically on Unix, and on
+    // Windows (MoveFileExW with REPLACE_EXISTING). On failure the original is
+    // untouched and we clean up the temp.
+    std::fs::rename(&tmp, target).map_err(|e| {
+        let _ = std::fs::remove_file(&tmp);
+        format!("Failed to save {}: {}", path, e)
+    })
+}
+
 #[tauri::command]
 fn save_text_to_path(path: String, contents: String) -> Result<(), String> {
-    // v6.42: create missing parent folders — auto saves write into an
-    // "Auto Saves" subfolder of the chosen location on first use.
-    if let Some(parent) = std::path::Path::new(&path).parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(|e| format!("Failed to create {}: {}", parent.display(), e))?;
-    }
-    std::fs::write(&path, contents).map_err(|e| format!("Failed to write {}: {}", path, e))
+    atomic_write(&path, contents.as_bytes())
 }
 
 #[tauri::command]
 fn save_binary_to_path(path: String, contents: Vec<u8>) -> Result<(), String> {
-    // v7.17: same parent-creating behaviour as save_text_to_path. Screenshots
-    // and mirrored copies pick a folder that may not exist yet, and a binary
-    // write that failed only because the folder was missing was the one
-    // difference between these two commands.
-    if let Some(parent) = std::path::Path::new(&path).parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(|e| format!("Failed to create {}: {}", parent.display(), e))?;
-    }
-    std::fs::write(&path, contents).map_err(|e| format!("Failed to write {}: {}", path, e))
+    atomic_write(&path, &contents)
 }
 
 /// v7.17 — PROVE a chosen folder is writable, now, while the user is looking
@@ -663,8 +697,28 @@ fn check_folder_writable(folder: String) -> Result<(), String> {
     Ok(())
 }
 
+/// v7.87 (security review D14) — a sanity ceiling on a single file read.
+/// Screenplays are tiny; this only stops a pathological or wrong file from
+/// being pulled fully into memory and then again across the IPC boundary. A
+/// metadata error is ignored (the read itself will report the real problem;
+/// on iOS a security-scoped file may have no readable metadata yet).
+const MAX_READ_BYTES: u64 = 256 * 1024 * 1024;
+
+fn check_read_size(path: &str) -> Result<(), String> {
+    if let Ok(meta) = std::fs::metadata(path) {
+        if meta.len() > MAX_READ_BYTES {
+            return Err(format!(
+                "This file is too large to open ({} MB).",
+                meta.len() / (1024 * 1024)
+            ));
+        }
+    }
+    Ok(())
+}
+
 #[tauri::command]
 fn read_text_file(path: String) -> Result<String, String> {
+    check_read_size(&path)?;
     #[cfg(not(target_os = "ios"))]
     {
         std::fs::read_to_string(&path).map_err(|e| format!("Failed to read {}: {}", path, e))
@@ -693,6 +747,7 @@ fn read_text_file(path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn read_binary_file(path: String) -> Result<Vec<u8>, String> {
+    check_read_size(&path)?;
     std::fs::read(&path).map_err(|e| format!("Failed to read {}: {}", path, e))
 }
 
@@ -1668,5 +1723,30 @@ mod tests {
         for s in ["1.1.1.1", "8.8.8.8", "93.184.216.34", "2606:4700:4700::1111"] {
             assert!(!is_blocked_ip(ip(s)), "{s} should be allowed");
         }
+    }
+
+    #[test]
+    fn atomic_write_replaces_and_leaves_no_temp() {
+        let dir = std::env::temp_dir().join(format!("sc-atomic-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let target = dir.join("doc.script");
+        let ts = target.to_string_lossy().to_string();
+
+        super::atomic_write(&ts, b"first").unwrap();
+        assert_eq!(std::fs::read_to_string(&target).unwrap(), "first");
+
+        // A second write replaces the whole file, never partially.
+        super::atomic_write(&ts, b"second, longer contents").unwrap();
+        assert_eq!(std::fs::read_to_string(&target).unwrap(), "second, longer contents");
+
+        // No sibling temp files are left behind.
+        let temps = std::fs::read_dir(&dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_name().to_string_lossy().contains(".tmp"))
+            .count();
+        assert_eq!(temps, 0, "{temps} temp file(s) left behind");
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

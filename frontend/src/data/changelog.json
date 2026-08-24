@@ -1,5 +1,13 @@
 [
   {
+    "version": "7.87",
+    "date": "2026-08-24",
+    "changes": [
+      "Reliability: saving a file is now atomic. If a save is interrupted partway — the disk fills up, a permission changes, a sync tool locks the file, the power drops — your file is left as its previous, complete version instead of being blanked or half-written. It writes the new copy alongside the old one and swaps them in a single step only once the new copy is safely on disk. This matters most for a Save-As'd or cloud-synced folder copy. From the security review (D3).",
+      "A size ceiling on opening files means a wrong or corrupt gigantic file reports \"too large\" instead of trying to load and exhausting memory."
+    ]
+  },
+  {
     "version": "7.86",
     "date": "2026-08-24",
     "changes": [
