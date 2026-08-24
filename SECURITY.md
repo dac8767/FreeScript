@@ -2,14 +2,16 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ScriptCraft, please report it responsibly.
+If you discover a security vulnerability in ScriptCraft, please report it
+responsibly.
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, please use [GitHub's private vulnerability reporting](https://github.com/Proteus-Technologies-Private-Limited/OpenDraft/security/advisories/new) to submit your report.
+Instead, please use [GitHub's private vulnerability reporting](https://github.com/dac8767/ScriptCraft/security/advisories/new)
+to submit your report.
 
 We will:
-1. Acknowledge your report within 48 hours
+1. Acknowledge your report within a few days
 2. Investigate and provide an estimated timeline for a fix
 3. Credit you in the release notes (unless you prefer to remain anonymous)
 
@@ -17,9 +19,8 @@ We will:
 
 This policy covers the ScriptCraft application code in this repository:
 - Frontend (React/TypeScript)
-- Backend (Python/FastAPI)
 - Desktop shell (Tauri/Rust)
-- Collaboration server (Node.js)
+- Backend (Python/FastAPI) and collaboration/auth server (Node.js), where deployed
 
 ## Supported Versions
 

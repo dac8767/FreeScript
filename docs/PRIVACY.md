@@ -1,62 +1,101 @@
 # Privacy Policy
 
-**Last updated: April 8, 2026**
+**Last updated: 2026-08-24**
+
+> **Maintainer note (not part of the policy):** two fields below are marked
+> `<FILL IN>` — the name of the person or company that publishes ScriptCraft
+> (the "data controller") and a public contact address. Set both before this
+> policy ships. Everything else describes what the app actually does today,
+> verified against the source in this repository.
 
 ## Overview
 
-ScriptCraft is a screenwriting application developed by Proteus Technologies Private Limited, available on macOS, iOS, iPadOS, Windows, Linux, and Android. Your privacy is important to us.
+ScriptCraft is a screenwriting application for macOS, Windows, Linux, iOS,
+iPadOS and Android, published by **`<FILL IN — controller name>`**. It is a
+local-first app: your screenplays live on your device, and the app works fully
+offline for writing. Some optional features connect to the internet; this
+policy lists every one of them, and whether it happens automatically or only
+when you choose to use it.
 
-## Data Collection
+## Where your work is stored
 
-**ScriptCraft does not collect, store, transmit, or share any personal data.** The application runs entirely on your device.
+Your screenplays, settings and customizations are stored **locally on your
+device**, in the app's data folder:
 
-Specifically:
+- **macOS:** `~/Library/Application Support/com.freedraft.app/`
+- **Windows:** `%APPDATA%\com.freedraft.app\`
+- **Linux:** `~/.local/share/com.freedraft.app/`
+- **iOS / iPadOS:** the app's private sandbox (visible in the Files app)
+- **Android:** app-private storage
 
-- **No analytics or tracking** — We do not use any analytics services, crash reporters, or tracking tools.
-- **No user accounts required** — No registration, login, or authentication is required for core functionality.
-- **No cloud storage** — All your screenplays and project data are stored locally on your device.
-- **No advertising** — ScriptCraft does not display ads or use advertising identifiers.
+(The folder keeps the legacy `com.freedraft.app` identifier on purpose —
+renaming it would orphan existing users' data.)
 
-## Network Connections
+Your scripts never leave your device unless you explicitly export, sync, or
+share them, or submit a screenshot with feedback (see below).
 
-ScriptCraft works fully offline. The only optional network feature is **real-time collaboration**, which requires connecting to a collaboration server. When using collaboration:
+## Network connections
 
-- You choose which server to connect to (self-hosted or the public demo server).
-- Only your screenplay content and a display name are transmitted to the collaboration server during an active session.
-- No data is retained on the collaboration server after the session ends.
-- Collaboration is entirely optional — all other features work without any network connection.
+ScriptCraft has **no analytics, advertising, tracking, or crash-reporting
+SDKs**. It does not build a profile of you. The connections it can make are:
 
-## Data Storage
+### Automatic
 
-Your screenplays, projects, and settings are stored locally on your device:
+- **Update check.** On launch (and periodically after), the app fetches a
+  small version file from GitHub
+  (`raw.githubusercontent.com/dac8767/ScriptCraft-releases`) to see whether a
+  newer version exists. This is a plain download; it sends no personal data,
+  but like any web request it reveals your IP address and the fact that the app
+  was launched. It never downloads or installs anything on its own — it only
+  tells you an update is available.
+- **Fonts.** If a screenplay or the interface uses a Google-hosted font, the
+  font is loaded from Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`),
+  which reveals your IP address to Google. The default screenplay font (Courier
+  Prime) ships inside the app and needs no connection.
 
-- **macOS:** `~/Library/Application Support/com.proteus.opendraft/`
-- **iOS/iPadOS:** App sandbox (managed by iOS, accessible via Files app)
-- **Windows:** `%APPDATA%\com.proteus.opendraft\`
-- **Linux:** `~/.local/share/com.proteus.opendraft/`
-- **Android:** App-private storage
+### Only when you choose to
 
-This data never leaves your device unless you explicitly export or share it. You can delete it at any time by removing the application and its data folder.
+- **Feedback.** If you use Help ▸ Feedback, the name, email and message you
+  enter — and any screenshot you attach — are sent to our feedback backend
+  (hosted on Supabase). A screenshot may show whatever was on your screen,
+  including unreleased work, so attach one only when you mean to. Nothing is
+  sent unless you press Submit.
+- **Spelling dictionaries.** Choosing a spell-check language that isn't already
+  bundled downloads that dictionary once (from `cdn.jsdelivr.net` or the
+  LibreOffice dictionary repository on GitHub) and caches it on your device.
+- **Link previews.** In the Beat Board, a preview for a link is fetched only
+  when you click "Load preview" for that link — never automatically. The app
+  refuses to fetch previews from private or local network addresses.
+- **Cloud storage (Google Drive / OneDrive).** If you connect a cloud drive in
+  Save Locations, the app signs in with Google or Microsoft (OAuth) and uploads
+  the scripts you save there. Google Drive access is limited to files ScriptCraft
+  creates or opens; OneDrive access is what the platform requires to save into
+  the folders you choose. You can disconnect at any time.
+- **ScriptCraft Cloud / collaboration.** Off by default. If you configure a
+  cloud server URL, the app sends your sign-in details and a device identifier
+  to that server to authenticate, and syncs the scripts you choose. If you never
+  set a server, none of this runs.
+- **Embedded video and external links.** Pasting a YouTube or Vimeo link into
+  Script Notes can embed a player from those services (which see your IP). The
+  "Donate" link and other outbound links open in your normal web browser.
 
-## Third-Party Services
+## Children's privacy
 
-ScriptCraft does not integrate with or send data to any third-party services. No SDKs from third-party analytics, advertising, or tracking providers are included in the application.
+ScriptCraft is not directed at children and does not knowingly collect data
+from them. The optional features above are the same for all users.
 
-## Children's Privacy
+## Your choices
 
-ScriptCraft does not collect any data from any users, including children under 13. The app is safe for use by all ages.
+- Writing, saving locally, printing and exporting need no network at all.
+- Feedback, dictionary downloads, link previews and cloud storage are each
+  opt-in.
+- You can remove all local data by deleting the app's data folder (paths above).
 
-## Your Rights
+## Changes to this policy
 
-Since ScriptCraft does not collect personal data, there is no personal data to access, correct, or delete. Your screenplay files are entirely under your control on your device.
-
-## Changes to This Policy
-
-If we update this privacy policy, we will post the changes here with a revised date. Since ScriptCraft does not collect data, we do not anticipate significant changes.
+If this policy changes, the revised version will be posted here with a new date.
 
 ## Contact
 
-If you have questions about this privacy policy, contact us at:
-
-- GitHub: [github.com/Proteus-Technologies-Private-Limited/OpenDraft](https://github.com/Proteus-Technologies-Private-Limited/OpenDraft)
-- Email: kandarp.baghar@proteustech.co
+Questions about this policy: **`<FILL IN — contact address>`**
+(project: [github.com/dac8767/ScriptCraft](https://github.com/dac8767/ScriptCraft)).
