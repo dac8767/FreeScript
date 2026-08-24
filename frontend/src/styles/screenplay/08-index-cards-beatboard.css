@@ -937,6 +937,39 @@
 .beat-link-preview-remove:hover {
   background: rgba(0,0,0,0.9);
 }
+/* v7.85 (security review D4): previews load on click, never on open. A dashed
+   chip (vs the solid-bordered loaded card) marks a URL whose preview has not
+   been fetched or shown yet — so nothing in an opened file reaches the network
+   until the writer asks for it. */
+.beat-link-preview-load {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--fd-text-muted);
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px dashed var(--fd-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.beat-link-preview-load:hover {
+  border-color: var(--fd-accent);
+  color: var(--fd-accent);
+}
+.beat-link-preview-load svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.beat-link-preview-load span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Add beat button ── */
 .beat-add-btn {

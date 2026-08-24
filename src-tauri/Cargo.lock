@@ -3982,7 +3982,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "scriptcraft"
-version = "7.84.0"
+version = "7.85.0"
 dependencies = [
  "jni",
  "ndk-context",

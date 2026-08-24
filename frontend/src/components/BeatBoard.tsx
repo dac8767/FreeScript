@@ -270,60 +270,35 @@ function extractUrls(text: string): string[] {
 /* ─── Link Preview fetcher with in-memory cache ─── */
 const _previewCache = new Map<string, BeatLinkPreview | 'loading' | 'error'>();
 
-function useLinkPreviews(
-  beatId: string,
+/** v7.85 (security review D4) — previews are NO LONGER fetched automatically.
+ *  A URL can arrive inside an opened file, and auto-fetching it (plus auto-
+ *  loading its og:image) turned "open a stranger's script" into a silent
+ *  beacon to the sender and a probe of the local network. This hook only
+ *  reports the URLs in the description and any preview DATA already saved on
+ *  the beat; nothing reaches the network — not the fetch, not the image —
+ *  until the writer clicks "Load preview" (see loadPreview in BeatCard). */
+export function useLinkPreviews(
   description: string,
   existingPreviews: BeatLinkPreview[] | undefined,
-  onUpdate: (id: string, updates: Partial<BeatInfo>) => void,
 ) {
   const urls = useMemo(() => extractUrls(description), [description]);
-
-  useEffect(() => {
-    if (urls.length === 0) return;
-
-    // Find URLs that aren't already cached on the beat or in the in-memory cache
-    const existingUrls = new Set((existingPreviews || []).map((p) => p.url));
-    const newUrls = urls.filter((u) => !existingUrls.has(u) && _previewCache.get(u) !== 'loading');
-
-    if (newUrls.length === 0) {
-      // Check if any cached previews can fill in
-      const cached = urls
-        .map((u) => _previewCache.get(u))
-        .filter((v): v is BeatLinkPreview => !!v && typeof v === 'object');
-      if (cached.length > 0 && cached.length > (existingPreviews || []).length) {
-        onUpdate(beatId, { linkPreviews: cached });
-      }
-      return;
+  const byUrl = useMemo(() => {
+    const m = new Map<string, BeatLinkPreview>();
+    for (const p of existingPreviews || []) {
+      if (urls.includes(p.url)) m.set(p.url, p);
     }
-
-    for (const url of newUrls) {
-      _previewCache.set(url, 'loading');
-      api.fetchLinkPreview(url).then((resp) => {
-        const preview: BeatLinkPreview = {
-          url: resp.url,
-          title: resp.title,
-          description: resp.description,
-          image: resp.image,
-          siteName: resp.site_name,
-        };
-        _previewCache.set(url, preview);
-        // Merge into beat's cached previews
-        const store = useEditorStore.getState();
-        const beat = store.beats.find((b) => b.id === beatId);
-        const current = beat?.linkPreviews || [];
-        if (!current.some((p) => p.url === url)) {
-          onUpdate(beatId, { linkPreviews: [...current, preview] });
-        }
-      }).catch(() => {
-        _previewCache.set(url, 'error');
-      });
-    }
-  }, [beatId, urls, existingPreviews, onUpdate]);
-
-  // Return only previews for URLs still in the description
-  return useMemo(() => {
-    return (existingPreviews || []).filter((p) => urls.includes(p.url));
+    return m;
   }, [existingPreviews, urls]);
+  return { urls, byUrl };
+}
+
+/** Hostname of a URL for the "Load preview" chip label, best-effort. */
+export function prettyHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
 }
 
 /* ─── Link Preview Card ─── */
@@ -505,17 +480,93 @@ const BeatCardContent: React.FC<BeatCardContentProps> = ({
   const imgH = beat.imageHeight || 0;
   const isImgFull = imgH === -1; // -1 = full card
 
-  // Fetch and cache link previews for URLs in description
-  const linkPreviews = useLinkPreviews(beat.id, beat.description, beat.linkPreviews, onUpdate);
+  // v7.84 (D4): link previews load on an explicit click, never on open.
+  const { urls: descUrls, byUrl: previewByUrl } = useLinkPreviews(beat.description, beat.linkPreviews);
+  const [revealedPreviews, setRevealedPreviews] = useState<Set<string>>(() => new Set());
+  const [loadingPreviews, setLoadingPreviews] = useState<Set<string>>(() => new Set());
+
+  const loadPreview = useCallback(
+    (url: string) => {
+      // Already have the data (saved on the beat, or fetched earlier this
+      // session) → just reveal it. The network is touched only for a
+      // first-time fetch, and only on this explicit click.
+      const cached = _previewCache.get(url);
+      if (previewByUrl.has(url) || (cached && typeof cached === 'object')) {
+        setRevealedPreviews((s) => new Set(s).add(url));
+        return;
+      }
+      setLoadingPreviews((s) => new Set(s).add(url));
+      api.fetchLinkPreview(url)
+        .then((resp) => {
+          const preview: BeatLinkPreview = {
+            url: resp.url,
+            title: resp.title,
+            description: resp.description,
+            image: resp.image,
+            siteName: resp.site_name,
+          };
+          _previewCache.set(url, preview);
+          const current = beat.linkPreviews || [];
+          if (!current.some((p) => p.url === url)) {
+            onUpdate(beat.id, { linkPreviews: [...current, preview] });
+          }
+          setRevealedPreviews((s) => new Set(s).add(url));
+        })
+        .catch(() => {
+          _previewCache.set(url, 'error');
+        })
+        .finally(() => {
+          setLoadingPreviews((s) => {
+            const n = new Set(s);
+            n.delete(url);
+            return n;
+          });
+        });
+    },
+    [beat.id, beat.linkPreviews, previewByUrl, onUpdate],
+  );
 
   const handleRemovePreview = useCallback(
     (url: string) => {
       const updated = (beat.linkPreviews || []).filter((p) => p.url !== url);
       onUpdate(beat.id, { linkPreviews: updated });
       _previewCache.set(url, 'error'); // prevent re-fetch
+      setRevealedPreviews((s) => {
+        const n = new Set(s);
+        n.delete(url);
+        return n;
+      });
     },
     [beat.id, beat.linkPreviews, onUpdate],
   );
+
+  // ONE render for both card layouts (was duplicated) — a revealed preview
+  // shows its card; everything else is a click-to-load chip, so no URL in an
+  // opened file fetches or renders a remote image on its own.
+  const linkPreviewsBlock = descUrls.length > 0 ? (
+    <div className="beat-link-previews">
+      {descUrls.map((url) => {
+        const cached = _previewCache.get(url);
+        const data = previewByUrl.get(url)
+          ?? (cached && typeof cached === 'object' ? cached : undefined);
+        if (revealedPreviews.has(url) && data) {
+          return <LinkPreviewCard key={url} preview={data} onRemove={() => handleRemovePreview(url)} />;
+        }
+        return (
+          <button
+            key={url}
+            type="button"
+            className="beat-link-preview-load"
+            title={`Load a preview for ${url}`}
+            onClick={(e) => { e.stopPropagation(); loadPreview(url); }}
+          >
+            <FaLink aria-hidden />
+            <span>{loadingPreviews.has(url) ? 'Loading preview…' : `Load preview — ${prettyHost(url)}`}</span>
+          </button>
+        );
+      })}
+    </div>
+  ) : null;
 
   // v2.44, Derek: the color paints the WHOLE block, not just the edge.
   // (v6.49: always — the v2.46 "Show beat color on all tabs" checkbox and
@@ -720,13 +771,7 @@ const BeatCardContent: React.FC<BeatCardContentProps> = ({
               )}
             </div>
           )}
-          {linkPreviews.length > 0 && (
-            <div className="beat-link-previews">
-              {linkPreviews.map((p) => (
-                <LinkPreviewCard key={p.url} preview={p} onRemove={() => handleRemovePreview(p.url)} />
-              ))}
-            </div>
-          )}
+          {linkPreviewsBlock}
         </div>
       ) : (
         <>
@@ -749,13 +794,7 @@ const BeatCardContent: React.FC<BeatCardContentProps> = ({
               )}
             </div>
           )}
-          {linkPreviews.length > 0 && (
-            <div className="beat-link-previews">
-              {linkPreviews.map((p) => (
-                <LinkPreviewCard key={p.url} preview={p} onRemove={() => handleRemovePreview(p.url)} />
-              ))}
-            </div>
-          )}
+          {linkPreviewsBlock}
         </>
       )}
 

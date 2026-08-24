@@ -790,12 +790,109 @@ async fn fetch_link_preview(url: String) -> Result<LinkPreview, String> {
     Ok(LinkPreview { url, title, description, image, site_name })
 }
 
+/// v7.85 (security review D4) — an address a link preview must never fetch:
+/// loopback, private, link-local, unique-local, CGNAT, the unspecified and
+/// broadcast addresses. A preview URL can arrive inside an OPENED file, so
+/// without this the act of opening a stranger's script makes this machine GET
+/// `http://localhost:…`, `http://169.254.169.254/…` (cloud metadata) or an
+/// intranet host and echo the response back into the card.
+fn is_blocked_ip(ip: std::net::IpAddr) -> bool {
+    match ip {
+        std::net::IpAddr::V4(v4) => {
+            v4.is_loopback()
+                || v4.is_private()
+                || v4.is_link_local()
+                || v4.is_broadcast()
+                || v4.is_unspecified()
+                || v4.is_documentation()
+                // 100.64.0.0/10 carrier-grade NAT
+                || (v4.octets()[0] == 100 && (v4.octets()[1] & 0xc0) == 0x40)
+        }
+        std::net::IpAddr::V6(v6) => {
+            if v6.is_loopback() || v6.is_unspecified() {
+                return true;
+            }
+            // An IPv4-mapped v6 address is just a v4 address wearing a hat.
+            if let Some(v4) = v6.to_ipv4_mapped() {
+                return is_blocked_ip(std::net::IpAddr::V4(v4));
+            }
+            let seg0 = v6.segments()[0];
+            (seg0 & 0xfe00) == 0xfc00   // fc00::/7 unique-local
+                || (seg0 & 0xffc0) == 0xfe80 // fe80::/10 link-local
+        }
+    }
+}
+
+/// Resolve `host` off the async runtime and refuse it unless it resolves to at
+/// least one address and EVERY address is public. Blocks the SSRF/beacon in
+/// `fetch_url_body`. Note: this screens the hostname's current DNS answer; a
+/// name that resolves public here and private on the real connection (DNS
+/// rebinding) is the residual a desktop link-preview accepts.
+async fn screen_host(host: &str, port: u16) -> Result<(), String> {
+    let host_port = format!("{host}:{port}");
+    let ips = tauri::async_runtime::spawn_blocking(move || {
+        use std::net::ToSocketAddrs;
+        host_port
+            .to_socket_addrs()
+            .map(|it| it.map(|s| s.ip()).collect::<Vec<std::net::IpAddr>>())
+    })
+    .await
+    .map_err(|e| format!("resolve task failed: {e}"))?
+    .map_err(|e| format!("could not resolve host: {e}"))?;
+
+    if ips.is_empty() {
+        return Err("host did not resolve".to_string());
+    }
+    if ips.into_iter().any(is_blocked_ip) {
+        return Err("refusing to fetch a private, loopback, or link-local address".to_string());
+    }
+    Ok(())
+}
+
 /// Fetch URL body using reqwest (works on all platforms including iOS/Android).
 /// Times out after 5 seconds.
+///
+/// v7.85 (security review D4): only http/https, the host is screened against
+/// internal address ranges before the request, and redirects are capped and
+/// refused when they point at a literal internal host — so a public URL cannot
+/// bounce the fetch to `localhost` or the metadata endpoint.
 async fn fetch_url_body(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let parsed = reqwest::Url::parse(url)?;
+    match parsed.scheme() {
+        "http" | "https" => {}
+        other => return Err(format!("refusing to fetch non-http(s) scheme: {other}").into()),
+    }
+    let host = parsed.host_str().ok_or("url has no host")?;
+    let port = parsed
+        .port_or_known_default()
+        .unwrap_or(if parsed.scheme() == "https" { 443 } else { 80 });
+    screen_host(host, port).await?;
+
+    // Cap redirects, and refuse any hop whose target is a literal internal host
+    // (a public hostname that DNS-resolves internally is the rebinding residual
+    // noted on screen_host).
+    let redirect_policy = reqwest::redirect::Policy::custom(|attempt| {
+        if attempt.previous().len() >= 5 {
+            return attempt.stop();
+        }
+        if let Some(h) = attempt.url().host_str() {
+            let lower = h.to_ascii_lowercase();
+            let internal = lower == "localhost"
+                || lower
+                    .parse::<std::net::IpAddr>()
+                    .map(is_blocked_ip)
+                    .unwrap_or(false);
+            if internal {
+                return attempt.error("refusing to follow a redirect to an internal host");
+            }
+        }
+        attempt.follow()
+    });
+
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(5))
         .user_agent("Mozilla/5.0 (compatible; ScriptCraft/1.0)")
+        .redirect(redirect_policy)
         .build()?;
 
     let resp = client.get(url).send().await?;
@@ -1532,4 +1629,44 @@ pub fn run() {
             }
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_blocked_ip;
+    use std::net::IpAddr;
+
+    fn ip(s: &str) -> IpAddr {
+        s.parse().unwrap()
+    }
+
+    #[test]
+    fn blocks_internal_v4() {
+        // loopback, RFC1918, link-local (incl. cloud metadata), CGNAT, 0.0.0.0
+        for s in [
+            "127.0.0.1",
+            "10.0.0.1",
+            "172.16.5.4",
+            "192.168.1.1",
+            "169.254.169.254", // AWS/GCP/Azure metadata
+            "100.64.0.1",      // carrier-grade NAT
+            "0.0.0.0",
+        ] {
+            assert!(is_blocked_ip(ip(s)), "{s} should be blocked");
+        }
+    }
+
+    #[test]
+    fn blocks_internal_v6() {
+        for s in ["::1", "fc00::1", "fd12:3456::1", "fe80::1", "::ffff:127.0.0.1"] {
+            assert!(is_blocked_ip(ip(s)), "{s} should be blocked");
+        }
+    }
+
+    #[test]
+    fn allows_public() {
+        for s in ["1.1.1.1", "8.8.8.8", "93.184.216.34", "2606:4700:4700::1111"] {
+            assert!(!is_blocked_ip(ip(s)), "{s} should be allowed");
+        }
+    }
 }

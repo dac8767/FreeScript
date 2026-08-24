@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.85",
+    "date": "2026-08-24",
+    "changes": [
+      "Privacy & security: link previews on the Beat Board no longer load on their own. A link in a beat now shows a \"Load preview\" button, and the preview — text and image — is fetched only when you click it. Before, opening a script from someone else quietly contacted every link inside it, which told the sender your device had opened the file and, with a crafted link, could even poke at your own network. Now nothing is contacted until you ask, and the app flatly refuses to load previews from private or local addresses. From the security review (D4)."
+    ]
+  },
+  {
     "version": "7.84",
     "date": "2026-08-24",
     "changes": [
