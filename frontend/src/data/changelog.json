@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.86",
+    "date": "2026-08-24",
+    "changes": [
+      "Security: the app now only permits network connections to the handful of services it actually uses — feedback, the update check, dictionary downloads, and Google/Microsoft cloud storage if you connect them — instead of allowing a connection to anywhere on the web. If a bug or bad dependency ever tried to smuggle your work out to some other server, this stops it. Also removed a leftover allowance for the old Airtable feedback embed, which is long gone. From the security review (D11)."
+    ]
+  },
+  {
     "version": "7.85",
     "date": "2026-08-24",
     "changes": [
