@@ -45,12 +45,11 @@ export default function ContextMenuTab() {
   return (
     <section>
       <h3>Context Menu</h3>
+      {/* v7.81, Derek's wording — replaced the paragraph about drag mechanics
+          and the permanent items. */}
       <p className="fs-customize-hint">
-        Drag items between Shown and Hidden — where you drop one is where it
-        sits on the right-click menu. Undo, Redo, Cut, Copy, Paste, Select
-        All, Delete, Delete Element and Customize Context Menu are permanent,
-        so they aren't listed. What's <em>inside</em> an item is set by its
-        own tab — the elements under Element come from the Elements tab.
+        Choose what appears in the toolbar that appears when you right-click on
+        the script:
       </p>
 
       <DndColumns

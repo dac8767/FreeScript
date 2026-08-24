@@ -2,11 +2,10 @@
  * Settings ▸ Page Setup (v6.99) — Derek, via the feedback form: the old
  * Templates checkbox tab and the Page Setup tab are ONE tab now.
  *
- * The tab answers two questions in two places, and the split is the point:
- * the LIST on top says what each template is and how to work on one; the
- * SHOWN/HIDDEN columns below say which ones the New Script picker offers.
- * What's shown is exactly what that picker offers — the same
- * `enabledScriptFormats` ids the old checkboxes wrote, so nothing migrates.
+ * The tab is the template LIST — what each template is and how to work on
+ * one. (Until v7.81 a second half held SHOWN/HIDDEN columns configuring which
+ * templates the New Script picker offered; Derek retired the filter — the
+ * picker always shows every option now.)
  *
  * v7.50: the list is the Format ▸ Script Format / Template window's list —
  * literally, the same TemplateCard — with View added, since this is the one
@@ -23,13 +22,11 @@ import type { Editor } from '@tiptap/react';
 import { SYSTEM_TEMPLATE_LIST, useFormattingTemplateStore } from '../stores/formattingTemplateStore';
 import type { FormattingTemplate } from '../stores/formattingTypes';
 import { INDUSTRY_STANDARD_ID } from '../stores/formattingTypes';
-import { useSettingsStore } from '../stores/settingsStore';
 import { useEditorStore } from '../stores/editorStore';
 import TemplateEditorDialog from './TemplateEditorDialog';
 import PageSetupDialog from './PageSetupDialog';
 import TemplateCard from './TemplateCard';
 import { useApplyTemplate } from '../hooks/useApplyTemplate';
-import { DndColumns, type DndColumnSpec } from './CustomizePanelsDialog';
 import { showToast } from './Toast';
 
 /* v7.10, Derek: "'page setup' used to have a full page of fields for the
@@ -102,22 +99,12 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
   const updateTemplate = useFormattingTemplateStore((s) => s.updateTemplate);
   // null means Industry Standard — the card's `current` badge needs the real id.
   const activeId = useFormattingTemplateStore((s) => s.activeTemplateId) || INDUSTRY_STANDARD_ID;
-  const enabled = useSettingsStore((s) => s.enabledScriptFormats);
-  const setEnabled = useSettingsStore((s) => s.setEnabledScriptFormats);
-  const setInit = useSettingsStore((s) => s.setFormatPreferencesInitialized);
-
+  /* v7.81, Derek: "remove the show/hide function for NEW SCRIPT PICKER. a new
+     script will always show all options." The Shown/Hidden columns, the
+     enabledScriptFormats plumbing and the ≥1 rule are gone with the filter —
+     the picker offers every format now, so there is nothing here to configure. */
   const userTemplates = templates.filter((t) => t.category !== 'system');
   const all: FormattingTemplate[] = [...SYSTEM_TEMPLATE_LIST, ...userTemplates];
-  // Never-configured = everything shown (the old checkbox default).
-  const shownIds = enabled.length > 0 ? enabled : all.map((t) => t.id);
-  const shown = all.filter((t) => shownIds.includes(t.id));
-  const hidden = all.filter((t) => !shownIds.includes(t.id));
-
-  const setShown = (ids: string[]) => {
-    // The old ≥1 rule — New Script must always have something to offer.
-    setEnabled(ids.length > 0 ? ids : [INDUSTRY_STANDARD_ID]);
-    setInit(true);
-  };
 
   const [editing, setEditing] = useState<FormattingTemplate | null>(null);
   const [viewing, setViewing] = useState<FormattingTemplate | null>(null);
@@ -131,20 +118,13 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
     (t) => showToast(`“${t.name}” applied to the script.`, 'success'),
   );
 
-  /* A template the writer just made must appear in the New Script picker, or
-     they have made something they cannot find. Same reason the duplicate
-     handler on each card below adds the copy. */
-  const showAndEdit = (t: FormattingTemplate) => {
-    setShown([...shownIds, t.id]);
-    setEditing(t);
-  };
 
   /* The union of built-ins and custom ones — the built-ins are constants
      rather than rows in `templates`, so neither list alone can resolve an id. */
   const selectedTemplate = all.find((t) => t.id === selectedId) ?? null;
 
   const createBlank = async () => {
-    showAndEdit(await createTemplate({ name: 'New Template' }));
+    setEditing(await createTemplate({ name: 'New Template' }));
   };
 
   /* v7.12, Derek: "add a list of all of the page setup templates to the top of
@@ -176,78 +156,15 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
       onSelect={() => setSelectedId(t.id)}
       onView={() => setViewing(t)}
       onEdit={setEditing}
-      onDuplicated={(dup) => setShown([...shownIds, dup.id])}
-      onDeleted={(id: string) => { if (shownIds.includes(id)) setShown(shownIds.filter((x) => x !== id)); }}
     />
   );
-
-  /* The Shown/Hidden rows: name + the one toggle. Same DndColumns every other
-     customization list uses (v7.11), so the drag behaves identically. */
-  const columnRow = (t: FormattingTemplate, isShown: boolean) => (
-    <div className="pst-dndrow">
-      <div className="fmt-card-name">
-        <span>{t.name}</span>
-        {t.scriptTypeGroup && <span className="fmt-card-group">{t.scriptTypeGroup}</span>}
-      </div>
-      <button
-        className="fs-dnd-rowbtn"
-        title={isShown ? 'Hide from list when creating a New Script' : 'Show in the list when creating a New Script'}
-        onClick={() => setShown(isShown ? shownIds.filter((x) => x !== t.id) : [...shownIds, t.id])}
-      >{isShown ? '×' : '+'}</button>
-    </div>
-  );
-
-  const columns: DndColumnSpec[] = [
-    {
-      id: 'shown',
-      title: 'Shown',
-      headerExtra: (
-        <button
-          className="fs-dnd-headbtn"
-          title="Show all templates when creating a New Script"
-          onClick={() => setShown(all.map((t) => t.id))}
-        >Show All</button>
-      ),
-      sections: [{ rows: shown.map((t) => ({ key: t.id, content: columnRow(t, true) })) }],
-    },
-    {
-      id: 'hidden',
-      title: 'Hidden',
-      isHidden: true,
-      headerExtra: (
-        <button
-          className="fs-dnd-headbtn"
-          /* The ≥1 rule lives in setShown — New Script must always have
-             something to offer, so Hide All leaves Industry Standard. */
-          onClick={() => setShown([])}
-        >Hide All</button>
-      ),
-      sections: [{ rows: hidden.map((t) => ({ key: t.id, content: columnRow(t, false) })) }],
-    },
-  ];
-
-  const onDrop = (src: { col: string; key: string }, dst: { col: string; idx: number }) => {
-    if (src.col === dst.col) {
-      if (dst.col !== 'shown') return;                     // Hidden has no order
-      const rest = shownIds.filter((x) => x !== src.key);
-      const at = Math.max(0, Math.min(dst.idx, rest.length));
-      setShown([...rest.slice(0, at), src.key, ...rest.slice(at)]);
-      return;
-    }
-    if (dst.col === 'hidden') setShown(shownIds.filter((x) => x !== src.key));
-    else setShown([...shownIds.filter((x) => x !== src.key), src.key]);
-  };
 
   return (
     <>
       <div className="prefs-general">
         <section>
           <h3>Page Templates</h3>
-          <p className="prefs-hint">
-            Every template, and what you can do with one. View opens its page
-            setup — page size, margins, header and footer — which you can edit
-            for the built-ins too.
-          </p>
+          {/* v7.81, Derek: hint removed (helper-text cull). */}
           <div className="pst-list template-select-list">
             <div className="template-select-category">Script Formats</div>
             {SYSTEM_TEMPLATE_LIST.map(card)}
@@ -287,14 +204,6 @@ export default function PageSetupTab({ editor }: { editor?: Editor | null }) {
               Apply to Script
             </button>
           </div>
-        </section>
-        <section>
-          <h3>New Script Picker</h3>
-          <p className="prefs-hint">
-            Drag a template between Shown and Hidden — what’s shown is what the
-            New Script picker offers, in this order.
-          </p>
-          <DndColumns columns={columns} onDrop={onDrop} />
         </section>
       </div>
 

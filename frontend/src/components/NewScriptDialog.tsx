@@ -31,15 +31,11 @@ export interface NewScriptMeta {
 /** The dropdown's options: enabled formats in canonical order, or every
  *  built-in when preferences were never set / were emptied. */
 function formatOptions() {
-  const s = useSettingsStore.getState();
-  // v6.99: user templates join the picker; anything hidden in Settings ▸
-  // Page Setup (missing from enabledScriptFormats) stays out.
+  /* v7.81, Derek: "a new script will always show all options." The
+     enabledScriptFormats filter and its Shown/Hidden configuration are gone —
+     every system format plus every custom template, always. */
   const user = useFormattingTemplateStore.getState().templates.filter((t) => t.category !== 'system');
-  const all = [...SYSTEM_TEMPLATE_LIST, ...user];
-  const enabled = s.formatPreferencesInitialized
-    ? all.filter((t) => s.enabledScriptFormats.includes(t.id))
-    : SYSTEM_TEMPLATE_LIST;
-  return enabled.length > 0 ? enabled : SYSTEM_TEMPLATE_LIST;
+  return [...SYSTEM_TEMPLATE_LIST, ...user];
 }
 
 export default function NewScriptDialog({ open, onClose, onCreate, onBack }: {

@@ -135,10 +135,11 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
     <div className="fs-customize-body">
       <section>
         <h3>Transitions</h3>
+        {/* v7.81, Derek's wording — his message read "options a Transition
+            element"; shipped with the missing "in". */}
         <p className="fs-customize-hint">
-          The transitions offered as you type in a Transition element. Add your
-          own; the built-ins can be hidden but not deleted. Drag between Shown and
-          Hidden, or use the + / × buttons.
+          Choose which transitions are shown as options in a Transition
+          element. You can add your own.
         </p>
         <DndColumns
           columns={[
@@ -230,11 +231,10 @@ export default function EditElementsDialog({ open = true, onClose, embedded = fa
 
       <section>
         <h3>Elements</h3>
+        {/* v7.81, Derek's wording. */}
         <p className="fs-customize-hint">
-          Drag elements between Shown and Hidden — where you drop one is its
-          place in the Element dropdown and the Insert menu. Core elements
-          (Scene Heading, Action, Character, Dialogue) can be reordered but
-          not hidden.
+          Choose which elements are shown as options when beginning a new line
+          on the script:
         </p>
         <DndColumns
           columns={[

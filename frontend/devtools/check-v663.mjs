@@ -48,8 +48,12 @@ try {
   /* v6.70, Derek: "add annotation presets … check the app for any additional
      presets missing from that list." Four joined: annotation presets,
      keyboard shortcuts, design and helper text. */
+  /* v7.81, Derek: "remove helper text and design from the list of options."
+     Seven rows now. The two part ids stay REGISTERED (a file he exported from
+     either window still imports through Restore) — they are only unlisted,
+     and the absence is asserted by name below. */
   const WANT = ['Settings', 'Customizations', 'Themes', 'Workspaces',
-    'Annotation Presets', 'Keyboard Shortcuts', 'Design', 'Helper Text', 'Outline Presets'];
+    'Annotation Presets', 'Keyboard Shortcuts', 'Outline Presets'];
   ok(list.length === WANT.length && list.map((r) => r.label).join(' · ') === WANT.join(' · '),
     `one row per preset item, all ${WANT.length} of them (${list.map((r) => r.label).join(', ')})`);
   const checks = await page.evaluate((p) => document.querySelectorAll(`${p} .fs-presets-check`).length, P);
@@ -74,27 +78,23 @@ try {
   // row is always available.
   const annRow = list.find((r) => r.label === 'Annotation Presets');
   ok(!annRow.disabled && annRow.checked, 'Annotation Presets is always available — six ship by default');
-  /* v7.70 made these two available from first launch, because Derek's 81 design
-     values and his helper-text edits shipped as SEEDED OVERRIDES.
-     v7.76 reversed that on purpose: "take these settings and add them directly
-     into the app code", so the numbers are the tokens' own defaults and the
-     strings are the source. A fresh profile therefore overrides NOTHING, and
-     these two rows are empty again — which is the correct offer, because
-     exporting them would write a file of changes the writer has not made.
-     They join Keyboard Shortcuts, and the three together are what keeps this
-     section meaning something: a row with nothing behind it is disabled rather
-     than quietly exporting an empty file. */
-  for (const n of ['Design', 'Helper Text', 'Keyboard Shortcuts']) {
-    const row = list.find((r) => r.label === n);
+  /* Design and Helper Text: v7.70 seeded them, v7.76 disabled them on a fresh
+     profile, v7.81 removed the rows outright (Derek). Gone from the LISTING —
+     which the row-count assertion above can only half-prove, so by name too. */
+  for (const n of ['Design', 'Helper Text']) {
+    ok(!list.some((r) => r.label === n), `${n} is not offered in the backup list at all`);
+  }
+  {
+    const row = list.find((r) => r.label === 'Keyboard Shortcuts');
     ok(row?.disabled === true && !row.checked,
-      `${n} starts empty on a fresh profile, so it is disabled and unticked`);
+      'Keyboard Shortcuts starts empty on a fresh profile, so it is disabled and unticked');
   }
 
   /* ── 4: select all / none ── */
   await page.click('.fs-presets-all');
   await settle(page);
   const noneOn = (await rows()).filter((r) => r.checked).length;
-  ok(noneOn === 0, `"Select none" clears every box (${noneOn} left on)`);
+  ok(noneOn === 0, `"Deselect All" clears every box (${noneOn} left on)`);
   const label = await page.evaluate(() => document.querySelector('.fs-presets-all').textContent);
   ok(label === 'Select all', `and the link flips to Select all ("${label}")`);
   await page.click('.fs-presets-all');
@@ -127,7 +127,7 @@ try {
     const label = await page.evaluate(() => document.querySelector('.fs-presets-all').textContent);
     await page.click('.fs-presets-all');
     await settle(page);
-    if (label === 'Select none') break;
+    if (label === 'Deselect All') break;   // v7.81, Derek's label
   }
   const cleared = (await rows()).filter((r) => r.checked).length;
   ok(cleared === 0, `every box can be cleared (${cleared} left on)`);
@@ -149,7 +149,9 @@ try {
   }, P);
   ok(/nothing to include/i.test(emptyTip), `an empty item says why it cannot be ticked ("${emptyTip}")`);
   const intro = await page.evaluate((p) => document.querySelector(`${p} .fs-presets-intro`)?.textContent ?? '', P);
-  ok(/ONE preset file/i.test(intro), `the tab states the promise up front ("${intro.slice(0, 60)}…")`);
+  // v7.81, Derek's wording replaced the ONE-file promise line.
+  ok(/Check all items you want to include in the backup file/.test(intro),
+    `the tab opens with Derek's instruction line ("${intro.slice(0, 60)}…")`);
 
 } catch (e) {
   console.log('PROBE ERROR:', e.message);

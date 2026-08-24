@@ -465,19 +465,14 @@
   overflow-y: auto;
   flex: 1;
 }
-.fmt-dialog-hint {
-  margin: 0 0 12px 0;
-  font-size: 13px;
-  color: var(--fd-text-muted, var(--fd-text-dim));
-  line-height: 1.45;
-}
+/* v7.81: .fmt-dialog-hint removed with ScriptFormatPreferencesDialog. */
 .fmt-dialog .dialog-actions {
   padding: 12px 20px;
   border-top: 1px solid var(--fd-border);
 }
 
-/* Card list — used by both the multi-select preferences dialog (with checkbox)
-   and the single-select picker (without checkbox). */
+/* Card list — the single-select format picker (the multi-select preferences
+   dialog that shared it left in v7.81). */
 .fmt-card-list {
   display: flex;
   flex-direction: column;
@@ -507,12 +502,7 @@
   background: var(--fd-accent-bg, rgba(59,130,246,0.12));
   border-color: var(--fd-accent, #4a90d9);
 }
-.fmt-card-checkbox {
-  margin-top: 2px;
-  flex-shrink: 0;
-  cursor: pointer;
-  accent-color: var(--fd-accent, #4a90d9);
-}
+/* v7.81: .fmt-card-checkbox removed with the multi-select preferences dialog. */
 .fmt-card-info { flex: 1; min-width: 0; }
 .fmt-card-name {
   font-size: 14px;

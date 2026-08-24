@@ -34,9 +34,33 @@ const CheckIcon: React.FC = () => (
   </svg>
 );
 
-const SuggestionRulesEditor: React.FC = () => {
+/* v7.81, Derek: "Move the 'All elements' button up one row. Add 'Show:'
+   before it." The mode row used to render inside this editor, one row below
+   the section heading; his layout puts it ON the heading row, and the heading
+   lives in CustomizePanelsDialog. The control is exported rather than copied —
+   mode is store state, so both pieces read the same switch. */
+export const SuggestionModeToggle: React.FC = () => {
   const mode = useEditorStore((s) => s.suggestionMode);
   const setMode = useEditorStore((s) => s.setSuggestionMode);
+  return (
+    <span className="fs-sugg-mode">
+      <span className="fs-sugg-mode-label">Show:</span>
+      <span className="fs-customize-seg">
+        <button
+          className={mode !== 'all' ? 'active' : ''}
+          onClick={() => setMode('smart')}
+        >Script-Aware</button>
+        <button
+          className={mode === 'all' ? 'active' : ''}
+          onClick={() => setMode('all')}
+        >All Elements</button>
+      </span>
+    </span>
+  );
+};
+
+const SuggestionRulesEditor: React.FC = () => {
+  const mode = useEditorStore((s) => s.suggestionMode);
   const rules = useEditorStore((s) => s.suggestionRules);
   const setRules = useEditorStore((s) => s.setSuggestionRules);
   const effective = rules ?? DEFAULT_SUGGESTION_RULES;
@@ -62,20 +86,8 @@ const SuggestionRulesEditor: React.FC = () => {
 
   return (
     <div className="fs-sugg-editor">
-      <div className="fs-sugg-mode">
-        <span className="fs-sugg-mode-label">Show:</span>
-        <span className="fs-customize-seg">
-          <button
-            className={mode !== 'all' ? 'active' : ''}
-            onClick={() => setMode('smart')}
-          >Script-Aware</button>
-          <button
-            className={mode === 'all' ? 'active' : ''}
-            onClick={() => setMode('all')}
-          >All Elements</button>
-        </span>
-        {/* v4.65: Reset moved to the tab's Reset section (customizeResets). */}
-      </div>
+      {/* v7.81: the Show toggle renders on the section heading row now —
+          SuggestionModeToggle above, placed by CustomizePanelsDialog. */}
       {mode !== 'all' && (
         <div className="fs-sugg-tablewrap">
           <table className="fs-sugg-table">

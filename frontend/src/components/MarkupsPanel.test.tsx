@@ -93,8 +93,8 @@ describe('MarkupsPanel', () => {
     expect(cardTexts()).toEqual([]);
   });
 
-  it('the empty state invites the first markup', () => {
+  it('the empty state is Derek\'s v7.81 wording, not the old how-to', () => {
     renderPanel();
-    expect(container.querySelector('.markups-empty')?.textContent).toMatch(/annotations collect here/i);
+    expect(container.querySelector('.markups-empty')?.textContent).toBe('No annotations yet.');
   });
 });

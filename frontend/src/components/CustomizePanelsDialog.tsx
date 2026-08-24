@@ -22,7 +22,7 @@ import { DEFAULT_TOOLBAR_LEFT, stripTall } from './toolbarBuiltins';
 import RibbonPalette from './RibbonPalette';
 import { buildRibbonPalette } from './ribbonPaletteData';
 import EditElementsDialog from './EditElementsDialog';
-import SuggestionRulesEditor from './SuggestionRulesEditor';
+import SuggestionRulesEditor, { SuggestionModeToggle } from './SuggestionRulesEditor';
 import MoresContdsDialog from './MoresContdsDialog';
 import { TabActionBar, type CustomizeTabId } from './customizeResets';
 import AddMenu from './AddMenu';
@@ -839,7 +839,7 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
       <div className={soloCategory ? 'fs-customize-solo' : 'prefs-layout fs-customize-layout'}>
         {!soloCategory && (
         <div className="prefs-tabs fs-customize-tabs">
-          {([['elements', 'Editor'], ['toolbar', 'Toolbar'], ['panels', 'Side Panels'], ['qat', 'Quick Access'], ['context', 'Context Menu'], ['markups', 'Annotations'], ['themes', 'Themes']] as const)
+          {([['elements', 'Editor'], ['toolbar', 'Ribbon Toolbar'], ['panels', 'Side Panels'], ['qat', 'Quick Access'], ['context', 'Context Menu'], ['markups', 'Annotations'], ['themes', 'Themes']] as const)
             .map(([id, label]) => (
             <button
               key={id}
@@ -867,8 +867,11 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
           )}
           {activeCat === 'toolbar' && (<>
           <section>
-            <h3>Toolbar Layout</h3>
-            {/* v3.39: the helper text moved to the tab info icon (TAB_HINTS). */}
+            {/* v7.81, Derek: "Toolbar" is "Ribbon Toolbar" — here AND the rail
+                tab above, matching the Settings sidebar, which was renamed
+                first and left this window behind. His standing rule: a rename
+                in either surface lands in both. */}
+            <h3>Ribbon Toolbar</h3>
             {/* v3.36: the SOURCE side only — the real bar is the drop
                 surface (see RibbonPalette / ribbonDrag). */}
             <RibbonPalette
@@ -886,11 +889,23 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                 </span>
               </>}
             />
+            {/* v7.81, Derek: his how-to line, at the bottom of the window. */}
+            <p className="fs-customize-hint fs-hint-below">
+              Customize the ribbon toolbar by adding or removing items directly
+              from the bar at the top of the screen. You can create sections,
+              section titles, dividers, and spacers. Icons will appear small
+              when in two-row sections, and large when in single-row sections.
+            </p>
           </section>
           </>)}
           {activeCat === 'qat' && (<>
           <section>
             <h3>Quick Access Toolbar</h3>
+            {/* v7.81, Derek's wording (his message read "items appears"). */}
+            <p className="fs-customize-hint">
+              Choose which items appear in the toolbar that sits between the
+              menu bar and the ribbon toolbar:
+            </p>
             <DndColumns
               columns={[
                 {
@@ -976,7 +991,17 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                 keyed on the element above — his follows-what table is the
                 default, edited here; All Elements switches the filter off. */}
             <section>
-              <h3>Element Suggestions</h3>
+              {/* v7.81, Derek: "Element Suggestions" is "Element Rules"; the
+                  Show toggle sits on the heading row (up one row from the
+                  editor's own row), his helper line under it. */}
+              <div className="fs-sec-headrow">
+                <h3>Element Rules</h3>
+                <SuggestionModeToggle />
+              </div>
+              <p className="fs-customize-hint">
+                Choose which script elements will be suggested after another
+                element:
+              </p>
               <SuggestionRulesEditor />
               {/* v7.58: this section's reset, under this section. */}
               <TabActionBar tab="elements" section="suggestions" />

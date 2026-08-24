@@ -121,7 +121,8 @@ export const CUSTOMIZE_RESETS: ResetAction[] = [
     },
   },
   {
-    id: 'suggestions', label: 'Reset Element Suggestions', tab: 'elements', section: 'suggestions',
+    // v7.81: the section is "Element Rules" now; its reset follows the rename.
+    id: 'suggestions', label: 'Reset Element Rules', tab: 'elements', section: 'suggestions',
     what: 'the element suggestion rules',
     run: () => {
       const st = useEditorStore.getState();

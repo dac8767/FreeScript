@@ -192,16 +192,8 @@ export default function ThemesTab() {
           <span>Match the system's light or dark appearance</span>
         </label>
       </div>
-      <p className="fs-customize-hint">
-        Switches between the Dark and Light themes when macOS does. Picking a
-        theme by hand still works; the next system change follows again.
-      </p>
-      <p className="fs-customize-hint">
-        Click a theme to switch to it. Drag themes between Shown and Hidden —
-        where you drop one is its place in the View → Themes menu. Built-in
-        themes can be reordered and hidden, but not edited or deleted; the
-        theme you're using can't be hidden.
-      </p>
+      {/* v7.81, Derek: both explanatory paragraphs removed — part of the
+          helper-text cull across Settings/Customize. */}
 
       {/* v1.81: Outlook-style — Shown | Hidden, drag between them. */}
       <DndColumns

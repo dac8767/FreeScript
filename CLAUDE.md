@@ -166,6 +166,11 @@ it actually produced — not by staring at the source and reasoning.
   with a reason is respected; quiet failure is not. If you got something wrong, say that
   too — plainly, and then fix it.
 - **He renames things constantly.** When he does, rename everywhere, immediately.
+  v7.81 addendum, his words: *"any changes made to the equivalent sections in
+  settings should be made in the customize window as well"* — the Settings
+  sidebar and the Customize window show the same tabs, and a rename or text
+  change in one lands in both in the SAME change ("Ribbon Toolbar" reached
+  Settings first and left Customize saying "Toolbar" for three versions).
 - **The About window's open-source list tracks the real dependencies** (v4.76,
   Derek's standing rule): removing a tool that retires a library — or adding or
   swapping one — updates the "Made possible by open source" list in

@@ -52,10 +52,15 @@ ok('View no longer offers Customize…',
   !viewItems.some((i) => i.label === 'Customize…'), JSON.stringify(viewItems.map((i) => i.label).slice(0, 6)));
 ok('Format offers it now',
   formatItems.some((i) => i.label === 'Customize…'), JSON.stringify(formatItems.map((i) => i.label)));
-/* The other two Customize doors are scoped ones that belong where they are —
-   this must not have swept them up. */
-ok('…and the scoped doors are untouched',
-  formatItems.some((i) => /Script Format Preferences/.test(i.label)),
+/* When this was written, Script Format Preferences… was a scoped door that
+   had to survive the sweep. v7.81 removed the dialog itself (Derek: "a new
+   script will always show all options"), so the assertion flips — the door
+   must be GONE, while the Formatting Template one stays. */
+ok('…Script Format Preferences is gone with its dialog',
+  !formatItems.some((i) => /Script Format Preferences/.test(i.label)),
+  JSON.stringify(formatItems.map((i) => i.label)));
+ok('…and the Formatting Template door survived',
+  formatItems.some((i) => /Formatting Template/.test(i.label)),
   JSON.stringify(formatItems.map((i) => i.label)));
 
 /* ── the two Settings sections that read alike ───────────────────────────── */

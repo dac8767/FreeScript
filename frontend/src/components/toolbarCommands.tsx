@@ -92,7 +92,8 @@ export const TOOLBAR_COMMANDS: ToolbarCommand[] = [
   { id: 'screenshot', label: 'Screenshot', icon: <FaCamera />, run: () => { void import('../utils/screenshot').then((m) => m.captureScreenshot()); } },
   // v3.25: bookmarks removed (markers cover them); Last Edit stays pinnable.
   { id: 'lastEditLocation', label: 'Go to Last Edited', icon: <FaPencilAlt />, run: () => emit('lastEditLocation') },
-  { id: 'formatPrefs', label: 'Script Format Preferences', icon: <FaFileAlt />, run: () => emit('formatPrefs') },
+  // v7.81: 'formatPrefs' removed with the Script Format Preferences dialog —
+  // the v6.41 rule discards the token from any saved layout still carrying it.
   { id: 'grammarSettings', label: 'Grammar & Spelling Settings', icon: <FaSpellCheck />, run: () => emit('grammarSettings') },
   { id: 'about', label: 'About ScriptCraft', icon: <FaInfoCircle />, run: () => emit('about') },
   { id: 'keyboardShortcuts', label: 'Keyboard Shortcuts', icon: <FaKeyboard />, run: () => emit('keyboardShortcuts') },

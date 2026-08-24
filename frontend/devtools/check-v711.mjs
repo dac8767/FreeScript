@@ -90,43 +90,23 @@ const defaults = await page.evaluate(() => ({
 ok('Backup & Restore carries the preset checklist', defaults.heads.includes('Backup'), JSON.stringify(defaults.heads));
 ok('…and the presets panel renders in it', defaults.hasPanel, '');
 
-// ── 3. Page Setup uses the shared Shown/Hidden columns ───────────────
-console.log('\n3. Page Setup columns');
+// ── 3. Page Setup: the Shown/Hidden columns are GONE (v7.81) ─────────
+/* This section used to assert the shared DndColumns wired to
+   enabledScriptFormats. Derek retired the feature — "a new script will
+   always show all options" — so the assertion flips: the tab is the
+   template list, with no columns and no picker configuration left in it. */
+console.log('\n3. Page Setup has no Shown/Hidden columns');
 await page.evaluate(() => window.__scStore.getState().openPreferences('page'));
-await page.waitForSelector('.prefs-content .fs-dnd-cols', { timeout: 8000 });
-const cols = await page.evaluate(() => {
-  const heads = [...document.querySelectorAll('.prefs-content .fs-dnd-col-head')].map((e) => e.textContent.trim());
-  const bodies = [...document.querySelectorAll('.prefs-content .fs-dnd-col')].map((c) => ({
-    rows: c.querySelectorAll('.fs-dnd-row').length,
-    handles: c.querySelectorAll('.fs-customize-drag').length,
-  }));
-  return { heads, bodies };
-});
-ok('two columns, Shown and Hidden', cols.heads.length === 2
-  && /Shown/.test(cols.heads[0]) && /Hidden/.test(cols.heads[1]), JSON.stringify(cols.heads));
-ok('with Show All / Hide All in the headers',
-  /Show All/.test(cols.heads[0]) && /Hide All/.test(cols.heads[1]), JSON.stringify(cols.heads));
-ok('the templates are rows in the Shown column', cols.bodies[0]?.rows >= 6, JSON.stringify(cols.bodies));
-ok('every row has a drag handle', cols.bodies[0]?.handles === cols.bodies[0]?.rows, JSON.stringify(cols.bodies));
-ok('the old single-list markup is gone', await page.evaluate(() =>
-  document.querySelectorAll('.prefs-content .pst-listhead').length === 0), '');
-
-// hiding a template moves it across
-const moved = await page.evaluate(async () => {
-  const { useSettingsStore } = await window.__scImport('/src/stores/settingsStore.ts');
-  const before = document.querySelectorAll('.fs-dnd-col')[0].querySelectorAll('.fs-dnd-row').length;
-  const btn = document.querySelectorAll('.fs-dnd-col')[0].querySelector('.fs-dnd-rowbtn');
-  btn.click();
-  await new Promise((r) => setTimeout(r, 120));
-  return {
-    before,
-    shown: document.querySelectorAll('.fs-dnd-col')[0].querySelectorAll('.fs-dnd-row').length,
-    hidden: document.querySelectorAll('.fs-dnd-col')[1].querySelectorAll('.fs-dnd-row').length,
-    stored: useSettingsStore.getState().enabledScriptFormats.length,
-  };
-});
-ok('the row button moves a template to Hidden',
-  moved.shown === moved.before - 1 && moved.hidden >= 1, JSON.stringify(moved));
+await page.waitForSelector('.pst-list', { timeout: 8000 });
+await settle(page);
+const pst = await page.evaluate(() => ({
+  cols: document.querySelectorAll('.prefs-content .fs-dnd-cols').length,
+  rows: document.querySelectorAll('.pst-list .template-select-item').length,
+  heads: [...document.querySelectorAll('.prefs-content h3')].map((e) => e.textContent.trim()),
+}));
+ok('no DnD columns render in the tab', pst.cols === 0, JSON.stringify(pst));
+ok('the template list is still there, every built-in on it', pst.rows >= 6, `rows=${pst.rows}`);
+ok('and no "New Script Picker" section remains', !pst.heads.includes('New Script Picker'), JSON.stringify(pst.heads));
 
 // ── 5. the native Settings icon ──────────────────────────────────────
 console.log('\n5. native Settings icon');

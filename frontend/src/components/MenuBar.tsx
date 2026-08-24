@@ -52,11 +52,9 @@ import { SCRIPT_EXT } from '../utils/scriptFileExt';
 import { trackChangesPluginKey } from '../editor/trackChanges';
 import PageSetupDialog from './PageSetupDialog';
 import TemplateSelectDialog from './TemplateSelectDialog';
-import ScriptFormatPreferencesDialog from './ScriptFormatPreferencesDialog';
 import ScriptFormatPickerDialog from './ScriptFormatPickerDialog';
 import { useFormattingTemplateStore } from '../stores/formattingTemplateStore';
 import { applyScriptFormat } from '../utils/applyScriptFormat';
-import { INDUSTRY_STANDARD_ID } from '../stores/formattingTypes';
 import { getCurrentElementRule, getLockedFormatting } from '../utils/effectiveFormatting';
 import { pluginRegistry } from '../plugins/registry';
 import { LuSearch, LuZoomIn } from 'react-icons/lu';
@@ -369,10 +367,12 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const [templateSelectOpen, setTemplateSelectOpen] = useState(false);
 
   // ── Script-format preferences (multi-select) and per-script picker ──
-  // `formatPrefsOpen` controls the multi-select preferences dialog. When `firstRun`
-  // is true the dialog is non-cancellable and triggers `pendingFormatApply` after save.
-  // `formatPickerOpen` is the single-select dialog shown when 2+ formats are enabled.
-  const [formatPrefsOpen, setFormatPrefsOpen] = useState<{ firstRun: boolean; afterSave: 'apply-new-screenplay' | null } | null>(null);
+  /* v7.81, Derek: "a new script will always show all options." The
+     multi-select Script Format Preferences dialog (and its first-run gate)
+     configured which formats the picker offered; with the filter gone it
+     configured nothing, so the dialog, its menu door, its toolbar command and
+     the enabledScriptFormats gate are all removed. The stored key stays in
+     localStorage, unread — deleting it breaks nobody's saved backup. */
   const [formatPickerOpen, setFormatPickerOpen] = useState(false);
 
   // ── Per-attribute locking from active template ──
@@ -688,30 +688,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const promptForNewScreenplayFormat = useCallback((mode: 'reset' | 'apply-only') => {
     if (!editor) return;
     setFormatPickerMode(mode);
-    const settings = useSettingsStore.getState();
-    const enabled = settings.enabledScriptFormats;
-
-    // First run — never asked the user. Show the multi-select prefs dialog.
-    if (!settings.formatPreferencesInitialized) {
-      setFormatPrefsOpen({ firstRun: true, afterSave: 'apply-new-screenplay' });
-      return;
-    }
-
-    // No formats enabled (edge case — user deselected everything).
-    if (enabled.length === 0) {
-      setFormatPrefsOpen({ firstRun: false, afterSave: 'apply-new-screenplay' });
-      return;
-    }
-
-    // Exactly one enabled — apply it directly, no prompt.
-    if (enabled.length === 1) {
-      finishNewScreenplayWithFormat(enabled[0], mode);
-      return;
-    }
-
-    // 2+ enabled — show the quick single-select picker.
+    // v7.81: straight to the picker, which always offers every format.
     setFormatPickerOpen(true);
-  }, [editor, finishNewScreenplayWithFormat]);
+  }, [editor]);
 
   // v1.57: launch found nothing to open — show the New Script prompt.
   // No unsaved-work guard: this only fires on a fresh, empty session.
@@ -818,7 +797,6 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
     insertImage: () => useEditorStore.getState().imageInsertHandler?.(),
     insertMarker: () => insertOutlineLine('⚑ '),
     showRulers: () => { const s = useEditorStore.getState(); s.setRulersVisible(!s.rulersVisible); },
-    formatPrefs: () => setFormatPrefsOpen({ firstRun: false, afterSave: null }),
     grammarSettings: () => setGrammarRulesPanelOpen(true),
     about: () => setAboutOpen(true),
     keyboardShortcuts: () => setShortcutsOpen(true),
@@ -1347,7 +1325,6 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         },
         { separator: true, label: '' },
         { icon: <FaFileAlt />, label: `Formatting Template (${activeTemplate.name})...`, action: () => setTemplateSelectOpen(true) },
-        { icon: <FaFileAlt />, label: 'Script Format Preferences…', action: () => setFormatPrefsOpen({ firstRun: false, afterSave: null }) },
         /* v4.86 removed Customize from View; v6.14 put it back there at Derek's
            ask; v7.65, Derek: "move customize from the view menu to format
            menu". It sits with the other two doors that configure how the app
@@ -2193,26 +2170,8 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
     {templateSelectOpen && (
       <TemplateSelectDialog editor={editor} onClose={() => setTemplateSelectOpen(false)} />
     )}
-    {formatPrefsOpen && (
-      <ScriptFormatPreferencesDialog
-        firstRun={formatPrefsOpen.firstRun}
-        onConfirm={(ids) => {
-          const next = formatPrefsOpen;
-          setFormatPrefsOpen(null);
-          if (next?.afterSave === 'apply-new-screenplay') {
-            // After saving prefs, immediately route the new-screenplay action through
-            // the same logic again (1 enabled = apply directly, 2+ = show picker).
-            if (ids.length === 1) finishNewScreenplayWithFormat(ids[0], formatPickerMode);
-            else if (ids.length > 1) setFormatPickerOpen(true);
-            else finishNewScreenplayWithFormat(INDUSTRY_STANDARD_ID, formatPickerMode);
-          }
-        }}
-        onCancel={() => setFormatPrefsOpen(null)}
-      />
-    )}
     {formatPickerOpen && (
       <ScriptFormatPickerDialog
-        enabledIds={useSettingsStore.getState().enabledScriptFormats}
         onPick={(id) => {
           setFormatPickerOpen(false);
           finishNewScreenplayWithFormat(id, formatPickerMode);

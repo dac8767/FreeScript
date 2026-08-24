@@ -96,7 +96,14 @@ export default function PresetsPanel({ showImports = true, preCheck }: {
   const [, bump] = useState(0);
 
   const counts = Object.fromEntries(PRESET_PARTS.map((p) => [p.id, p.count()])) as Record<PresetPartId, number | null>;
-  const available = PRESET_PARTS.filter((p) => counts[p.id] !== 0).map((p) => p.id);
+  /* v7.81, Derek: "remove helper text and design from the list of options."
+     The two windows are leaving the release and their values are the code now
+     (v7.76), so a backup row for them only describes leftovers. LISTING only —
+     the part ids stay registered, so a file he exported from either window
+     still imports through Restore. */
+  const HIDDEN_PARTS: PresetPartId[] = ['design', 'helpertext'];
+  const listed = PRESET_PARTS.filter((p) => !HIDDEN_PARTS.includes(p.id));
+  const available = listed.filter((p) => counts[p.id] !== 0).map((p) => p.id);
   // Everything the app actually has is checked to begin with — the common
   // case is "save all of it", and the old Full Preset was one click.
   const [checked, setChecked] = useState<PresetPartId[]>(
@@ -146,16 +153,19 @@ export default function PresetsPanel({ showImports = true, preCheck }: {
 
   return (
     <div className="fs-presets">
+      {/* v7.81, Derek: an empty row above this line, his wording, and
+          "Select none" is "Deselect All". */}
+      <div className="prefs-gap-row" />
       <div className="fs-presets-intro">
-        Tick what to include. Everything you tick is saved in ONE preset file.
+        Check all items you want to include in the backup file:
         <button
           className="fs-presets-all"
           onClick={() => setChecked(allOn ? [] : available)}
           title={allOn ? 'Uncheck all items' : 'Check all items'}
-        >{allOn ? 'Select none' : 'Select all'}</button>
+        >{allOn ? 'Deselect All' : 'Select all'}</button>
       </div>
 
-      {PRESET_PARTS.map((p) => {
+      {listed.map((p) => {
         const empty = counts[p.id] === 0;
         return (
           <label key={p.id} className={`fs-presets-row${empty ? ' fs-presets-row-empty' : ''}`}>

@@ -140,10 +140,13 @@ const TemplateEditorDialog: React.FC<TemplateEditorDialogProps> = ({
                 Override
               </button>
             </div>
+            {/* v7.81, Derek asked what the difference is — the old hint spoke
+                from the code's side ("element-level styling", "per-instance").
+                Rules vs defaults is the actual distinction. */}
             <span className="template-editor-hint">
               {mode === 'enforce'
-                ? 'Formatting is locked — users cannot change element-level styling.'
-                : 'Formatting sets defaults — users can override per-instance.'}
+                ? 'These are the rules — the template’s formatting is locked while writing.'
+                : 'These are the defaults — formatting can still be changed while writing.'}
             </span>
           </div>
         </div>

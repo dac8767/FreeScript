@@ -8,23 +8,23 @@
  */
 
 import React from 'react';
-import { SYSTEM_TEMPLATES, useFormattingTemplateStore } from '../stores/formattingTemplateStore';
+import { SYSTEM_TEMPLATE_LIST, useFormattingTemplateStore } from '../stores/formattingTemplateStore';
 import { Modal } from './Modal';
 
 interface Props {
-  enabledIds: string[];
   onPick: (templateId: string) => void;
   onCancel: () => void;
 }
 
-const ScriptFormatPickerDialog: React.FC<Props> = ({ enabledIds, onPick, onCancel }) => {
+const ScriptFormatPickerDialog: React.FC<Props> = ({ onPick, onCancel }) => {
   const userTemplates = useFormattingTemplateStore((s) => s.templates);
-  // Resolve to template objects — system first, then user templates
-  // (v6.99: shown custom templates appear here too) — filtering out
-  // anything stale (e.g. a deleted custom template).
-  const options = enabledIds
-    .map((id) => SYSTEM_TEMPLATES[id] || userTemplates.find((t) => t.id === id))
-    .filter((t): t is NonNullable<typeof t> => Boolean(t));
+  /* v7.81, Derek: "a new script will always show all options" — every system
+     format, then every custom template. The enabledIds filter (and the
+     Shown/Hidden columns that fed it) are gone. */
+  const options = [
+    ...SYSTEM_TEMPLATE_LIST,
+    ...userTemplates.filter((t) => t.category !== 'system'),
+  ];
 
   return (
     <Modal onClose={onCancel} boxClass="fmt-dialog fmt-dialog-narrow">

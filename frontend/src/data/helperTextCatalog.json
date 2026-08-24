@@ -1580,15 +1580,6 @@
   "label": "Hide All"
  },
  {
-  "text": "Hide from list when creating a New Script",
-  "kind": "tooltip",
-  "sites": 1,
-  "area": "Everything Else",
-  "where": [
-   "components/PageSetupTab.tsx"
-  ]
- },
- {
   "text": "Hide occurrences",
   "kind": "tooltip",
   "sites": 1,
@@ -2715,16 +2706,6 @@
   "label": "Show All"
  },
  {
-  "text": "Show all templates when creating a New Script",
-  "kind": "tooltip",
-  "sites": 1,
-  "area": "Everything Else",
-  "where": [
-   "components/PageSetupTab.tsx"
-  ],
-  "label": "Show All"
- },
- {
   "text": "Show all tools",
   "kind": "tooltip",
   "sites": 1,
@@ -2769,15 +2750,6 @@
   "area": "Customize Window",
   "where": [
    "components/CustomizePanelsDialog.tsx"
-  ]
- },
- {
-  "text": "Show in the list when creating a New Script",
-  "kind": "tooltip",
-  "sites": 1,
-  "area": "Everything Else",
-  "where": [
-   "components/PageSetupTab.tsx"
   ]
  },
  {

@@ -611,10 +611,7 @@ function RegionTab() {
             ))}
           </select>
         </label>
-        <p className="prefs-hint">
-          Used wherever ScriptCraft shows a date — the Version autofill, the
-          changelog, and friends.
-        </p>
+        {/* v7.81, Derek: hint removed (helper-text cull). */}
         <label className="prefs-check-row">
           <span>Time format</span>
           <select
@@ -626,10 +623,7 @@ function RegionTab() {
             <option value="24h">24-hour (23:30)</option>
           </select>
         </label>
-        <p className="prefs-hint">
-          How times are typed and shown — for example Vomit Draft's
-          &ldquo;Write until&rdquo; field and its unlock time.
-        </p>
+        {/* v7.81, Derek: hint removed (helper-text cull). */}
       </section>
     </div>
   );
@@ -693,11 +687,7 @@ function GeneralTab() {
           />
           <span>Reopen windows on their last used tab</span>
         </label>
-        <p className="prefs-hint">
-          Applies to every window with tabs — this Settings window (including
-          the Customize tabs), Characters, Production Tags. When off, they
-          always open on their first tab.
-        </p>
+        {/* v7.81, Derek: hint removed (helper-text cull). */}
       </section>
 
       {/* v4.26, Derek: "Match the system appearance" moved to Customize >
@@ -715,12 +705,7 @@ function GeneralTab() {
           />
           <span>Check spelling as you type</span>
         </label>
-        <p className="prefs-hint">
-          Misspellings get the red squiggle. Applies to every script that
-          hasn't made its own choice; a script's Tools → Spell Check toggle
-          still wins once set. Names and anything typed in ALL CAPS are never
-          checked.
-        </p>
+        {/* v7.81, Derek: hint removed (helper-text cull). */}
         {/* v3.24, Derek's menu reorg #6: the rules panel opens from HERE now
             (it left the Project > Spell Check submenu — it's configuration).
             The bus command is the same one the old menu item used. */}
@@ -805,25 +790,27 @@ function BackupRestoreTab() {
           settings-only section to be. */}
       <section>
         <h3>Backup</h3>
-        {/* PresetsPanel's own line already explains the checklist — this one
-            says only what it does not: WHY you would want the file. */}
-        <p className="prefs-hint">
+        {/* v7.81, Derek's pass over this tab: his wording, hints flush with
+            the headings (prefs-hint's 26px indent is for hints under a
+            checkbox row — these two sit under an h3). */}
+        <p className="prefs-hint prefs-hint-flush">
           Settings and customizations live in this app's local storage, which
-          isn't shared between installs — a backup is how you carry them to
-          another one.
+          isn't shared between installs. Back them up for safe keeping.
         </p>
         <PresetsPanel showImports={false} />
-        <p className="prefs-hint">
-          Sign-in, cloud tokens and this device's identity are left out of the
-          file for safety — sign in once on the other app.
+        <p className="prefs-hint prefs-hint-flush">
+          Login info, cloud tokens, and device identity are left out of the
+          file for safety.
         </p>
       </section>
       <section>
         <h3>Restore</h3>
-        <p className="prefs-hint">
+        <p className="prefs-hint prefs-hint-flush">
           Load a file saved above. It overrides what you have for whatever the
           file carries, then reloads. Your scripts are not affected.
         </p>
+        {/* v7.81, Derek: an empty row between the text and the button. */}
+        <div className="prefs-gap-row" />
         <div className="prefs-check-row">
           {/* ONE import door, and it reads both shapes — the preset files the
               Backup section writes and the whole-app settings files written

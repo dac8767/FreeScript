@@ -39,9 +39,10 @@ const layout = await page.evaluate(() => {
   };
 });
 ok('every template is in the list', layout.listRows >= 6, `rows=${layout.listRows}`);
-ok('the list sits ABOVE the columns', layout.listBottom <= layout.colsTop + 1,
-  `list ends ${Math.round(layout.listBottom)}, columns start ${Math.round(layout.colsTop)}`);
-ok('the two areas are named', layout.heads.length >= 2, JSON.stringify(layout.heads));
+/* v7.81, Derek retired the New Script Picker columns — the tab is the list
+   alone now, so "list above columns" becomes "no columns at all". */
+ok('the Shown/Hidden columns are gone', layout.colsTop === 0, `columns start ${Math.round(layout.colsTop)}`);
+ok('the one remaining area is named', layout.heads.includes('Page Templates'), JSON.stringify(layout.heads));
 
 const buttons = await page.evaluate(() => {
   const kids = [...document.querySelector('.pst-list').children];

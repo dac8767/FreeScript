@@ -1,5 +1,18 @@
 [
   {
+    "version": "7.81",
+    "date": "2026-08-24",
+    "changes": [
+      "Your fifteen-item pass over Settings and Customize, all in one go. The long explanatory paragraphs are gone or replaced with your short instructions \u2014 Themes, Context Menu, Elements, Transitions, the date and time formats, spell check, tabbed windows, and the Page Templates blurb.",
+      "Element Suggestions is Element Rules, with your helper line under it and the Show toggle up on the heading row.",
+      "The Customize window's Toolbar tab is Ribbon Toolbar, matching the Settings sidebar \u2014 and your how-to line now closes that window. Quick Access has its helper line too.",
+      "Backup & Restore reworded and re-spaced as you asked: your intro line with an empty row above it, Deselect All, both hints flush with their headings, the shorter safety line, and an empty row before the Restore button. Design and Helper Text are out of the backup list \u2014 their values live in the code now; a file you exported from either window still restores.",
+      "The New Script Picker's Shown/Hidden configuration is gone \u2014 a new script always offers every format. The old Script Format Preferences dialog and its first-run gate went with it.",
+      "The annotations panel's empty state now just says \"No annotations yet.\"",
+      "The Enforce/Override hint in the template editor answers the question you asked: Enforce means the template's formatting is the rules, locked while writing; Override means it is the defaults, changeable while writing."
+    ]
+  },
+  {
     "version": "7.78",
     "date": "2026-08-22",
     "changes": [

@@ -209,8 +209,9 @@ export default function MarkupsPanel({ editor }: { editor: Editor | null }) {
       <div className="markups-list">
         {visible.length === 0 && (
           <div className="markups-empty">
+            {/* v7.81, Derek's wording — was a how-to sentence about the + button. */}
             {markups.length === 0
-              ? 'Select script text and hit the + above — your annotations collect here.'
+              ? 'No annotations yet.'
               : 'No annotations match the current filter.'}
           </div>
         )}

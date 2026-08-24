@@ -24,7 +24,8 @@
  *     must not highlight with nothing to act on the highlight, so the row and
  *     its Apply are checked as a pair.
  *
- * And the Shown/Hidden columns must still be below all of it, which is the
+ * (Until v7.81 the Shown/Hidden columns had to sit below all of it — Derek
+ * then retired the picker filter, so their absence is asserted instead.) The
  * half of Derek's message it would be easiest to satisfy by accident and lose
  * by accident too.
  */
@@ -86,8 +87,10 @@ ok('…and the one that the open script uses is marked current',
 ok('every card offers View', tab.every((c) => c.btns.includes('View')), JSON.stringify(tab[0]?.btns));
 ok('the window\'s + Create Template came too', tabShape.createBtn === true, JSON.stringify(tabShape));
 /* Derek: "keep the shown/hidden section below this." */
-ok('the Shown/Hidden columns are still below the list',
-  tabShape.colsTop > tabShape.listBottom, JSON.stringify(tabShape));
+/* v7.81, Derek retired the New Script Picker columns entirely — what was
+   "still below the list" is now "not there at all". */
+ok('the Shown/Hidden columns are gone from the tab',
+  tabShape.colsTop === 0, JSON.stringify(tabShape));
 /* The one deliberate deviation from the window, and the reason it is one. */
 ok('the list is not clipped inside its own scroller here',
   tabShape.clipped === false, JSON.stringify(tabShape));

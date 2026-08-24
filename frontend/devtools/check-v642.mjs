@@ -207,11 +207,13 @@ try {
       editableDefaults: builtIns.filter((c) => btns(c).includes('Edit')).length,
     };
   });
-  /* v7.11, Derek: "change the page setup tab so that it uses the Shown and
-     Hidden windows like the screenshot" — the shared DndColumns, same as the
-     Context Menu / Toolbar / Side Panels tabs. */
-  ok(pst.heads.some((h) => /Shown/.test(h)) && pst.heads.some((h) => /Hidden/.test(h)),
-    `Page Setup uses the Shown/Hidden columns (${pst.heads.join(' | ')})`);
+  /* v7.11 put Shown/Hidden columns here; v7.81, Derek: "remove the show/hide
+     function for NEW SCRIPT PICKER. a new script will always show all
+     options." The columns configured a filter that no longer exists, so the
+     assertion flips: the tab is the template LIST, and no Shown/Hidden
+     columns render in it. */
+  ok(!pst.heads.some((h) => /Shown|Hidden/.test(h)),
+    `Page Setup has NO Shown/Hidden columns any more (${pst.heads.join(' | ') || 'none'})`);
   ok(pst.cards >= 6 && pst.builtIns >= 6 && pst.newBtn,
     `six built-in templates listed, plus + Create Template (${pst.cards} cards)`);
   /* The built-ins are immutable CONSTANTS, not rows in templates[] — so
@@ -243,21 +245,6 @@ try {
     [...document.querySelectorAll('.dialog-actions button')].find((b) => /Apply|Close/.test(b.textContent.trim()))?.click();
   });
   await settle(page);
-  const beforeShown = await page.evaluate(async () => {
-    const { useSettingsStore } = await window.__scImport('/src/stores/settingsStore.ts');
-    return useSettingsStore.getState().enabledScriptFormats.slice();
-  });
-  await page.evaluate(() => {
-    const row = [...document.querySelectorAll('.fs-dnd-col .fs-dnd-row')][1];
-    [...row.querySelectorAll('.fs-dnd-rowbtn')].find((b) => b.textContent === '×')?.click();
-  });
-  await settle(page);
-  const afterHide = await page.evaluate(async () => {
-    const { useSettingsStore } = await window.__scImport('/src/stores/settingsStore.ts');
-    return useSettingsStore.getState().enabledScriptFormats.slice();
-  });
-  ok(afterHide.length > 0 && (beforeShown.length === 0 || afterHide.length === beforeShown.length - 1),
-    `Hide takes the template out of the New Script set (${beforeShown.length || 'all'} → ${afterHide.length})`);
   ok(await page.evaluate(() => {
     const f = document.querySelector('.prefs-footer');
     const labels = [...(f?.querySelectorAll('button') ?? [])].map((b) => b.textContent.trim());
@@ -265,12 +252,46 @@ try {
   }), 'the footer holds Cancel + a primary Save, Customize-style');
   await page.click('.prefs-footer button:has-text("Cancel")');
   await settle(page);
-  const reverted = await page.evaluate(async () => {
+  ok(await page.evaluate(() => !document.querySelector('.prefs-window')), 'Cancel closes Settings');
+
+  /* v7.81: with the filter gone the thing to prove is the PICKER ITSELF —
+     the real New Script dialog's Format dropdown, with the retired setting
+     poisoned the way an old profile would carry it. If anything still read
+     enabledScriptFormats, one option would render instead of all of them. */
+  const picker = await page.evaluate(async () => {
     const { useSettingsStore } = await window.__scImport('/src/stores/settingsStore.ts');
-    return { open: !!document.querySelector('.prefs-window'), ids: useSettingsStore.getState().enabledScriptFormats.slice() };
+    const fmt = await window.__scImport('/src/stores/formattingTemplateStore.ts');
+    useSettingsStore.setState({ enabledScriptFormats: ['industry-standard'], formatPreferencesInitialized: true });
+    return { sys: fmt.SYSTEM_TEMPLATE_LIST.length };
   });
-  ok(!reverted.open && JSON.stringify(reverted.ids) === JSON.stringify(beforeShown),
-    `Cancel closed Settings and REVERTED the hide (back to ${reverted.ids.length || 'all shown'})`);
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.menu-bar-item, .menu-item')].find((m) => m.textContent.trim() === 'File')?.click();
+  });
+  await page.waitForSelector('.menu-dropdown-item', { timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.menu-dropdown-item')].find((i) => /New Script/.test(i.textContent))?.click();
+  });
+  // The unsaved-changes guard fronts the launcher (the check typed into the
+  // script earlier) — Discard, this scratch document is the fixture's.
+  await settle(page);
+  await page.evaluate(() => {
+    const box = [...document.querySelectorAll('.dialog-box, .fs-confirm-box')]
+      .find((b) => /Unsaved Changes/i.test(b.textContent ?? ''));
+    if (box) [...box.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Discard')?.click();
+  });
+  await page.waitForSelector('.fs-launcher-choice', { timeout: 5000 }).catch(() => {});
+  // The launcher fronts New Script — take the manual door.
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.fs-launcher-choice')].find((b) => /Manual Setup/.test(b.textContent))?.click();
+  });
+  await page.waitForSelector('.fs-newscript-format', { timeout: 5000 }).catch(() => {});
+  const offered = await page.evaluate(() =>
+    document.querySelectorAll('.fs-newscript-format option').length);
+  ok(offered >= picker.sys,
+    `the New Script Format dropdown offers every system format despite the poisoned filter (${offered} ≥ ${picker.sys})`);
+  // close the New Script dialog
+  await page.keyboard.press('Escape');
+  await settle(page);
 
   // ── 7: the Annotations button says Filter (v6.71) ──
   await openTool(page, 'Annotations');

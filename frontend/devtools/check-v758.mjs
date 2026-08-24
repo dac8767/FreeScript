@@ -191,7 +191,7 @@ const editor = await page.evaluate(async () => {
 for (const [heading, label] of [
   ['Transitions', 'Reset Transitions'],
   ['Elements', 'Reset Elements'],
-  ['Element Suggestions', 'Reset Element Suggestions'],
+  ['Element Rules', 'Reset Element Rules'],
 ]) {
   const s = editor.secs.find((x) => x.heading === heading);
   ok(`“${label}” is inside the ${heading} section`,
@@ -213,7 +213,7 @@ ok('…and from Settings ▸ Defaults, not just from the tab',
 /* The ones that stayed must still be there — a sweep that deleted all four
    would satisfy every assertion above. */
 ok('…while the other Editor resets still compile into Defaults',
-  ['Reset Transitions', 'Reset Elements', 'Reset Element Suggestions']
+  ['Reset Transitions', 'Reset Elements', 'Reset Element Rules']
     .every((l) => defaults.includes(l)), JSON.stringify(defaults));
 
 /* ── 3. the Ribbon Toolbar tab, restructured ─────────────────────────────── */

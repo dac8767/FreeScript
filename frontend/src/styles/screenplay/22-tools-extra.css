@@ -234,6 +234,9 @@ body.fs-rulers-on .tool-window:not(.tool-window-temp) { top: 20px; }
 }
 .fs-customize-body h3 { font-size: 11.5px; margin: 14px 0 4px; color: var(--fd-text-muted); }
 .fs-customize-hint { font-size: 11.5px; color: var(--fd-text-muted); margin: 0 0 8px; }
+/* v7.81: a hint that closes a section instead of opening it (Ribbon Toolbar's
+   how-to line sits under the palette, not under the heading). */
+.fs-customize-hint.fs-hint-below { margin: 10px 0 0; }
 .fs-customize-row {
   display: flex;
   align-items: center;
@@ -265,8 +268,13 @@ body.fs-rulers-on .tool-window:not(.tool-window-temp) { top: 20px; }
 }
 /* v4.59: Customize ▸ Editor ▸ Element Suggestions. v4.63: a real TABLE —
    row = the element above, column = candidate, check cell = allowed. */
-.fs-sugg-mode { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.fs-sugg-mode { display: inline-flex; align-items: center; gap: 10px; }
 .fs-sugg-mode-label { font-size: 12px; color: var(--fd-text-muted); }
+/* v7.81, Derek: the Show toggle moved up onto the section heading row —
+   heading at the left, control at the right, baselines level. Generic on
+   purpose: any section that wants a control beside its title uses this. */
+.fs-sec-headrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fs-sec-headrow > h3 { margin: 0; }
 
 /* v4.65: every Customize tab ends in a Reset section; Settings ▸ Defaults
    compiles them (same registry, customizeResets). */
@@ -1090,8 +1098,7 @@ input.fs-switch:checked::after { left: 15px; }
    in a box nothing marks as scrollable. */
 .pst-list { display: flex; flex-direction: column; }
 .pst-list.template-select-list { max-height: none; overflow-y: visible; }
-.pst-dndrow { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-.pst-dndrow .fmt-card-name { flex: 1; min-width: 0; }
+/* v7.81: .pst-dndrow removed with the New Script Picker columns. */
 .pst-newrow {
   display: flex; align-items: center; gap: 8px;
   margin-top: 10px;
@@ -1126,6 +1133,14 @@ input.fs-switch:checked::after { left: 15px; }
   margin: 6px 0 0 26px;
   max-width: 520px;
 }
+/* v7.81, Derek ("aligned properly with the title above it"): the 26px indent
+   above exists to line a hint up with the label text of a checkbox row. A hint
+   that sits directly under a section HEADING has no checkbox to align with —
+   flush left, level with the h3. */
+.prefs-hint.prefs-hint-flush { margin-left: 0; }
+/* v7.81: "add an empty row" — one blank line of deliberate air, where Derek
+   asked for it, instead of nudging margins nobody else shares. */
+.prefs-gap-row { height: 14px; }
 /* v3.25 (task #139): a hint that belongs to the checkbox row right above it —
    tucked close and slightly smaller than a section-level hint. */
 .prefs-hint.prefs-subhint {
