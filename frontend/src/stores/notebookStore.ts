@@ -268,13 +268,32 @@ export function loadNotebook(): Pick<NotebookState, 'pages' | 'tree' | 'selected
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+// v7.89 (security review D10): warn ONCE per full-stretch, re-armed by the next
+// good save — so a persistent overflow doesn't toast on every keystroke.
+let notebookSaveWarned = false;
 function persist(get: () => NotebookState) {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     const { pages, tree, selectedPageId } = get();
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ pages, tree, selectedPageId }));
-    } catch { /* quota — images may be too heavy; the UI warns on add */ }
+      notebookSaveWarned = false;
+    } catch (e) {
+      // A cumulative quota overflow (many pages / pasted images) used to be
+      // swallowed here — the live UI kept the edits but nothing was written, so
+      // the next launch lost everything since. The old "the UI warns on add"
+      // note only covered a single oversized image, not the running total. Tell
+      // the writer instead of failing silently.
+      console.error('[notebook] persist failed:', e);
+      if (!notebookSaveWarned) {
+        notebookSaveWarned = true;
+        void import('../components/Toast')
+          .then(({ showToast }) =>
+            showToast('The Notebook is full — remove some images or pages to keep saving it.', 'error'),
+          )
+          .catch(() => {});
+      }
+    }
   }, 800);
 }
 

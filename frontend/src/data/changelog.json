@@ -1,5 +1,13 @@
 [
   {
+    "version": "7.89",
+    "date": "2026-08-24",
+    "changes": [
+      "The Notebook now tells you when it runs out of room instead of silently failing to save. If pages and pasted images fill the local storage it uses, you get a clear \"Notebook is full\" message, so nothing is quietly lost on the next launch. From the security review (D10).",
+      "A background error that used to only reach the developer console now shows a brief \"something went wrong — your work is safe\" note, so a hidden failure can't leave the app wedged with no explanation. (D14)"
+    ]
+  },
+  {
     "version": "7.88",
     "date": "2026-08-24",
     "changes": [

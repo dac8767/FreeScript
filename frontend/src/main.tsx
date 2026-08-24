@@ -5,6 +5,36 @@ import App from './App.tsx';
 import AppErrorBoundary from './components/AppErrorBoundary.tsx';
 import { initStorage } from './services/api';
 
+// v7.89 (security review D14): a global safety net for errors that escape
+// React's render boundary — a throw in an async handler, a setTimeout, an
+// unawaited promise. index.html catches these BEFORE the app boots (the
+// "failed to start" overlay); afterwards they only reached the console, so a
+// wedged background failure was invisible. Now the writer gets a quiet,
+// throttled recovery toast. Registered at module load so it is armed as early
+// as possible; the toast itself only appears once the app (and its toast host)
+// has mounted.
+let lastGlobalErrorToast = 0;
+function surfaceGlobalError(kind: string, detail: unknown) {
+  console.error(`[${kind}]`, detail);
+  const now = Date.now();
+  if (now - lastGlobalErrorToast < 8000) return; // don't storm the writer
+  lastGlobalErrorToast = now;
+  void import('./components/Toast')
+    .then(({ showToast }) =>
+      showToast(
+        'Something went wrong in the background. Your work is safe — if the app misbehaves, reload the window.',
+        'error',
+      ),
+    )
+    .catch(() => {});
+}
+window.addEventListener('unhandledrejection', (e) => surfaceGlobalError('unhandledrejection', e.reason));
+window.addEventListener('error', (e) => {
+  // Only real uncaught exceptions — a failed image/resource load has no `error`
+  // and must not raise a scary toast.
+  if (e.error) surfaceGlobalError('error', e.error);
+});
+
 async function init() {
   // Apply saved theme before first render to avoid flash. A CUSTOM theme is a
   // base + variable overrides, so setting data-theme alone wouldn't restore it
