@@ -956,36 +956,15 @@ fn updater_target() -> String {
     format!("{}-{}", os, std::env::consts::ARCH)
 }
 
-/// Open a URL in the user's default browser.
-#[tauri::command]
-fn open_url(url: String) -> Result<(), String> {
-    // Only allow http/https URLs
-    if !url.starts_with("http://") && !url.starts_with("https://") {
-        return Err("Only http and https URLs are allowed".to_string());
-    }
-    #[cfg(target_os = "macos")]
-    {
-        std::process::Command::new("open")
-            .arg(&url)
-            .spawn()
-            .map_err(|e| format!("Failed to open URL: {}", e))?;
-    }
-    #[cfg(target_os = "windows")]
-    {
-        std::process::Command::new("cmd")
-            .args(["/C", "start", "", &url])
-            .spawn()
-            .map_err(|e| format!("Failed to open URL: {}", e))?;
-    }
-    #[cfg(target_os = "linux")]
-    {
-        std::process::Command::new("xdg-open")
-            .arg(&url)
-            .spawn()
-            .map_err(|e| format!("Failed to open URL: {}", e))?;
-    }
-    Ok(())
-}
+// v7.84 (security review D2) — the hand-rolled `open_url` command is GONE.
+// On Windows it ran `cmd /C start "" <url>`, and `cmd` re-parses `& | ^`, so a
+// space-free URL like `https://x/&calc.exe` in a note of an OPENED script
+// executed a program on click — native code, no webview script needed, so the
+// CSP could not touch it. External links now route through tauri-plugin-opener
+// (already registered below and used by File ▸ Print via openPath). The plugin
+// opens URLs through the OS shell API, not a re-parsed command line, and the
+// `opener:allow-default-urls` capability scopes it to http/https/mailto/tel.
+// One opener for the whole app — the duplicate shell-out is retired.
 
 /// v6.36, Derek ("it opens it in a pdf view first. it should not do that"):
 /// File ▸ Print runs the REAL macOS print dialog on the just-written export
@@ -1279,7 +1258,6 @@ pub fn run() {
             android_check_new_intent,
             open_new_window,
             set_window_title,
-            open_url,
             print_pdf_dialog,
             updater_target,
         ]);

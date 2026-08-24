@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.84",
+    "date": "2026-08-24",
+    "changes": [
+      "Security (Windows): closed a hole where a specially crafted link inside an opened script's note could run a program instead of just opening in your browser. External links now go through the system's own URL handler — the same one File ▸ Print already uses — with no command shell in between, and they're limited to normal web and mail links. macOS and Linux were never affected. Found in the security review (D2)."
+    ]
+  },
+  {
     "version": "7.83",
     "date": "2026-08-24",
     "changes": [
