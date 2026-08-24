@@ -74,15 +74,23 @@ const backup = await page.evaluate(() => {
     hintLeft: hint?.classList.contains('prefs-hint') ? hint.getBoundingClientRect().left : null,
     restoreHintLeft: restoreHint?.getBoundingClientRect().left,
     restoreHeadLeft: restoreH3?.getBoundingClientRect().left,
+    hintsAfterPanel: (() => {
+      const panel = content.querySelector('.fs-presets');
+      let n = 0; let el = panel?.nextElementSibling;
+      while (el) { if (el.classList?.contains('prefs-hint')) n++; el = el.nextElementSibling; }
+      return n;
+    })(),
     gapAboveIntro: Boolean(document.querySelector('.fs-presets .prefs-gap-row')),
     gapBeforeRestoreBtn: Boolean(restoreBtn?.parentElement?.previousElementSibling?.classList.contains('prefs-gap-row')),
   };
 });
-ok('the Backup hint is his sentence',
-  backup.hints.some((h) => h === "Settings and customizations live in this app's local storage, which isn't shared between installs. Back them up for safe keeping."),
+/* v7.82, Derek: ONE paragraph — the safety sentence follows "…safe keeping"
+   rather than dangling under the checklist. */
+ok('the Backup hint is his merged paragraph',
+  backup.hints.some((h) => h === "Settings and customizations live in this app's local storage, which isn't shared between installs. Back them up for safe keeping. Login info, cloud tokens, and device identity are left out of the file for safety."),
   JSON.stringify(backup.hints[0]));
-ok('…and the safety line is his short one',
-  backup.hints.some((h) => h === 'Login info, cloud tokens, and device identity are left out of the file for safety.'), '');
+ok('…and nothing dangles below the checklist any more',
+  backup.hintsAfterPanel === 0, `${backup.hintsAfterPanel} hint(s) after the panel`);
 ok('…the old "sign in once on the other app" tail is gone',
   !backup.hints.some((h) => /sign in once/.test(h)), '');
 ok('the checklist intro is his instruction', backup.intro === 'Check all items you want to include in the backup file:',
@@ -119,13 +127,22 @@ await page.evaluate(() => {
 await settle(page);
 const ribbon = await page.evaluate(() => {
   const body = document.querySelector('.fs-customize-body');
-  const hint = [...body.querySelectorAll('.fs-customize-hint')].map((h) => h.textContent.trim().replace(/\s+/g, ' '));
-  return { h3: [...body.querySelectorAll('h3')].map((h) => h.textContent.trim()), hint };
+  const HOWTO = 'Customize the ribbon toolbar by adding or removing items directly from the bar at the top of the screen. You can create sections, section titles, dividers, and spacers. Icons will appear small when in two-row sections, and large when in single-row sections.';
+  const hintEl = [...body.querySelectorAll('.fs-customize-hint')]
+    .find((h) => h.textContent.trim().replace(/\s+/g, ' ') === HOWTO);
+  /* v7.82, Derek: "move it below the buttons (reset size, reset items, etc)" —
+     position asserted against the REAL bar, not just presence. */
+  const bar = body.querySelector('.fs-tab-actionbar, .fs-customize-actionbar, [class*="actionbar"]')
+    ?? [...body.querySelectorAll('button')].find((b) => /Reset Items/.test(b.textContent))?.parentElement;
+  return {
+    h3: [...body.querySelectorAll('h3')].map((h) => h.textContent.trim()),
+    found: Boolean(hintEl),
+    belowBar: hintEl && bar ? hintEl.getBoundingClientRect().top >= bar.getBoundingClientRect().bottom - 1 : false,
+  };
 });
 ok('its heading says Ribbon Toolbar', ribbon.h3.includes('Ribbon Toolbar'), JSON.stringify(ribbon.h3));
-ok('the how-to line closes the window',
-  ribbon.hint.some((h) => h === 'Customize the ribbon toolbar by adding or removing items directly from the bar at the top of the screen. You can create sections, section titles, dividers, and spacers. Icons will appear small when in two-row sections, and large when in single-row sections.'),
-  JSON.stringify(ribbon.hint));
+ok('the how-to line is on the tab', ribbon.found === true, '');
+ok('…BELOW the Reset buttons', ribbon.belowBar === true, JSON.stringify(ribbon));
 
 // Quick Access: the new hint (his "items appears" shipped as "items appear")
 await page.evaluate(() => {
@@ -205,6 +222,36 @@ const toggled = await page.evaluate(async () => {
   return { gone, back };
 });
 ok('…and it still switches the table off and on', toggled.gone && toggled.back, JSON.stringify(toggled));
+
+/* ── 5. v7.82 follow-ups: typography and the checkbox gap ────────────────── */
+console.log('\nthe v7.82 polish');
+await page.evaluate(() => {
+  [...document.querySelectorAll('.fs-customize-tabs .prefs-tab')].find((t) => t.textContent.trim() === 'Themes')?.click();
+});
+await settle(page);
+const polish = await page.evaluate(() => {
+  const body = document.querySelector('.fs-customize-body');
+  const h3 = body.querySelector('section h3');
+  const hint = body.querySelector('.fs-customize-hint');
+  const row = body.querySelector('.fs-follow-system-row');
+  const input = row?.querySelector('input');
+  const span = row?.querySelector('span');
+  return {
+    /* "differentiate the font style for titles and helper text": the computed
+       styles must actually DIFFER — uppercase transform on the title is the
+       differentiator, same as the Settings tabs' headings. */
+    h3Transform: h3 ? getComputedStyle(h3).textTransform : null,
+    hintTransform: hint ? getComputedStyle(hint).textTransform : 'none',
+    gap: input && span
+      ? Math.round(span.getBoundingClientRect().left - input.getBoundingClientRect().right)
+      : null,
+  };
+});
+ok('section titles are set apart from helper text (uppercase, like Settings)',
+  polish.h3Transform === 'uppercase' && polish.hintTransform !== 'uppercase',
+  JSON.stringify(polish));
+ok('the Match-the-system checkbox has air before its label',
+  polish.gap !== null && polish.gap >= 6, `${polish.gap}px`);
 
 await browser.close();
 console.log(`\ncheck-v781: ${pass} passed, ${fail} failed`);

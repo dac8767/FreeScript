@@ -793,15 +793,15 @@ function BackupRestoreTab() {
         {/* v7.81, Derek's pass over this tab: his wording, hints flush with
             the headings (prefs-hint's 26px indent is for hints under a
             checkbox row — these two sit under an h3). */}
+        {/* v7.82, Derek: one paragraph — the safety sentence follows "…safe
+            keeping" instead of dangling under the checklist. */}
         <p className="prefs-hint prefs-hint-flush">
           Settings and customizations live in this app's local storage, which
-          isn't shared between installs. Back them up for safe keeping.
+          isn't shared between installs. Back them up for safe keeping. Login
+          info, cloud tokens, and device identity are left out of the file for
+          safety.
         </p>
         <PresetsPanel showImports={false} />
-        <p className="prefs-hint prefs-hint-flush">
-          Login info, cloud tokens, and device identity are left out of the
-          file for safety.
-        </p>
       </section>
       <section>
         <h3>Restore</h3>

@@ -889,13 +889,6 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
                 </span>
               </>}
             />
-            {/* v7.81, Derek: his how-to line, at the bottom of the window. */}
-            <p className="fs-customize-hint fs-hint-below">
-              Customize the ribbon toolbar by adding or removing items directly
-              from the bar at the top of the screen. You can create sections,
-              section titles, dividers, and spacers. Icons will appear small
-              when in two-row sections, and large when in single-row sections.
-            </p>
           </section>
           </>)}
           {activeCat === 'qat' && (<>
@@ -1028,6 +1021,17 @@ export default function CustomizePanelsDialog({ open, onClose, embedded = false,
               tab={activeCat as CustomizeTabId}
               adders={tabAdders[activeCat]}
             />
+          )}
+          {/* v7.81, Derek's how-to line; v7.82: "move it below the buttons
+              (reset size, reset items, etc)" — so it renders after the
+              TabActionBar, the true bottom of the window. */}
+          {activeCat === 'toolbar' && (
+            <p className="fs-customize-hint fs-hint-below">
+              Customize the ribbon toolbar by adding or removing items directly
+              from the bar at the top of the screen. You can create sections,
+              section titles, dividers, and spacers. Icons will appear small
+              when in two-row sections, and large when in single-row sections.
+            </p>
           )}
         </div>
       </div>

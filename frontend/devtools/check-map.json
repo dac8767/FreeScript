@@ -1,6 +1,6 @@
 {
  "_comment": "DERIVED by devtools/build-check-map.mjs — do not hand-edit. Maps each browser check to the frontend/src files it covers, so check-all --changed can run the relevant ones in the iteration loop. A check with no entry is always run (unmapped means unknown, and unknown must not mean skipped).",
- "_generated_from": "10ef92b",
+ "_generated_from": "1ab74aa",
  "_ritual": [
   "frontend/src/data/changelog.json",
   "frontend/src/data/changelog.ts"
@@ -1659,8 +1659,28 @@
    ]
   },
   "check-v781.mjs": {
-   "sha": "",
-   "covers": []
+   "sha": "1ab74aa",
+   "covers": [
+    "frontend/src/components/ContextMenuTab.tsx",
+    "frontend/src/components/CustomizePanelsDialog.tsx",
+    "frontend/src/components/EditElementsDialog.tsx",
+    "frontend/src/components/MarkupsPanel.tsx",
+    "frontend/src/components/MenuBar.tsx",
+    "frontend/src/components/NewScriptDialog.tsx",
+    "frontend/src/components/PageSetupTab.tsx",
+    "frontend/src/components/PreferencesDialog.tsx",
+    "frontend/src/components/PresetsPanel.tsx",
+    "frontend/src/components/ScriptFormatPickerDialog.tsx",
+    "frontend/src/components/ScriptFormatPreferencesDialog.tsx",
+    "frontend/src/components/SuggestionRulesEditor.tsx",
+    "frontend/src/components/TemplateEditorDialog.tsx",
+    "frontend/src/components/ThemesTab.tsx",
+    "frontend/src/components/customizeResets.tsx",
+    "frontend/src/components/toolbarCommands.tsx",
+    "frontend/src/data/helperTextCatalog.json",
+    "frontend/src/styles/screenplay/18-elements-templates.css",
+    "frontend/src/styles/screenplay/22-tools-extra.css"
+   ]
   },
   "check-version-sync.mjs": {
    "sha": "4fcec3a",

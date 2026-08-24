@@ -1,5 +1,15 @@
 [
   {
+    "version": "7.82",
+    "date": "2026-08-24",
+    "changes": [
+      "Backup & Restore's hint is one paragraph now — the safety line follows \"safe keeping\" in the same breath instead of dangling under the checklist, and the odd line break after \"shared between\" is gone. The text was being wrapped at a width meant for the narrow hints under checkboxes.",
+      "The ribbon toolbar's how-to line sits below the Reset buttons — the true bottom of the Customize window.",
+      "The Customize window's section titles are set apart from helper text the same way the Settings window does it — small caps, muted — so a heading no longer reads as just another line of grey text.",
+      "The \"Match the system's light or dark appearance\" checkbox in Themes no longer touches its own label — the row had no layout at all."
+    ]
+  },
+  {
     "version": "7.81",
     "date": "2026-08-24",
     "changes": [
