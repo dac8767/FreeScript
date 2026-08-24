@@ -7,7 +7,7 @@ import re
 import socket
 from urllib.error import URLError
 from urllib.parse import urlparse, urlunparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -54,6 +54,23 @@ def _validate_url(url: str) -> tuple[str, str]:
 
     safe_url = urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
     return safe_url, hostname
+
+
+class _ValidatingRedirectHandler(HTTPRedirectHandler):
+    """C3 #1: the initial URL is screened for a private/reserved IP, but
+    urlopen follows redirects by default — a public URL could 302 the fetch to
+    http://169.254.169.254/ or an intranet host. Re-run the guard on EVERY hop;
+    _validate_url raises HTTPException (surfaced by the caller) if a hop is not
+    public."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        _validate_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+# Bounded, validating opener used for every preview fetch (replaces the default
+# redirect-following urlopen).
+_OPENER = build_opener(_ValidatingRedirectHandler)
 
 
 class LinkPreviewRequest(BaseModel):
@@ -104,7 +121,7 @@ async def fetch_link_preview(body: LinkPreviewRequest):
 
     try:
         req = Request(safe_url, headers={"User-Agent": _UA, "Host": original_host})
-        with urlopen(req, timeout=_TIMEOUT) as resp:  # noqa: S310
+        with _OPENER.open(req, timeout=_TIMEOUT) as resp:  # noqa: S310
             content_type = resp.headers.get("Content-Type", "")
             if "text/html" not in content_type and "application/xhtml" not in content_type:
                 raise HTTPException(status_code=422, detail="URL is not an HTML page")
