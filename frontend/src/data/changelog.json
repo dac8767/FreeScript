@@ -1,5 +1,13 @@
 [
   {
+    "version": "7.83",
+    "date": "2026-08-24",
+    "changes": [
+      "Security: the PDF import engine (pdf.js) is updated to its latest patched release, closing a known flaw where a specially crafted PDF could run code when imported. If you import PDFs, this is worth having.",
+      "Security: the library that cleans up pasted rich text is updated to close a known sanitizer-bypass, and a small ID generator is patched too. No change to how anything looks or works — these are the known-vulnerability fixes from the security review."
+    ]
+  },
+  {
     "version": "7.82",
     "date": "2026-08-24",
     "changes": [
