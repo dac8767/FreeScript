@@ -144,12 +144,17 @@ ok('…and registered in generate_handler!', missingReg.length === 0, JSON.strin
 for (const cmd of ['save_text_to_path', 'save_binary_to_path', 'read_binary_file', 'check_folder_writable']) {
   ok(`${cmd} is wired`, new RegExp(`fn ${cmd}\\s*\\(`).test(rust) && registered.has(cmd), '');
 }
-/* Both writers create missing parents: a chosen folder can be deleted between
-   the pick and the save, and an auto-save writes into an "Auto Saves"
-   subfolder that does not exist on first use. */
+/* v7.87 (review D3): both writers go through atomic_write, which (a) creates
+   missing parents — a chosen folder can be deleted between the pick and the
+   save, and an auto-save writes into an "Auto Saves" subfolder absent on first
+   use — and (b) writes a temp file then renames it over the target, so a failed
+   save can no longer truncate the file to empty. */
 const writers = rust.match(/fn save_(?:text|binary)_to_path[\s\S]*?\n\}/g) ?? [];
-ok('both save_*_to_path commands create missing parent folders',
-  writers.length === 2 && writers.every((w) => w.includes('create_dir_all')), String(writers.length));
+ok('both save_*_to_path commands go through atomic_write',
+  writers.length === 2 && writers.every((w) => /atomic_write\(/.test(w)), String(writers.length));
+const atomic = rust.match(/fn atomic_write[\s\S]*?\n\}/)?.[0] ?? '';
+ok('atomic_write creates missing parents AND renames into place (no truncation)',
+  atomic.includes('create_dir_all') && /rename\(/.test(atomic), '');
 ok('check_folder_writable cleans up after itself',
   /fn check_folder_writable[\s\S]*?remove_file/.test(rust), '');
 

@@ -56,6 +56,31 @@ describe('parseFDXFull', () => {
     ]);
     expect(result.castList).toEqual([{ name: 'SARAH', description: 'Sharp-eyed, wary.' }]);
   });
+
+  // v7.88 (security review D14): a non-numeric layout attribute must fall back
+  // to its default, not slip a NaN into page-layout math (which then blanks the
+  // page). `attr || 'default'` only caught the empty case; a garbage value did
+  // not. fdxNum guards every numeric read.
+  it('falls back to defaults for non-numeric PageLayout attributes — no NaN', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<FinalDraft DocumentType="Script">
+  <Content><Paragraph Type="Action"><Text>x</Text></Paragraph></Content>
+  <PageLayout TopMargin="abc" BottomMargin="" HeaderMargin="36" FooterMargin="oops">
+    <PageSize Width="not-a-number" Height="11.00"/>
+  </PageLayout>
+</FinalDraft>`;
+    const { pageLayout } = parseFDXFull(xml);
+    expect(pageLayout).not.toBeNull();
+    // every field stays a finite number — no NaN reached the layout
+    for (const [k, v] of Object.entries(pageLayout!)) {
+      expect(Number.isFinite(v), `${k} = ${v}`).toBe(true);
+    }
+    expect(pageLayout!.pageWidth).toBe(8.5);   // "not-a-number" → default
+    expect(pageLayout!.topMargin).toBe(90);    // "abc" → default
+    expect(pageLayout!.footerMargin).toBe(36); // "oops" → default
+    expect(pageLayout!.headerMargin).toBe(36); // valid → kept
+    expect(pageLayout!.pageHeight).toBe(11);   // valid → kept
+  });
 });
 
 describe('FDX round-trip (export → parse)', () => {

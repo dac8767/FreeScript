@@ -104,6 +104,12 @@ export function parseOdraft(
     throw new Error('This .odraft file was made by a newer version of ScriptCraft — update the app to open it');
   }
 
+  // v7.88 (security review D8): parseOdraft stays deliberately TOLERANT of the
+  // content field (missing → {}, odd → as-is; pinned by odraftFormat.test.ts,
+  // and legacy/hand-edited files rely on it). The silent-blank the review flags
+  // is an EDITOR-render concern, not a parse one, and is fixed there:
+  // ScreenplayEditor now sets enableContentCheck + onContentError, so content
+  // that doesn't fit the schema tells the writer instead of blanking the page.
   return {
     meta: {
       // `??` not `||`: a deliberately-empty title round-trips as '' (the header

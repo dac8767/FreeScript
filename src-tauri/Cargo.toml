@@ -3,7 +3,7 @@
 # BINARY, so "Hide freedraft" lingered despite productName being ScriptCraft.
 # The com.freedraft.app identifier stays: identifiers persist user data.
 name = "scriptcraft"
-version = "7.87.0"
+version = "7.88.0"
 description = "ScriptCraft - Professional Screenwriting Application"
 authors = ["ScriptCraft"]
 edition = "2021"

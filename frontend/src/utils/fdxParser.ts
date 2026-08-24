@@ -143,6 +143,18 @@ export interface FDXParseResult {
   beatColumns: FDXBeatColumn[];
 }
 
+/** v7.88 (security review D14): read a numeric FDX attribute, falling back to a
+ *  default when it is missing OR present-but-non-numeric. `parseFloat('abc')`
+ *  is NaN, and `attr || 'default'` only catches the empty case — a garbage
+ *  value slipped a NaN straight into page-layout math, which then blanks the
+ *  page (linesPerPage = floor(NaN) = NaN → no breaks or exploded pages). */
+function fdxNum(el: Element | null | undefined, attr: string, fallback: number): number {
+  const raw = el?.getAttribute(attr);
+  if (raw == null) return fallback;
+  const n = parseFloat(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export function parseFDXFull(xmlString: string): FDXParseResult {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
@@ -153,7 +165,7 @@ export function parseFDXFull(xmlString: string): FDXParseResult {
   const layoutEl = xmlDoc.querySelector('PageLayout');
   if (layoutEl) {
     const pageSize = layoutEl.querySelector('PageSize');
-    const pageWidth = parseFloat(pageSize?.getAttribute('Width') || '8.50');
+    const pageWidth = fdxNum(pageSize, 'Width', 8.5);
 
     // Derive left/right margins from Action ElementSettings ParagraphSpec indents
     let leftIndent = 1.50;  // Final Draft default
@@ -162,24 +174,24 @@ export function parseFDXFull(xmlString: string): FDXParseResult {
     // Primary: read from ElementSettings for Action (the base script element)
     const actionSettings = xmlDoc.querySelector('ElementSettings[Type="Action"] > ParagraphSpec');
     if (actionSettings) {
-      leftIndent = parseFloat(actionSettings.getAttribute('LeftIndent') || '1.50');
-      rightIndent = parseFloat(actionSettings.getAttribute('RightIndent') || '7.50');
+      leftIndent = fdxNum(actionSettings, 'LeftIndent', 1.5);
+      rightIndent = fdxNum(actionSettings, 'RightIndent', 7.5);
     } else {
       // Fallback: check Scene Heading ElementSettings
       const shSettings = xmlDoc.querySelector('ElementSettings[Type="Scene Heading"] > ParagraphSpec');
       if (shSettings) {
-        leftIndent = parseFloat(shSettings.getAttribute('LeftIndent') || '1.50');
-        rightIndent = parseFloat(shSettings.getAttribute('RightIndent') || '7.50');
+        leftIndent = fdxNum(shSettings, 'LeftIndent', 1.5);
+        rightIndent = fdxNum(shSettings, 'RightIndent', 7.5);
       }
     }
 
     pageLayout = {
       pageWidth,
-      pageHeight: parseFloat(pageSize?.getAttribute('Height') || '11.00'),
-      topMargin: parseFloat(layoutEl.getAttribute('TopMargin') || '90'),
-      bottomMargin: parseFloat(layoutEl.getAttribute('BottomMargin') || '62'),
-      headerMargin: parseFloat(layoutEl.getAttribute('HeaderMargin') || '36'),
-      footerMargin: parseFloat(layoutEl.getAttribute('FooterMargin') || '36'),
+      pageHeight: fdxNum(pageSize, 'Height', 11),
+      topMargin: fdxNum(layoutEl, 'TopMargin', 90),
+      bottomMargin: fdxNum(layoutEl, 'BottomMargin', 62),
+      headerMargin: fdxNum(layoutEl, 'HeaderMargin', 36),
+      footerMargin: fdxNum(layoutEl, 'FooterMargin', 36),
       leftMargin: leftIndent,
       rightMargin: Math.max(0, pageWidth - rightIndent),
     };

@@ -1,5 +1,13 @@
 [
   {
+    "version": "7.88",
+    "date": "2026-08-24",
+    "changes": [
+      "A corrupt or foreign file whose contents don't fit ScriptCraft's format now tells you so — and keeps whatever it could read — instead of opening as a silent blank page. From the security review (D8).",
+      "A Final Draft (.fdx) file with a garbled page size or margin value falls back to sensible defaults, instead of a bad number leaving the page unrendered. Same guard now protects the zoom and panel sizes from a stray non-number."
+    ]
+  },
+  {
     "version": "7.87",
     "date": "2026-08-24",
     "changes": [

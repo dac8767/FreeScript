@@ -1033,6 +1033,17 @@ const ScreenplayEditor: React.FC = () => {
     // starting action element — like any word processor.
     autofocus: (urlScriptId || urlCommitHash) ? false : 'start',
     editable: !isHistoryMode,
+    // v7.88 (security review D8): if content passed to the editor doesn't fit
+    // the screenplay schema — a corrupt or foreign file whose JSON parsed but
+    // whose nodes don't — TipTap otherwise drops the bad parts SILENTLY and can
+    // leave the page blank with no word to the writer. enableContentCheck turns
+    // that into onContentError; we tell the writer and keep whatever DID load,
+    // instead of a silent empty document.
+    enableContentCheck: true,
+    onContentError: ({ error }) => {
+      console.error('[content-check] invalid content on load:', error);
+      showToast('This file could not be fully read — some of its content may be missing.', 'error');
+    },
     editorProps: {
       attributes: { class: `screenplay-content${isHistoryMode ? ' history-readonly' : ''}`, spellcheck: 'false' },
     },

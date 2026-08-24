@@ -192,4 +192,10 @@ export const _seeded = seedDefaultSettings();
 export const _vs = loadViewState();
 
 /** Clamp a number to the inclusive range [lo, hi]. Shared by store slices. */
-export const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
+// v7.88 (security review D14): NaN-safe. Math.max(lo, NaN) is NaN, so an
+// unguarded clamp let a NaN (e.g. a bad zoom or a non-numeric imported value)
+// pass straight through into layout math and blank the page. NaN falls back to
+// the low bound — a safe in-range default; ±Infinity still clamps normally to
+// the bounds (Math.min/max handle those correctly).
+export const clamp = (v: number, lo: number, hi: number): number =>
+  Number.isNaN(v) ? lo : Math.min(hi, Math.max(lo, v));
