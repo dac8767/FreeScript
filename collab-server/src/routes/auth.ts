@@ -213,7 +213,11 @@ router.post('/login', strictLimiter, async (req, res) => {
 
     if (!user) {
       await auditService.logEvent('login_failed', null, null, { email, reason: 'user_not_found' }, getClientIp(req));
-      res.status(404).json({ error: 'User not found' });
+      // C3: answer an unknown email identically to a wrong password — same
+      // status, same body, and a dummy bcrypt so the timing matches too — so
+      // login can't be used to discover which emails have accounts.
+      userService.dummyVerifyPassword(password);
+      res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
 

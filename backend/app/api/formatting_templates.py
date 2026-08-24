@@ -32,7 +32,11 @@ async def list_templates():
 
 @router.post("/")
 async def create_template(body: TemplateCreate):
-    return formatting_template_service.create_template(body.model_dump())
+    try:
+        return formatting_template_service.create_template(body.model_dump())
+    except FileNotFoundError as exc:
+        # C1: a body id that isn't a safe resource id (traversal attempt)
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.get("/{template_id}")
@@ -54,5 +58,8 @@ async def update_template(template_id: str, body: TemplateUpdate):
 
 @router.delete("/{template_id}")
 async def delete_template(template_id: str):
-    formatting_template_service.delete_template(template_id)
+    try:
+        formatting_template_service.delete_template(template_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
     return {"message": "Template deleted"}

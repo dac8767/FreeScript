@@ -1,7 +1,22 @@
+import { randomInt } from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import { getDB } from '../db';
 import { config } from '../config';
+
+// v7.x (security review C3): the device name is supplied by the client at
+// login and is dropped into the HTML of a security email. Unescaped, an
+// attacker could inject markup — a fake "click here" link — into a genuine
+// ScriptCraft email. Escape every client-supplied value used in HTML. (Plain
+// text bodies below don't need this and are left as-is.)
+function escapeHtml(s: string | null | undefined): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -21,7 +36,9 @@ function getTransporter(): nodemailer.Transporter | null {
 
 export async function createVerificationCode(userId: string): Promise<string> {
   const db = getDB();
-  const code = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit
+  // v7.x (security review C3): crypto.randomInt, not Math.random — a 2FA code
+  // from a non-cryptographic PRNG is guessable.
+  const code = String(randomInt(100000, 1000000)); // 6-digit, CSPRNG
   const id = uuidv4();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString(); // 15 minutes
@@ -118,8 +135,8 @@ export async function sendNewDeviceCode(
         <h2 style="color: #333;">New sign-in attempt</h2>
         <p>We noticed a sign-in attempt to your ScriptCraft account from a new device:</p>
         <div style="background: #f5f5f5; border-radius: 6px; padding: 12px 16px; margin: 12px 0;">
-          <div><strong>Device:</strong> ${deviceName}</div>
-          ${ipAddress ? `<div><strong>IP:</strong> ${ipAddress}</div>` : ''}
+          <div><strong>Device:</strong> ${escapeHtml(deviceName)}</div>
+          ${ipAddress ? `<div><strong>IP:</strong> ${escapeHtml(ipAddress)}</div>` : ''}
         </div>
         <p>Enter this 6-digit verification code to confirm it was you:</p>
         <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; padding: 20px; background: #f5f5f5; border-radius: 8px; margin: 16px 0;">
@@ -163,8 +180,8 @@ export async function sendNewDeviceNotice(
         <h2 style="color: #333;">A new device just signed in</h2>
         <p>A new device just signed in to your ScriptCraft account:</p>
         <div style="background: #f5f5f5; border-radius: 6px; padding: 12px 16px; margin: 12px 0;">
-          <div><strong>Device:</strong> ${deviceName}</div>
-          ${ipAddress ? `<div><strong>IP:</strong> ${ipAddress}</div>` : ''}
+          <div><strong>Device:</strong> ${escapeHtml(deviceName)}</div>
+          ${ipAddress ? `<div><strong>IP:</strong> ${escapeHtml(ipAddress)}</div>` : ''}
         </div>
         <p>If this was you, you can ignore this email.</p>
         <p style="color: #b00;">
@@ -205,7 +222,7 @@ export async function sendPasswordResetEmail(
       <div style="font-family: sans-serif; max-width: 440px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #333;">Reset your ScriptCraft password</h2>
         <p>Someone requested a password reset for your ScriptCraft account.</p>
-        ${ipAddress ? `<p style="color: #666; font-size: 13px;">Requested from IP: ${ipAddress}</p>` : ''}
+        ${ipAddress ? `<p style="color: #666; font-size: 13px;">Requested from IP: ${escapeHtml(ipAddress)}</p>` : ''}
         <p>If this was you, click the button below to choose a new password:</p>
         <p style="text-align: center; margin: 20px 0;">
           <a href="${resetLink}" style="display: inline-block; background: #4a6fa5; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600;">Reset password</a>
@@ -237,7 +254,7 @@ export async function sendPasswordChangedNotice(email: string, deviceName: strin
     html: `
       <div style="font-family: sans-serif; max-width: 440px; margin: 0 auto; padding: 20px;">
         <h2>Your ScriptCraft password was changed</h2>
-        <p>Your password was just changed from <strong>${deviceName}</strong>.</p>
+        <p>Your password was just changed from <strong>${escapeHtml(deviceName)}</strong>.</p>
         <p style="color: #b00;">If this wasn't you, reset your password immediately and contact support.</p>
       </div>
     `,
@@ -260,7 +277,7 @@ export async function sendAccountDeletedNotice(email: string): Promise<void> {
     html: `
       <div style="font-family: sans-serif; max-width: 440px; margin: 0 auto; padding: 20px;">
         <h2>Your ScriptCraft account was deleted</h2>
-        <p>Your account <strong>${email}</strong> and all associated data have been permanently deleted.</p>
+        <p>Your account <strong>${escapeHtml(email)}</strong> and all associated data have been permanently deleted.</p>
         <p style="color: #b00;">
           If you did not request this, contact support immediately —
           accounts cannot be recovered after deletion.

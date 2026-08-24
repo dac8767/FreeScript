@@ -9,6 +9,7 @@
  * they can review/revoke any session that doesn't look like theirs.
  */
 
+import { randomInt } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { getDB } from '../db';
 import type { UserDeviceRow, DeviceChallengeRow } from '../db';
@@ -134,7 +135,8 @@ export async function createDeviceChallenge(
     return null;
   }
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  // v7.x (security review C3): CSPRNG for the new-device 2FA code.
+  const code = String(randomInt(100000, 1000000));
   const id = uuidv4();
   const expiresAt = new Date(now.getTime() + CHALLENGE_EXPIRY_MS).toISOString();
 

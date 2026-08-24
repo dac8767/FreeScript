@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.config import PROJECTS_DIR_BASE
+from app.security import assert_safe_resource_id
 
 
 def _templates_dir() -> Path:
@@ -30,6 +31,7 @@ def list_templates() -> list[dict]:
 
 def get_template(template_id: str) -> dict:
     """Get a single formatting template by ID."""
+    assert_safe_resource_id(template_id, "template")
     path = _templates_dir() / f"{template_id}.json"
     if not path.exists():
         raise FileNotFoundError(f"Template '{template_id}' not found")
@@ -38,7 +40,12 @@ def get_template(template_id: str) -> dict:
 
 def create_template(data: dict) -> dict:
     """Create a new formatting template."""
+    # v7.x (security review C1): the id can come from the REQUEST BODY, which
+    # the router's path-param validator never sees — an id like
+    # "../users/<victim>/projects/<p>/scripts/<s>" would escape the templates
+    # dir and overwrite another user's file. Guard it before any path join.
     template_id = data.get("id") or str(uuid.uuid4())
+    assert_safe_resource_id(template_id, "template")
     now = datetime.now(timezone.utc).isoformat()
     template = {
         "id": template_id,
@@ -56,6 +63,7 @@ def create_template(data: dict) -> dict:
 
 def update_template(template_id: str, data: dict) -> dict:
     """Update an existing formatting template."""
+    assert_safe_resource_id(template_id, "template")
     path = _templates_dir() / f"{template_id}.json"
     if not path.exists():
         raise FileNotFoundError(f"Template '{template_id}' not found")
@@ -72,6 +80,7 @@ def update_template(template_id: str, data: dict) -> dict:
 
 def delete_template(template_id: str) -> None:
     """Delete a formatting template."""
+    assert_safe_resource_id(template_id, "template")
     path = _templates_dir() / f"{template_id}.json"
     if path.exists():
         path.unlink()

@@ -66,6 +66,15 @@ export async function verifyPassword(user: UserRow, password: string): Promise<b
   return bcrypt.compareSync(password, user.password_hash);
 }
 
+// v7.x (security review C3): a fixed hash, computed once, so the "no such
+// account" login path can spend ~the same time as a real password check. Login
+// then answers unknown-email and wrong-password identically, in body AND
+// timing, and can't be used to enumerate which emails are registered.
+const _TIMING_EQUALIZER_HASH = bcrypt.hashSync('scriptcraft-timing-equalizer', config.bcryptRounds);
+export function dummyVerifyPassword(password: string): void {
+  bcrypt.compareSync(password, _TIMING_EQUALIZER_HASH);
+}
+
 export async function setEmailVerified(userId: string): Promise<void> {
   const db = getDB();
   const now = new Date().toISOString();

@@ -12,8 +12,11 @@ from app.security import assert_safe_resource_id
 
 def _project_dir(project_id: str):
     """Safe join of a validated project id under the projects root."""
+    # v7.x (security review C3): this returned `_project_dir(project_id)` — it
+    # called ITSELF, so every project operation recursed until RecursionError
+    # and 500'd. Join the validated id under the projects root, as intended.
     assert_safe_resource_id(project_id, 'project')
-    return _project_dir(project_id)
+    return get_projects_dir() / project_id
 
 
 def _slugify(name: str) -> str:

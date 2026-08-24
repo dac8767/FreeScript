@@ -50,9 +50,22 @@ function loadConfig(): ServerConfig {
   const jwtSecret = process.env.JWT_SECRET ||
     (isProduction ? '' : crypto.randomBytes(32).toString('hex'));
 
-  if (isProduction && !process.env.JWT_SECRET) {
-    console.error('FATAL: JWT_SECRET must be set in production');
-    process.exit(1);
+  if (isProduction) {
+    // v7.x (security review C2): "is it set" was the only check, so deploying
+    // with the example's JWT_SECRET=change-me passed — and anyone who knows
+    // that value can forge a token for ANY user. Reject placeholders and
+    // too-short secrets outright.
+    if (!process.env.JWT_SECRET) {
+      console.error('FATAL: JWT_SECRET must be set in production');
+      process.exit(1);
+    }
+    if (/change[-_]?me/i.test(jwtSecret) || jwtSecret.length < 32) {
+      console.error(
+        'FATAL: JWT_SECRET must be a long random string (>= 32 chars), not a ' +
+        'placeholder. Anyone who knows it can forge tokens for any user.',
+      );
+      process.exit(1);
+    }
   }
 
   return {
