@@ -6,9 +6,11 @@ on:
       - 'v*'
 
 permissions:
+  # v7.x (security review P2): dropped actions:write and pull-requests:write —
+  # no step in this workflow uses them (the release PR is made locally by
+  # release.sh via the gh CLI, not here). Least privilege limits the blast
+  # radius if a third-party action in a signing job is ever compromised.
   contents: write
-  actions: write
-  pull-requests: write
   packages: write
 
 jobs:
