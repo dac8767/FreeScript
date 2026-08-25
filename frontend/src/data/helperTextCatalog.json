@@ -2844,7 +2844,7 @@
   "where": [
    "components/BeatBoard.tsx"
   ],
-  "label": "Show this outline in the outline bar"
+  "label": "Use this variation in the outline toolbar"
  },
  {
   "text": "Show this theme",
@@ -3024,7 +3024,7 @@
   "where": [
    "components/BeatBoard.tsx"
   ],
-  "label": "Show this outline in the outline bar"
+  "label": "Use this variation in the outline toolbar"
  },
  {
   "text": "This combo is already a preset",

@@ -1483,7 +1483,7 @@ export function OutlineBarCheck() {
         disabled={isBarTab}
         onChange={() => useEditorStore.getState().setOutlineBarTab(viewedTab)}
       />
-      Show this outline in the outline bar
+      Use this variation in the outline toolbar
     </label>
   );
 }

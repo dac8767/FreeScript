@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.91",
+    "date": "2026-08-24",
+    "changes": [
+      "Outline: the checkbox in the outline view now reads \"Use this variation in the outline toolbar.\""
+    ]
+  },
+  {
     "version": "7.90",
     "date": "2026-08-24",
     "changes": [

@@ -66,7 +66,8 @@ try {
   }, W);
   ok(row && row.hasPreset && row.addLabel?.includes('Add Section'), 'Presets + "+ Add Section" render in the body first row');
   ok(row?.presetLeftish, 'Presets/Add hold the row\'s left side');
-  ok(row?.hasCheck && row.checkbox && row.checkText?.includes('Show this outline in the outline bar'), '"Show this outline in the outline bar" rides the same row');
+  // v7.91, Derek: label reworded to "Use this variation in the outline toolbar".
+  ok(row?.hasCheck && row.checkbox && row.checkText?.includes('Use this variation in the outline toolbar'), '"Use this variation in the outline toolbar" rides the same row');
   ok(row?.addLeftOfPreset, 'the add button sits far left, before Presets (with air between)');
   ok(row != null && row.checkRightGap >= 0 && row.checkRightGap < 40, `…aligned right (gap to row edge: ${row?.checkRightGap}px)`);
   ok(!row?.inHeader, 'neither lives in the header cluster anymore');
