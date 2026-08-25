@@ -2,16 +2,10 @@
 
 **Last updated: 2026-08-24**
 
-> **Maintainer note (not part of the policy):** two fields below are marked
-> `<FILL IN>` — the name of the person or company that publishes ScriptCraft
-> (the "data controller") and a public contact address. Set both before this
-> policy ships. Everything else describes what the app actually does today,
-> verified against the source in this repository.
-
 ## Overview
 
 ScriptCraft is a screenwriting application for macOS, Windows, Linux, iOS,
-iPadOS and Android, published by **`<FILL IN — controller name>`**. It is a
+iPadOS and Android, published by **Coalition Studios, LLC**. It is a
 local-first app: your screenplays live on your device, and the app works fully
 offline for writing. Some optional features connect to the internet; this
 policy lists every one of them, and whether it happens automatically or only
@@ -97,5 +91,5 @@ If this policy changes, the revised version will be posted here with a new date.
 
 ## Contact
 
-Questions about this policy: **`<FILL IN — contact address>`**
+Questions about this policy: **contact@scriptcraft.org**
 (project: [github.com/dac8767/ScriptCraft](https://github.com/dac8767/ScriptCraft)).
