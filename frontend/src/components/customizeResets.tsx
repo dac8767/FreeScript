@@ -348,7 +348,7 @@ export function ResetAllButton() {
       title="Reset every customization to the defaults"
       onClick={async () => {
         if (await confirmDialog(
-          'Reset ALL customizations to their defaults? Sizes and spacing, the toolbar layout, dropdown widths, Quick Access Toolbar, menu bar order, side panels, and the Outline Bar all go back to factory. (Themes, Editor and Keyboard Shortcuts have their own resets and are not touched.) You can undo this afterwards with the usual Undo key.',
+          'Reset ALL customizations to their defaults? Sizes and spacing, the toolbar layout, dropdown widths, Quick Access Toolbar, menu bar order, side panels, and the Outline Toolbar all go back to factory. (Themes, Editor and Keyboard Shortcuts have their own resets and are not touched.) You can undo this afterwards with the usual Undo key.',
           { title: 'Reset All Customizations', confirmLabel: 'Reset Customizations', danger: true, requireText: 'Reset Customizations' },
         )) {
           const restore = captureCustomizeState();

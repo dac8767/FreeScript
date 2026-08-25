@@ -1474,8 +1474,8 @@ export function OutlineBarCheck() {
     <label
       className={`beat-bar-check${isBarTab ? ' on' : ''}`}
       title={isBarTab
-        ? 'The Outline Bar shows this tab'
-        : 'Show this tab in the Outline Bar'}
+        ? 'The Outline Toolbar shows this variation'
+        : 'Show this variation in the Outline Toolbar'}
     >
       <input
         type="checkbox"
@@ -1964,7 +1964,7 @@ const BeatColumnView: React.FC<BeatColumnViewProps> = ({
         />
         {/* v2.11: the section's page budget — drives its block width on the
             Outline Bar's top row (also settable by right-click there). */}
-        <label className="beat-column-target" title="Target pages for this section on the Outline Bar">
+        <label className="beat-column-target" title="Target pages for this section on the Outline Toolbar">
           {/* v2.20: never blank (see BeatPagesField). */}
           <input
             type="number"

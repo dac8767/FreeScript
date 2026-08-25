@@ -18,8 +18,10 @@ const W = '.tool-window[data-tool="beatboard"]';
    about the MECHANISM (a dynamic tooltip is listed, overridable per arm, and
    swaps live), so what has to follow his wording is the default string it keys
    on: an override keyed to text no element carries can never match. */
-const CHECKED_ARM = 'The Outline Bar shows this tab';
-const UNCHECKED_ARM = 'Show this tab in the Outline Bar';
+// v7.92: "Outline Bar" → "Outline Toolbar" (Derek's feature rename), and the
+// arms were aligned to "this variation" with the label reword in v7.91.
+const CHECKED_ARM = 'The Outline Toolbar shows this variation';
+const UNCHECKED_ARM = 'Show this variation in the Outline Toolbar';
 
 try {
   await boot(page);
@@ -73,7 +75,7 @@ try {
   // ── 1: the Helper Text window LISTS the dynamic tooltip ──
   await page.evaluate(() => window.__scStore.getState().setHelperTextWindowOpen(true));
   await page.waitForSelector('.htw-panel .dz-search-input', { timeout: 8000 });
-  await page.fill('.htw-panel .dz-search-input', 'The Outline Bar shows this tab');
+  await page.fill('.htw-panel .dz-search-input', CHECKED_ARM);
   await settle(page);
   const listed = await page.evaluate((arm) => document.querySelector('.htw-panel .dz-body')?.textContent?.includes(arm), CHECKED_ARM);
   ok(listed, 'the Helper Text window lists the checkbox\'s hover text (Derek\'s example)');

@@ -3440,7 +3440,7 @@ const ScreenplayEditor: React.FC = () => {
       {outlineBarShown && (
         <div
           className={`fs-top-chrome-resize${uiResizeLocked ? ' locked' : ''}`}
-          title={uiResizeLocked ? undefined : 'Drag to resize the outline bar'}
+          title={uiResizeLocked ? undefined : 'Drag to resize the outline toolbar'}
           onPointerDown={uiResizeLocked ? undefined : startOutlineBarResize}
         />
       )}

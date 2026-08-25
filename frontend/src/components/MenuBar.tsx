@@ -1201,7 +1201,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
           children: [
             { icon: <FaColumns />, label: 'Left Panel', checked: navigatorOpen, action: () => toggleNavigator() },
             { icon: <FaColumns />, label: 'Right Panel', checked: shelfOpen, action: () => toggleShelf() },
-            { icon: <FaStream />, label: 'Outline Bar', checked: outlineBarOpen, action: () => setOutlineBarOpen(!outlineBarOpen) },
+            { icon: <FaStream />, label: 'Outline Toolbar', checked: outlineBarOpen, action: () => setOutlineBarOpen(!outlineBarOpen) },
           ],
         },
         // v2.95, Derek: Word/Docs-style rulers on the editor's top and left.

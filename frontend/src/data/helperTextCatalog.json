@@ -1131,7 +1131,7 @@
   "label": "Description"
  },
  {
-  "text": "Drag to resize the outline bar",
+  "text": "Drag to resize the outline toolbar",
   "kind": "tooltip",
   "sites": 1,
   "area": "Editor & Preview",
@@ -1609,7 +1609,7 @@
   "icon": "FaRegEye"
  },
  {
-  "text": "Hide the Outline Bar",
+  "text": "Hide the Outline Toolbar",
   "kind": "tooltip",
   "sites": 1,
   "area": "Ribbon Toolbar",
@@ -2791,7 +2791,7 @@
   ]
  },
  {
-  "text": "Show the Outline Bar",
+  "text": "Show the Outline Toolbar",
   "kind": "tooltip",
   "sites": 1,
   "area": "Ribbon Toolbar",
@@ -2837,16 +2837,6 @@
   ]
  },
  {
-  "text": "Show this tab in the Outline Bar",
-  "kind": "tooltip",
-  "sites": 1,
-  "area": "Outline Window",
-  "where": [
-   "components/BeatBoard.tsx"
-  ],
-  "label": "Use this variation in the outline toolbar"
- },
- {
   "text": "Show this theme",
   "kind": "tooltip",
   "sites": 1,
@@ -2854,6 +2844,16 @@
   "where": [
    "components/ThemesTab.tsx"
   ]
+ },
+ {
+  "text": "Show this variation in the Outline Toolbar",
+  "kind": "tooltip",
+  "sites": 1,
+  "area": "Outline Window",
+  "where": [
+   "components/BeatBoard.tsx"
+  ],
+  "label": "Use this variation in the outline toolbar"
  },
  {
   "text": "Show transition",
@@ -2970,7 +2970,7 @@
   ]
  },
  {
-  "text": "Target pages for this section on the Outline Bar",
+  "text": "Target pages for this section on the Outline Toolbar",
   "kind": "tooltip",
   "sites": 1,
   "area": "Outline Window",
@@ -3017,7 +3017,7 @@
   ]
  },
  {
-  "text": "The Outline Bar shows this tab",
+  "text": "The Outline Toolbar shows this variation",
   "kind": "tooltip",
   "sites": 1,
   "area": "Outline Window",

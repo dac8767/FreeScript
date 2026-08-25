@@ -915,7 +915,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       case 'toggleOutlineBar': return (
         <button
           className={`toolbar-btn${outlineBarOpen ? ' active' : ''}`}
-          title={outlineBarOpen ? 'Hide the Outline Bar' : 'Show the Outline Bar'}
+          title={outlineBarOpen ? 'Hide the Outline Toolbar' : 'Show the Outline Toolbar'}
           onClick={() => useEditorStore.getState().setOutlineBarOpen(!outlineBarOpen)}
         >{TOOLBAR_ICONS.toggleOutlineBar}</button>
       );
@@ -937,7 +937,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
           title={uiResizeLocked ? 'Sizing is locked' : 'Reset all sizes & spacing to defaults'}
           onClick={async () => {
             if (await confirmDialog(
-              'Reset all sizes and spacing to their defaults? Side panels, toolbar, menu bar, outline bar, and spacing all go back to factory positions.',
+              'Reset all sizes and spacing to their defaults? Side panels, toolbar, menu bar, outline toolbar, and spacing all go back to factory positions.',
               { title: 'Reset All Sizes & Spacing', confirmLabel: 'Reset' },
             )) useEditorStore.getState().resetChromeSizes();
           }}

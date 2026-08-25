@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.92",
+    "date": "2026-08-24",
+    "changes": [
+      "The \"Outline Bar\" is now called the \"Outline Toolbar\" everywhere it's named — the toolbar button, the View menu, and its tooltips. Nothing about how it works changed; just the name."
+    ]
+  },
+  {
     "version": "7.91",
     "date": "2026-08-24",
     "changes": [
