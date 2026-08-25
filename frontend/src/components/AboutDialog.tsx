@@ -70,6 +70,7 @@ export function AboutDialog({ onClose, onShowChangelog }: { onClose: () => void;
             <Ext href="https://github.com/retextjs/retext">retext</Ext> /{' '}
             <Ext href="https://unifiedjs.com">unified</Ext>,{' '}
             <Ext href="https://tauri.app">Tauri</Ext>,{' '}
+            <Ext href="https://github.com/hwchen/keyring-rs">keyring-rs</Ext>,{' '}
             <Ext href="https://fastapi.tiangolo.com">FastAPI</Ext>,{' '}
             <Ext href="https://www.dulwich.io">Dulwich</Ext>,{' '}
             <Ext href="https://alembic.sqlalchemy.org">Alembic</Ext>, and the{' '}

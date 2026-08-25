@@ -1,5 +1,12 @@
 [
   {
+    "version": "7.90",
+    "date": "2026-08-24",
+    "changes": [
+      "Security: your Google Drive and OneDrive sign-in tokens now live in your operating system's secure store — the macOS Keychain, Windows Credential Manager, or Linux Secret Service — instead of the app's local storage. If you'd already connected a drive, the token moves there automatically the next time you launch; you won't need to reconnect. This keeps your cloud credentials out of plain text on disk. From the security review (D9)."
+    ]
+  },
+  {
     "version": "7.89",
     "date": "2026-08-24",
     "changes": [

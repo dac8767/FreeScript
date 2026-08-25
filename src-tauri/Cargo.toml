@@ -3,7 +3,7 @@
 # BINARY, so "Hide freedraft" lingered despite productName being ScriptCraft.
 # The com.freedraft.app identifier stays: identifiers persist user data.
 name = "scriptcraft"
-version = "7.89.0"
+version = "7.90.0"
 description = "ScriptCraft - Professional Screenwriting Application"
 authors = ["ScriptCraft"]
 edition = "2021"
@@ -61,6 +61,21 @@ objc2 = { version = "=0.6.4", features = ["exception"] }
 objc2-foundation = "=0.3.2"
 objc2-app-kit = "=0.3.2"
 objc2-pdf-kit = "=0.3.2"
+# v7.90 (security review D9): keyring is BACK — not for the retired Anthropic
+# key (see the v7.10 note below) but to hold the Google Drive / OneDrive OAuth
+# tokens in the OS keychain instead of the webview's plaintext localStorage.
+# A native backend per OS: macOS Keychain here, Windows Credential Manager and
+# the Linux Secret Service below. `crypto-rust` keeps the Secret Service session
+# crypto pure-Rust (no OpenSSL), but the Linux backend still links libdbus-1 —
+# so the CI Linux build installs libdbus-1-dev (added to the workflows). macOS
+# and Windows use their native APIs and need nothing extra.
+keyring = { version = "3", features = ["apple-native"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+keyring = { version = "3", features = ["windows-native"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "3", features = ["sync-secret-service", "crypto-rust"] }
 
 # v7.10, Derek: "remove the Action Rewrite tool completely from the app." That
 # retired the only user of `keyring` (the BYO Anthropic key lived in the OS

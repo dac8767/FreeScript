@@ -23,7 +23,7 @@ import { scriptFileName } from '../utils/scriptFileExt';
 import { reportSaveError } from '../stores/saveErrorStore';
 import { errText } from '../utils/errText';
 import {
-  connect, getAccessToken, loadTokens, clearTokens, type ProviderConfig,
+  connect, getAccessToken, tokensPresent, clearTokens, type ProviderConfig,
 } from './oauthPkce';
 
 /* ── Provider configs ──────────────────────────────────────────────────── */
@@ -51,10 +51,13 @@ export function onedriveConfig(): ProviderConfig {
 
 export const connectGDrive = () => connect(gdriveConfig());
 export const connectOneDrive = () => connect(onedriveConfig());
-export const gdriveConnected = () => !!loadTokens('opendraft:gdriveTokens');
-export const onedriveConnected = () => !!loadTokens('opendraft:onedriveTokens');
-export const disconnectGDrive = () => clearTokens('opendraft:gdriveTokens');
-export const disconnectOneDrive = () => clearTokens('opendraft:onedriveTokens');
+// v7.90 (D9): the connected-check reads the sync presence marker, not the token
+// itself (the secret now lives in the async keychain). disconnect clears the
+// keychain entry (async, fire-and-forget — the UI flips immediately).
+export const gdriveConnected = () => tokensPresent('opendraft:gdriveTokens');
+export const onedriveConnected = () => tokensPresent('opendraft:onedriveTokens');
+export const disconnectGDrive = () => { void clearTokens('opendraft:gdriveTokens'); };
+export const disconnectOneDrive = () => { void clearTokens('opendraft:onedriveTokens'); };
 
 /* ── Small persistent maps (mirror IDs / remote file IDs) ──────────────── */
 

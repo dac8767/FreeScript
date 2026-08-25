@@ -9,6 +9,8 @@
  * Tokens are cached in localStorage and refreshed when expired.
  */
 
+import { secureGet, secureSet, secureDelete } from './secureStore';
+
 export interface TokenSet {
   accessToken: string;
   refreshToken?: string;
@@ -73,21 +75,64 @@ export interface ProviderConfig {
   extraAuthParams?: Record<string, string>;
 }
 
-export function loadTokens(storageKey: string): TokenSet | null {
+/* v7.90 (security review D9): the SECRET token set now lives in the OS keychain
+   (secureStore), not plaintext localStorage. A non-secret presence marker stays
+   in localStorage so the UI's synchronous "connected?" check needn't await the
+   keychain. */
+const markerKey = (storageKey: string) => `${storageKey}:present`;
+
+/** SYNC: is a token set stored for this provider? Reads the marker, and treats
+ *  a legacy plaintext blob (≤ v7.89) as present until it migrates. */
+export function tokensPresent(storageKey: string): boolean {
   try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return null;
-    const t = JSON.parse(raw) as TokenSet;
-    return t && t.accessToken ? t : null;
-  } catch { return null; }
+    return !!localStorage.getItem(markerKey(storageKey)) || !!localStorage.getItem(storageKey);
+  } catch { return false; }
 }
 
-export function clearTokens(storageKey: string): void {
-  try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+/** ASYNC: the secret token set, from the keychain. On first read it migrates a
+ *  legacy plaintext localStorage blob into the keychain and deletes the copy on
+ *  disk, so existing users' tokens move off disk transparently. */
+export async function loadTokens(storageKey: string): Promise<TokenSet | null> {
+  try {
+    const raw = await secureGet(storageKey);
+    if (raw) {
+      const t = JSON.parse(raw) as TokenSet;
+      if (t && t.accessToken) return t;
+    }
+  } catch { /* fall through to the legacy path */ }
+
+  try {
+    const legacy = localStorage.getItem(storageKey);
+    if (legacy) {
+      const t = JSON.parse(legacy) as TokenSet;
+      if (t && t.accessToken) {
+        await saveTokens(storageKey, t);                 // → keychain + marker
+        try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+        return t;
+      }
+      try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
+    }
+  } catch { /* ignore */ }
+  return null;
 }
 
-function saveTokens(storageKey: string, t: TokenSet): void {
-  try { localStorage.setItem(storageKey, JSON.stringify(t)); } catch { /* ignore */ }
+export async function clearTokens(storageKey: string): Promise<void> {
+  try { await secureDelete(storageKey); } catch { /* ignore */ }
+  try { localStorage.removeItem(markerKey(storageKey)); } catch { /* ignore */ }
+  try { localStorage.removeItem(storageKey); } catch { /* ignore */ } // legacy plaintext
+}
+
+async function saveTokens(storageKey: string, t: TokenSet): Promise<void> {
+  try { await secureSet(storageKey, JSON.stringify(t)); } catch { /* ignore */ }
+  try { localStorage.setItem(markerKey(storageKey), '1'); } catch { /* ignore */ }
+}
+
+/** v7.90: proactively move any legacy plaintext tokens off disk into the
+ *  keychain at startup, rather than waiting for the next cloud save. Idempotent. */
+export async function migrateOAuthTokensToKeychain(storageKeys: string[]): Promise<void> {
+  for (const k of storageKeys) {
+    try { await loadTokens(k); } catch { /* ignore */ }
+  }
 }
 
 async function tokenRequest(cfg: ProviderConfig, body: Record<string, string>): Promise<TokenSet> {
@@ -101,13 +146,13 @@ async function tokenRequest(cfg: ProviderConfig, body: Record<string, string>): 
     throw new Error(`Token exchange failed (${res.status}): ${text.slice(0, 200)}`);
   }
   const json = await res.json();
-  const prev = loadTokens(cfg.storageKey);
+  const prev = await loadTokens(cfg.storageKey);
   const tokens: TokenSet = {
     accessToken: json.access_token,
     refreshToken: json.refresh_token || prev?.refreshToken,
     expiresAt: Date.now() + Math.max(60, (json.expires_in ?? 3600) - 60) * 1000,
   };
-  saveTokens(cfg.storageKey, tokens);
+  await saveTokens(cfg.storageKey, tokens);
   return tokens;
 }
 
@@ -139,7 +184,7 @@ export async function connect(cfg: ProviderConfig): Promise<TokenSet> {
 /** Returns a valid access token, refreshing silently when possible.
  *  Throws when not connected — callers surface that as a save-location error. */
 export async function getAccessToken(cfg: ProviderConfig): Promise<string> {
-  const t = loadTokens(cfg.storageKey);
+  const t = await loadTokens(cfg.storageKey);
   if (!t) throw new Error('Not connected — open Settings → Save Locations and connect');
   if (Date.now() < t.expiresAt) return t.accessToken;
   if (!t.refreshToken) throw new Error('Session expired — reconnect in Settings → Save Locations');

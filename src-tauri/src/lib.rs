@@ -751,6 +751,63 @@ fn read_binary_file(path: String) -> Result<Vec<u8>, String> {
     std::fs::read(&path).map_err(|e| format!("Failed to read {}: {}", path, e))
 }
 
+// ── OS keychain (desktop) ───────────────────────────────────────────────────
+// v7.90 (security review D9): secrets that must NOT live in the webview's
+// plaintext localStorage — the Google Drive / OneDrive OAuth tokens — go here
+// instead. The service name is the app's bundle id; `key` is the per-item name
+// the frontend chooses (secureStore.ts). Backends: macOS Keychain, Windows
+// Credential Manager, Linux Secret Service (see Cargo.toml).
+#[cfg(desktop)]
+const KEYCHAIN_SERVICE: &str = "com.freedraft.app";
+
+#[cfg(desktop)]
+#[tauri::command]
+fn keychain_set(key: String, value: String) -> Result<(), String> {
+    keyring::Entry::new(KEYCHAIN_SERVICE, &key)
+        .and_then(|e| e.set_password(&value))
+        .map_err(|e| e.to_string())
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn keychain_get(key: String) -> Result<Option<String>, String> {
+    let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &key).map_err(|e| e.to_string())?;
+    match entry.get_password() {
+        Ok(v) => Ok(Some(v)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn keychain_delete(key: String) -> Result<(), String> {
+    let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &key).map_err(|e| e.to_string())?;
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+// Mobile has no desktop keychain crate; the frontend routes secrets to its
+// per-app storage instead and never calls these, but the handler list is one
+// list for all targets, so provide stubs.
+#[cfg(not(desktop))]
+#[tauri::command]
+fn keychain_set(_key: String, _value: String) -> Result<(), String> {
+    Err("keychain is desktop-only".to_string())
+}
+#[cfg(not(desktop))]
+#[tauri::command]
+fn keychain_get(_key: String) -> Result<Option<String>, String> {
+    Ok(None)
+}
+#[cfg(not(desktop))]
+#[tauri::command]
+fn keychain_delete(_key: String) -> Result<(), String> {
+    Ok(())
+}
+
 // ── Generic HTTP fetch command ────────────────────────────────────────────
 // Makes HTTP requests from Rust, bypassing WebView mixed-content restrictions.
 // The Tauri WebView loads from https://tauri.localhost, so browser fetch() to
@@ -1397,6 +1454,9 @@ pub fn run() {
             check_folder_writable,
             read_text_file,
             read_binary_file,
+            keychain_set,
+            keychain_get,
+            keychain_delete,
             http_fetch,
             fetch_link_preview,
             get_opened_file,

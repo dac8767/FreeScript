@@ -83,6 +83,13 @@ async function init() {
   // no additional wrapping needed here.
   await initStorage();
 
+  // v7.90 (security review D9): move any legacy plaintext Drive/OneDrive OAuth
+  // tokens off disk into the OS keychain, in the background — never blocks paint.
+  void import('./services/oauthPkce')
+    .then(({ migrateOAuthTokensToKeychain }) =>
+      migrateOAuthTokensToKeychain(['opendraft:gdriveTokens', 'opendraft:onedriveTokens']))
+    .catch(() => {});
+
   // Set initial native window title on desktop (for macOS Window menu)
   import('./services/platform').then(({ isDesktopTauri }) => {
     if (!isDesktopTauri()) return;
